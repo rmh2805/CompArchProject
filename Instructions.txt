@@ -1,3 +1,5 @@
+Opcodes are a single byte
+
 CPU Control:
 	  OPC | Mnemonic | Description 
 	------+----------+------------------------
@@ -7,19 +9,20 @@ CPU Control:
 	 0x03 |   DMP    | Dump value to trace
 	 0x04 |   OUT    | Output value to device 
 
-Basic Arithmetic:
+Basic Arithmetic and Logic:
 	  OPC | Mnemonic | Description 
 	------+----------+------------------------
 	 0x10 |   ADD    | dst <- src1 + src2
 	 0x11 |   SUB    | dst <- src1 - src2
 	 0x12 |   MUL    | dst <- src1 * src2
 	 0x13 |   DIV    | dst <- src1 / src2
-	 0x14 |   AND    | dst <- src1 & src2
-	 0x15 |   OR     | dst <- src1 | src2
-	 0x16 |   XOR    | dst <- src1 ^ src2
-	 0x17 |   CMP    | dst <- ~src
-	 0x18 |   INC    | dst <- dst + 1
-	 0x19 |   DEC    | dst <- dst - 1
+	 0x14 |   MOD    | dst <- src1 % src2
+	 0x15 |   AND    | dst <- src1 & src2
+	 0x16 |   OR     | dst <- src1 | src2
+	 0x17 |   XOR    | dst <- src1 ^ src2
+	 0x18 |   CMP    | dst <- ~src
+	 0x19 |   INC    | dst <- dst + 1
+	 0x1a |   DEC    | dst <- dst - 1
 
 Memory Management:
 	  OPC | Mnemonic | Description 
@@ -27,3 +30,5 @@ Memory Management:
 	 0x20 |   MOV    | dst <- src
 	 0x21 |   SWP    | dst <- src, src <- dst
 	 0x22 |   CPY    | Memory block copy
+
+(Unspecified opcodes are noop)

@@ -1,0 +1,28 @@
+CPU Control:
+	  OPC | Mnemonic | Description 
+	------+----------+------------------------
+	 0x00 |   NOP    | Noop
+	 0x01 |   HLT    | Halts the CPU
+	 0x02 |   CLR    | dst <- $0
+	 0x03 |   DMP    | Dump value to trace
+	 0x04 |   OUT    | Output value to device 
+
+- NOP: A null operation
+
+- HLT: Halts the CPU
+
+- CLR: dst <- $0
+	- 1 Operand: 1) Reg or Mem operand; dst
+
+- DMP: Dumps the value in dst to the trace
+	- 1 Operand: 1) Any operand; dst
+
+- OUT: Outputs the value of src to a simulated device on port dst 
+       (e.g. a line printer/terminal on device zero)
+	- 1 Operand: 1) Any operand; src
+	             (dst is $0)
+	
+	- 2 Operand: 1) Any operand; src
+	             2) Any operand; dst
+
+

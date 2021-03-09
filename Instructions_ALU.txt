@@ -1,0 +1,82 @@
+Basic Arithmetic and Logic:
+	  OPC | Mnemonic | Description 
+	------+----------+------------------------
+	 0x10 |   ADD    | dst <- src1 + src2
+	 0x11 |   SUB    | dst <- src1 - src2
+	 0x12 |   MUL    | dst <- src1 * src2
+	 0x13 |   DIV    | dst <- src1 / src2
+	 0x14 |   MOD    | dst <- src1 % src2
+	 0x15 |   AND    | dst <- src1 & src2
+	 0x16 |   OR     | dst <- src1 | src2
+	 0x17 |   XOR    | dst <- src1 ^ src2
+	 0x18 |   CMP    | dst <- ~src
+	 0x19 |   INC    | dst <- dst + 1
+	 0x1a |   DEC    | dst <- dst - 1
+
+- ADD: dst <- src1 + src2
+	- 2 Operands: 1) Reg or Mem; dst and src1
+	              2) Any; src2
+	
+	- 3 Operands: 1) Reg or Mem; dst
+	              2) Any; src1
+	              3) Any; src2
+
+- SUB: dst <- src1 - src2
+	- operands as in ADD
+
+- MUL: dst <- src1 * src2, ovf <- (src1 * src2) >> |dst|
+	- 2 Operands: 1) Reg or Mem; dst and src1
+	              2) Any; src2
+	
+	- 3 Operands: 1) Reg or Mem; dst
+	              2) Any; src1
+	              3) Any; src2
+	
+	- 4 Operands: 1) Reg or Mem; dst
+	              2) Reg or Mem; ovf
+	              3) Any; src1
+	              4) Any; src2
+
+- DIV: dst <- src1 * src2, mod <- src1 % src2
+	- 2 Operands: 1) Any; src1 (dst if !IMM)
+	              2) Any; src2 (mod if !IMM)
+	              (one of the two must not be IMM)
+	
+	- 3 Operands: 1) Reg or Mem; dst
+	              2) Any; src1 (mod if !IMM)
+	              3) Any; src2 (mod if !IMM and op2 !IMM)
+	
+	- 4 Operands: 1) Reg or Mem; dst
+	              2) Reg or Mem; mod
+	              3) Any; src1
+	              4) Any; src2
+
+- MOD: dst <- src1 % src2
+	- 3 Operands: 1) Reg or Mem; mod
+	              2) Any; src1
+	              3) Any; src2
+
+- AND: dst <- src1 & src2
+	- Operands as in ADD
+
+- OR: dst <- src1 | src2
+	- Operands as in ADD
+
+- XOR: dst <- src1 ^ src2
+	- Operands as in ADD
+
+- CMP: dst <- ~src
+	- 1 Operand: 1) Reg or Mem; dst, src
+	
+	- 2 Operand: 1) Reg or mem; dst
+	             2) Any; src
+
+- INC: dst <- dst + 1
+	- 1 Operand: 1) Reg or Mem; dst
+
+- DEC: dst <- dst - 1
+	- 1 Operand: 1) Reg or Mem; dst
+
+
+
+
