@@ -1,0 +1,29 @@
+Address Modes:
+	
+	0000 |   <Code>   | Control Codes
+	0001 |  xx    xx  | Nybble Immediate
+	0010 |  00  <isz> | 1-4 byte immediate
+	0011 | <rs> <rsz> | Register
+	0100 | <rs> <rsz> | Register Indirect
+	0101 |  00  <isz> | Memory Indirect
+	0110 | <rs> <rs2> | Index
+	0111 | <rs> <isz> | Displacement
+	1000 |  00  <isz> | Absolute
+	1001 | <rs> <val> | Increment
+	1010 | <rs> <val> | Decrement
+	1011 | <rs> <val> | Scale
+	1100 |            |
+	1101 |            |
+	1110 |            |
+	1111 |            |
+	
+Where:
+	- <rsz>, <isz>, and <val> are 2-bit fields indicating sizes and increments from 1 to 4 (bytes)
+	- <rs> is a 2-bit field indicating a register
+		- 00: register 0
+		- 01: register 1
+		- 10: program counter
+		- 11: reference to following byte
+	- <Code> specifies a control code
+		- 0000: explicit end of operand list (e.g. for instrs which can take variable numbers of 
+		        operands.
