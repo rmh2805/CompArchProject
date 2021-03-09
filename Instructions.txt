@@ -1,0 +1,29 @@
+CPU Control:
+	  OPC | Mnemonic | Description 
+	------+----------+------------------------
+	 0x00 |   NOP    | Noop
+	 0x01 |   HLT    | Halts the CPU
+	 0x02 |   CLR    | dst <- $0
+	 0x03 |   DMP    | Dump value to trace
+	 0x04 |   OUT    | Output value to device 
+
+Basic Arithmetic:
+	  OPC | Mnemonic | Description 
+	------+----------+------------------------
+	 0x10 |   ADD    | dst <- src1 + src2
+	 0x11 |   SUB    | dst <- src1 - src2
+	 0x12 |   MUL    | dst <- src1 * src2
+	 0x13 |   DIV    | dst <- src1 / src2
+	 0x14 |   AND    | dst <- src1 & src2
+	 0x15 |   OR     | dst <- src1 | src2
+	 0x16 |   XOR    | dst <- src1 ^ src2
+	 0x17 |   CMP    | dst <- ~src
+	 0x18 |   INC    | dst <- dst + 1
+	 0x19 |   DEC    | dst <- dst - 1
+
+Memory Management:
+	  OPC | Mnemonic | Description 
+	------+----------+------------------------
+	 0x20 |   MOV    | dst <- src
+	 0x21 |   SWP    | dst <- src, src <- dst
+	 0x22 |   CPY    | Memory block copy
