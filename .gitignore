@@ -1,7 +1,9 @@
 *.o
 *.yy.c
-*.asm
-*.obj
 
+Assembler/*.asm
+Assembler/*.obj
 Assembler/tokenizer
 Assembler/__pycache__
+
+src/main
