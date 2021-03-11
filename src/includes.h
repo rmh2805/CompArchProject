@@ -11,6 +11,8 @@
 
 // system include files
 #include <cstdlib>
+#include <cstdint>
+
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>

@@ -1,5 +1,5 @@
 #
-# Created by gmakemake (Ubuntu Jul 25 2014) on Wed Mar 10 11:09:58 2021
+# Created by gmakemake (Ubuntu Jul 25 2014) on Wed Mar 10 11:22:32 2021
 #
 
 #
@@ -54,14 +54,14 @@ CCLIBFLAGS = $(LIBFLAGS)
 ########## End of flags from header.mak
 
 
-CPP_FILES =	main.cpp
+CPP_FILES =	cpu.cpp main.cpp
 C_FILES =	
 PS_FILES =	
 S_FILES =	
 H_FILES =	cpu.h includes.h
 SOURCEFILES =	$(H_FILES) $(CPP_FILES) $(C_FILES) $(S_FILES)
 .PRECIOUS:	$(SOURCEFILES)
-OBJFILES =	
+OBJFILES =	cpu.o 
 
 #
 # Main targets
@@ -76,6 +76,7 @@ main:	main.o $(OBJFILES)
 # Dependencies
 #
 
+cpu.o:	cpu.h includes.h
 main.o:	cpu.h includes.h
 
 #
