@@ -1,0 +1,28 @@
+Fetch:
+    Mar <- PC, PC <- PC + 1
+    IR <- Mem[MAR], <No OP>
+    //goto FetchOperands
+
+FetchOperands:
+    //if val(IR) in noOps, goto decode
+    
+    uRet <- uPC + 1, goto GetOperand
+    OP1Type <- uR1, OP1Val <- uR2
+    if opType == 0, goto InterpOperand
+    //if val(IR) in oneOp, goto decode
+
+    //Repeat the above block for other operands
+
+    <No OP>, goto decode
+
+GetOperand:
+    uR1 <- 0, uR2 <- 0
+GetOpType:
+    MAR <- PC, PC + 1
+    MDR <- Mem[MAR], uR1 <- uR1 << 8
+    uR1 <- uR1 | MDR, <No OP>
+    if MDR & 0xF0 == 0, goto GetOpType
+    <No OP>, goto DecodeOpType
+
+DecodeOpType:
+    

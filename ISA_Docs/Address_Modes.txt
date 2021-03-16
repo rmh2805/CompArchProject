@@ -25,5 +25,6 @@ Where:
 		- 10: program counter
 		- 11: reference to following byte
 	- <Code> specifies a control code
-		- 0000: explicit end of operand list (e.g. for instrs which can take variable numbers of 
-		        operands.
+		- 0000: Explicit end of operand list (e.g. for instrs which can take variable numbers of 
+		        operands).
+		- 0001: Flag to sign extend the following operand's data before operation/storage.
