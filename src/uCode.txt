@@ -83,7 +83,7 @@ FetchOpImmEnd:
 
 FetchOpReg:
     # Don't read the extra byte if it's not needed
-    if MDR & 0x0B != 0x0B, goto FetchOpRet 
+    if MDR & 0x0C != 0x0C, goto FetchOpRet 
     
     if PC == <PC MAX>, goto halt        # Halt on overflow
     MAR <- PC, PC <- PC + 1             # Target and Increment next imm byte
@@ -94,7 +94,7 @@ FetchOpReg:
 
 FetchOpIdx:
     # Skip reading the first extra byte if not needed
-    if MDR & 0x0B != 0x0B, goto FetchOpRet 
+    if MDR & 0x0C != 0x0C, goto FetchOpRet 
     
     if PC == <PC MAX>, goto halt        # Halt on overflow
     MAR <- PC, PC <- PC + 1             # Target and Increment next imm byte
@@ -113,8 +113,20 @@ FetchOpIdx2:
     uPC <- uRet, <No OP>                # Return (No new data to grab)
 
 FetchOpDsp:
+    uR0_U <- 0x00FFFFFF, <No OP>        # uR0 upper word gets 0    
+
+                                        # Skip grabbing a non-existent ext. byte
+    if MDR & 0x0C != 0x0C, goto FetchOpImm
     
-    uPC <- uRet, <No OP>                # Return (No new data to grab)
+    if PC == <PC MAX>, goto halt        # Halt on overflow
+    MAR <- PC, PC <- PC + 1             # Target and Increment next imm byte
+    MDR <- Mem[MAR], <NoOP>             # Get next byte, make space in return 1
+    
+    uR1 <- MDR, <No OP>                 # Put the MDR into uR1
+    uR1 <- uR1 << 24, <No OP>           # Move up the MDR
+    uR0_U <- uR0_U | uR1, uR1 <- 0      # Include the register byte in the return
+
+    <No OP>, goto FetchOpImm            # Grab the displacement immediate value
 
 FetchOpScl:
     
