@@ -18,6 +18,7 @@ Address Modes:
 	1111 |            |
 	
 Where:
+    - Multi-word data is stored little endian
 	- <rsz>, <isz>, and <val> are 2-bit fields indicating sizes and increments from 1 to 4 (bytes)
 	- <rs> is a 2-bit field indicating a register
 		- 00: register 0
