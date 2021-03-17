@@ -1,28 +1,99 @@
 Fetch:
-    Mar <- PC, PC <- PC + 1
-    IR <- Mem[MAR], <No OP>
-    //goto FetchOperands
+    if PC == <PC MAX>, goto halt    # Halt on overflow
+
+    Mar <- PC, PC <- PC + 1         # Prepare to pull in the next instr byte, increment PC
+    IR <- Mem[MAR], <No OP>         # Grab the next opcode
+    <No Op>, goto FetchOperands     # Fetch the operands for this instruction
 
 FetchOperands:
-    //if val(IR) in noOps, goto decode
+    //if val(IR) in noOps, goto decode      # Decode the instruction if it takes no operations
     
-    uRet <- uPC + 1, goto GetOperand
-    OP1Type <- uR1, OP1Val <- uR2
-    if opType == 0, goto InterpOperand
-    //if val(IR) in oneOp, goto decode
+    uRet <- uPC + 1, goto GetOperand        # Micro function call
+    OP1Type <- uR0, OP1Val <- uR1           # Store the results of
+    if OP1Type == 0, goto InterpOperand     # If explicit end of operands, set others
+    //if val(IR) in oneOp, goto decode      # Break loop if this is the last operand
 
-    //Repeat the above block for other operands
+    //Repeat for other operands
 
-    <No OP>, goto decode
+    <No OP>, goto decode                    # If max length of operands is grabbed, decode
 
+# This microfunction will return the next operand from memory
+# Returns:
+#   uR0: All prefix bytes of the operand, as well as the address mode byte (LSB). 
+#        If this is a displacement operand, the MSB will contain either the RS extension byte or a 
+#        null byte.
+#        If this is a scale operand, the next MSB will be reserved for a displacement RS, followed 
+#        by the Scale AM, followed by an RS byte for the scale operand.
+#       
+#   uR1: Any additional data not included in uR0 (non-displacement/scale RS bytes, immediates, etc.)
+#        In the case of an Index op, the LSB will be the first RS byte, followed by the second RS 
+#        byte
+#        
 GetOperand:
-    uR1 <- 0, uR2 <- 0
+    uR0 <- 0, uR1 <- 0                  # Clear the return registers
 GetOpType:
-    MAR <- PC, PC + 1
-    MDR <- Mem[MAR], uR1 <- uR1 << 8
-    uR1 <- uR1 | MDR, <No OP>
-    if MDR & 0xF0 == 0, goto GetOpType
-    <No OP>, goto DecodeOpType
-
-DecodeOpType:
+    if PC == <PC MAX>, goto halt        # Halt on overflow
+    MAR <- PC, PC + 1                   # Prepare to pull in the next op byte, increment PC
+    MDR <- Mem[MAR], uR0 <- uR0 << 8    # Pull next op byte, move back prefixes
+    uR0 <- uR0 | MDR, <No OP>           # Insert next type byte into type buffer
     
+    if MDR != 0, goto GetOpType2        # Skip this unless this is an opcode terminator
+    if uR0 != 0, goto halt              # Illegal operand (prefix bytes on an opcode terminator)
+    uPC <- uRet, <No OP>                # Return since this is a legal terminator encoding
+    
+GetOpType2:
+    if MDR & 0xF0 == 0, goto GetOpType  # If this was a control code, grab the next byte
+    <No OP>, goto FetchOpVal            # Else, decode the operand type
+
+FetchOpVal:
+    # Break out to second stage fetch
+    if MDR & 0xF0 == 0x10, goto FetchOpRet  # No more work to be done
+    
+    if MDR & 0xF0 == 0x20, goto FetchOpImm  # Fetch the proper immediate
+    if MDR & 0xF0 == 0x50, goto FetchOpImm  # Fetch the immediate data (for the pointer address)
+    if MDR & 0xF0 == 0x80, goto FetchOpImm  # Fetch the immediate data (for absolute address)
+    
+    if MDR & 0xF0 == 0x30, goto FetchOpReg  # Fetch the register data
+    if MDR & 0xF0 == 0x40, goto FetchOpReg  # Fetch the register data (for indirect access)
+    if MDR & 0xF0 == 0x90, goto FetchOpReg  # Fetch the register data (for increment access) 
+    if MDR & 0xF0 == 0xA0, goto FetchOpReg  # Fetch the register data (for decrement access)
+    
+    if MDR & 0xF0 == 0x60, goto FetchOpIdx  # Fetch an index operand
+    if MDR & 0xF0 == 0x70, goto FetchOpDsp  # Fetch a displacement operand
+    if MDR & 0xF0 == 0xB0, goto FetchOpScl  # Fetch a scale operand
+    
+    <No OP>, goto halt                  # Invalid address mode
+
+FetchOpRet:
+    uPC <- uRet, <No OP>                # Return (No new data to grab)
+
+FetchOpImm:
+    uCnt <- MDR & 0x03, <No OP>         # Copy the isz field to uCnt
+FetchOpImmLoop:
+    if PC == <PC MAX>, goto halt        # Halt on overflow
+    MAR <- PC, PC <- PC + 1             # Target and Increment next imm byte
+    MDR <- Mem[MAR], uR1 <- uR1 << 8    # Get next byte, make space in return 1
+    uR1 <- uR1 | MDR, <No OP>           # Pull in the next byte for return
+    
+    if uCnt == 0, goto FetchOpImmEnd    # If countdown is over, break loop (else decr & repeat)
+    uCnt <- uCnt - 1, goto FetchOpImmLoop
+    
+FetchOpImmEnd:
+    uPC <- uRet, <No OP>                # Return (No new data to grab)
+
+FetchOpReg:
+    
+    uPC <- uRet, <No OP>                # Return (No new data to grab)
+
+FetchOpIdx:
+    
+    uPC <- uRet, <No OP>                # Return (No new data to grab)
+
+FetchOpDsp:
+    
+    uPC <- uRet, <No OP>                # Return (No new data to grab)
+
+FetchOpScl:
+    
+    uPC <- uRet, <No OP>                # Return (No new data to grab)
+

@@ -6,7 +6,7 @@ Address Modes:
 	0011 | <rs> <rsz> | Register
 	0100 | <rs> <rsz> | Register Indirect
 	0101 |  00  <isz> | Memory Indirect
-	0110 | <rs> <rs2> | Index
+	0110 | <rs> <rs2> | Index [EA = val(r1) + val(r2)]
 	0111 | <rs> <isz> | Displacement
 	1000 |  00  <isz> | Absolute
 	1001 | <rs> <val> | Increment
