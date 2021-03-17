@@ -26,7 +26,7 @@ FetchOperands:
 #        by the Scale AM, followed by an RS byte for the scale operand.
 #       
 #   uR1: Any additional data not included in uR0 (non-displacement/scale RS bytes, immediates, etc.)
-#        In the case of an Index op, the LSB will be the first RS byte, followed by the second RS 
+#        In the case of an Index op, the LSB will be the second RS byte, followed by the first RS 
 #        byte
 #        
 GetOperand:
@@ -82,10 +82,33 @@ FetchOpImmEnd:
     uPC <- uRet, <No OP>                # Return (No new data to grab)
 
 FetchOpReg:
+    # Don't read the extra byte if it's not needed
+    if MDR & 0x0B != 0x0B, goto FetchOpRet 
+    
+    if PC == <PC MAX>, goto halt        # Halt on overflow
+    MAR <- PC, PC <- PC + 1             # Target and Increment next imm byte
+    MDR <- Mem[MAR], <No OP>            # Get next byte, make space in return 1
+    uR1 <- MDR, <No OP>                 # Pull in the next byte for return
     
     uPC <- uRet, <No OP>                # Return (No new data to grab)
 
 FetchOpIdx:
+    # Skip reading the first extra byte if not needed
+    if MDR & 0x0B != 0x0B, goto FetchOpRet 
+    
+    if PC == <PC MAX>, goto halt        # Halt on overflow
+    MAR <- PC, PC <- PC + 1             # Target and Increment next imm byte
+    MDR <- Mem[MAR], <No OP>            # Get next byte
+    uR1 <- MDR, <No OP>                 # Pull in the next byte for return
+    
+FetchOpIdx2:
+    if MDR & 0x03 != 0x03, goto FetchOpRet 
+
+    
+    if PC == <PC MAX>, goto halt        # Halt on overflow
+    MAR <- PC, PC <- PC + 1             # Target and Increment next imm byte
+    MDR <- Mem[MAR], uR1 <- uR1 << 8    # Get next byte, make space in return 1
+    uR1 <- uR1 | MDR, <No OP>           # Pull in the next byte for return
     
     uPC <- uRet, <No OP>                # Return (No new data to grab)
 
