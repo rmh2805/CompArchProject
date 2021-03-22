@@ -76,9 +76,12 @@ GetOpType2:
     if MDR & 0xF0 == 0, goto GetOpType  # If this was a prefix byte, grab the next byte
     <No OP>, goto FetchOpVal            # Else, decode the operand type
 
+uRet:
+    uPC <- uRet, <No OP>                # Return (No further data to grab)
+
 FetchOpVal:
     # Break out to second stage fetch
-    if MDR & 0xF0 == 0x10, goto FetchOpRet  # No more work to be done  (nybble immediate)
+    if MDR & 0xF0 == 0x10, goto uRet        # No more work to be done  (nybble immediate)
     
     if MDR & 0xF0 == 0x20, goto FetchOpImm  # Fetch the immediate data (for immediate value)
     if MDR & 0xF0 == 0x50, goto FetchOpImm  # Fetch the immediate data (for the pointer address)
@@ -95,9 +98,6 @@ FetchOpVal:
     
     <No OP>, goto halt                      # Halt on Invalid address mode
 
-FetchOpRet:
-    uPC <- uRet, <No OP>                # Return (No further data to grab)
-
 FetchOpImm:
     uCnt <- MDR & 0x03, <No OP>         # Set the immediate width counter
 
@@ -108,12 +108,12 @@ FetchOpImmLoop:
     MDR <- Mem[MAR], uR1 <- uR1 << 8    # Grab next byte and prepare space for return
     uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
 
-    if uCnt == 0, goto FetchOpRet       # Return on zero counter, else loop
+    if uCnt == 0, goto uRet             # Return on zero counter, else loop
     uCnt <- uCnt - 1, goto FetchOpImmLoop
 
 FetchOpReg:
     # Skip grabbing the second byte if it isn't specified
-    if MDR & 0x0C == 3, goto FetchOpReg2
+    if MDR & 0x0C == 0x0C, goto FetchOpReg2
     uPC <- uRet, <No OP>                # Return
 
 FetchOpReg2:
@@ -125,6 +125,22 @@ FetchOpReg2:
     uPC <- uRet, <No OP>                # Return
 
 FetchOpIdx:
+    # Skip grabbing the first register byte if not specified
+    if MDR & 0x0C == 0x0C, goto FetchOpIdx2
+     
+    if PC == <PC MAX>, goto halt        # Halt on PC overflow
+    MAR <- PC, PC <- PC + 1             # Prepare to grab the next byte from data
+    MDR <- Mem[MAR], uR1 <- uR1 << 8    # Grab next byte and prepare space for return
+    uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
+    
+FetchOpIdx2:
+    if MDR & 0x03 == 0x03, goto  uRet   # Skip grabbing the second reg byte if unneeded
+
+    if PC == <PC MAX>, goto halt        # Halt on PC overflow
+    MAR <- PC, PC <- PC + 1             # Prepare to grab the next byte from data
+    MDR <- Mem[MAR], uR1 <- uR1 << 8    # Grab next byte and prepare space for return
+    uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
+    
     uPC <- uRet, <No OP>                # Return
 
 FetchOpDsp:
