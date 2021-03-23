@@ -1,7 +1,8 @@
 Fetch:
-    if PC == <PC MAX>, goto halt    # Halt on overflow
-
-    Mar <- PC, PC <- PC + 1         # Prepare to pull in the next instr byte, increment PC
+    <No OP>, <No OP>                # Space to ensure that uPC can start before first instruction
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    
+    Mar <- PC, <No OP>              # Prepare to pull in the next instr byte
     IR <- Mem[MAR], <No OP>         # Grab the next opcode
     <No Op>, goto FetchOperands     # Fetch the operands for this instruction
 
@@ -9,7 +10,7 @@ FetchOperands:
     //if val(IR) in noOps, goto Decode      # Decode the instruction if it takes no operations
     
     # Grab the first operand
-    uRet <- uPC + 1, goto GetOperand        # Micro function call
+    uRet <- uPC, goto GetOperand            # Micro function call
     OP1Type <- uR0, OP1Val <- uR1           # Store the type bytes & value bytes for the first operand
     OPScale1 <- uR2 << 16, <No OP>          # Store the scale bytes for the first operand
     
@@ -17,7 +18,7 @@ FetchOperands:
     //if val(IR) in oneOp, goto Decode      # Break loop if this is the last operand
     
     # Grab the second operand
-    uRet <- uPC + 1, goto GetOperand        # Micro function call
+    uRet <- uPC, goto GetOperand            # Micro function call
     OP2Type <- uR0, OP2Val <- uR1           # Store the type bytes & value bytes for the second operand
     OPScale1 <- uR2 | OPScale1, <No OP>     # Store the scale bytes for the second operand
     
@@ -25,7 +26,7 @@ FetchOperands:
     //if val(IR) in twoOp, goto Decode      # Break loop if this is the last operand
     
     # Grab the third operand
-    uRet <- uPC + 1, goto GetOperand        # Micro function call
+    uRet <- uPC, goto GetOperand            # Micro function call
     OP3Type <- uR0, OP3Val <- uR1           # Store the type bytes & value bytes for the third operand
     OPScale2 <- uR2 << 16, <No OP>          # Store the scale bytes for the third operand
     
@@ -33,7 +34,7 @@ FetchOperands:
     //if val(IR) in threeOp, goto Decode    # Break loop if this is the last operand
     
     # Grab the fourth operand
-    uRet <- uPC + 1, goto GetOperand        # Micro function call
+    uRet <- uPC, goto GetOperand            # Micro function call
     OP4Type <- uR0, OP4Val <- uR1           # Store the type bytes & value bytes for the fourth operand
     OPScale2 <- uR2 | OPScale2, <No OP>     # Store the scale bytes for the fourth operand
     
@@ -62,9 +63,9 @@ GetOperand:
     uR2 <- 0, <No OP>
 
 GetOpType:
-    if PC == <PC MAX>, goto halt        # Halt on PC overflow
+    IncPC, IncPC                        # Halt on PC overflow, else increment
     
-    MAR <- PC, PC + 1                   # Prepare to pull in the next op byte, increment PC
+    MAR <- PC, <No OP>                  # Prepare to pull in the next op byte
     MDR <- Mem[MAR], uR0 <- uR0 << 8    # Pull next op byte, move back prefixes
     uR0 <- uR0 | MDR, <No OP>           # Insert next type byte into type buffer
     
@@ -102,9 +103,8 @@ FetchOpImm:
     uCnt <- MDR & 0x03, <No OP>         # Set the immediate width counter
 
 FetchOpImmLoop:
-    
-    if PC == <PC MAX>, goto halt        # Halt on PC overflow
-    MAR <- PC, PC <- PC + 1             # Prepare to grab the next byte from data
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte from data
     MDR <- Mem[MAR], uR1 <- uR1 << 8    # Grab next byte and prepare space for return
     uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
 
@@ -117,8 +117,8 @@ FetchOpReg:
     uPC <- uRet, <No OP>                # Return
 
 FetchOpReg2:
-    if PC == <PC MAX>, goto halt        # Halt on PC overflow
-    MAR <- PC, PC <- PC + 1             # Prepare to grab the next byte from data
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte from data
     MDR <- Mem[MAR], uR1 <- uR1 << 8    # Grab next byte and prepare space for return
     uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
     
@@ -126,25 +126,38 @@ FetchOpReg2:
 
 FetchOpIdx:
     # Skip grabbing the first register byte if not specified
-    if MDR & 0x0C == 0x0C, goto FetchOpIdx2
+    if uR0 & 0x0C == 0x0C, goto FetchOpIdx2
      
-    if PC == <PC MAX>, goto halt        # Halt on PC overflow
-    MAR <- PC, PC <- PC + 1             # Prepare to grab the next byte from data
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte from data
     MDR <- Mem[MAR], uR1 <- uR1 << 8    # Grab next byte and prepare space for return
-    uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
+    uR1 <- MDR, <No OP>                 # Incorporate IMM byte into return
     
 FetchOpIdx2:
-    if MDR & 0x03 == 0x03, goto  uRet   # Skip grabbing the second reg byte if unneeded
+    if uR0 & 0x03 == 0x03, goto  uRet   # Skip grabbing the second reg byte if unneeded
 
-    if PC == <PC MAX>, goto halt        # Halt on PC overflow
-    MAR <- PC, PC <- PC + 1             # Prepare to grab the next byte from data
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte from data
     MDR <- Mem[MAR], uR1 <- uR1 << 8    # Grab next byte and prepare space for return
     uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
     
     uPC <- uRet, <No OP>                # Return
 
 FetchOpDsp:
-    uPC <- uRet, <No OP>                # Return
+    uR0 <- uR0 & 0x00FFFFFF, uCnt <- 0  # Clear the MSB of uR1 and the count (temp) register
+    
+    # Skip to grabbing IMM if not specified
+    if MDR & 0x0C == 0x0C, goto FetchOpImm
+
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte from data
+    MDR <- Mem[MAR], <No OP>            # Grab the register byte
+    uCnt <- MDR, <No OP>                # Store the register byte into temp register
+    
+    uCnt <- uCnt << 24, <No OP>         # Shift the register byte up three bytes
+    uR0 <- uR0 | uCnt, <No OP>          # Store the register byte in uR0
+
+    <No OP>, goto FetchOpImm            # Grab the immediate for this mode
 
 FetchOpScl:
     uPC <- uRet, <No OP>                # Return
