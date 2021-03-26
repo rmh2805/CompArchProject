@@ -160,5 +160,7 @@ FetchOpDsp:
     <No OP>, goto FetchOpImm            # Grab the immediate for this mode
 
 FetchOpScl:
+    uR2 <- MDR, uR0 <- uR0 & 0xFFFFFF00 # Move the scale param to ur2 and clear it from uR0
+    uR2 <- uR2 << 8, <No OP>            # Make space in ur2 for the register byte 
     uPC <- uRet, <No OP>                # Return
 
