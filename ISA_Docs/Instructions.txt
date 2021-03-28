@@ -8,11 +8,6 @@ CPU Control:
 	 0x02 |   CLR    | dst <- $0
 	 0x03 |   DMP    | Dump value to trace
 	 0x04 |   OUT    | Output value to port
-	 0x05 |   JMP    | Jump to specified location
-	 0x06 |   BEQ    | Branch if src1 == src2
-	 0x07 |   BNE    | Branch if src1 != src2
-	 0x08 |   BGT    | Branch if src1 > src2
-	 0x09 |   BLT    | Branch if src1 < src2
 
 Basic Arithmetic and Logic:
 	  OPC | Mnemonic | Description 
@@ -36,4 +31,15 @@ Memory Management:
 	 0x21 |   SWP    | dst <- src, src <- dst
 	 0x22 |   CPY    | Memory block copy
 
+Change of Location:
+	  OPC | Mnemonic | Description 
+	------+----------+------------------------
+	 0x31 |   JMP    | Jump to specified location
+	 0x32 |   BEQ    | Branch if src1 == src2
+	 0x33 |   BNE    | Branch if src1 != src2
+	 0x34 |   BGT    | Branch if src1 > src2
+	 0x35 |   BLT    | Branch if src1 < src2
+	 0x36 |   JAL    | Function call
+	 0x37 |   RET    | Function return
+	 
 (Unspecified opcodes are noop)

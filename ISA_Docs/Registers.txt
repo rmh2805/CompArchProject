@@ -1,0 +1,18 @@
+Register File
+    r0: Quick Access, GPR
+    r1: Quick Access, GPR
+    r2: GPR
+    r3: GPR
+    r4: GPR
+    r5: GPR
+    r6: GPR
+    r7: GPR
+    r8: GPR
+    r9: GPR
+    rA: GPR
+    rB: GPR
+
+    rC: Return Address Register
+    rD: Base Pointer
+    rE: Stack Pointer
+    rF: Quick Access, PC
