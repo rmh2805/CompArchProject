@@ -7,7 +7,12 @@ CPU Control:
 	 0x01 |   HLT    | Halts the CPU
 	 0x02 |   CLR    | dst <- $0
 	 0x03 |   DMP    | Dump value to trace
-	 0x04 |   OUT    | Output value to device 
+	 0x04 |   OUT    | Output value to port
+	 0x05 |   JMP    | Jump to specified location
+	 0x06 |   BEQ    | Branch if src1 == src2
+	 0x07 |   BNE    | Branch if src1 != src2
+	 0x08 |   BGT    | Branch if src1 > src2
+	 0x09 |   BLT    | Branch if src1 < src2
 
 Basic Arithmetic and Logic:
 	  OPC | Mnemonic | Description 

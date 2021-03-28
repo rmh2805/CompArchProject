@@ -12,7 +12,7 @@ Address Modes:
 	1001 | <rs> <val> | Increment
 	1010 | <rs> <val> | Decrement
 	1011 | <rs> <val> | Scale
-	1100 |            |
+	1100 | <rs> <val> | Deferred increment
 	1101 |            |
 	1110 |            |
 	1111 |            |
