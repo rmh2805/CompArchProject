@@ -1,0 +1,14 @@
+Change of Location:
+	  OPC | Mnemonic | Description 
+	------+----------+------------------------
+	 0x31 |   JMP    | Jump to specified location
+	 0x32 |   JAL    | Function call
+	 0x33 |   RET    | Function return
+	 0x34 |   BEQ    | Branch if src1 == src2
+	 0x35 |   BNE    | Branch if src1 != src2
+	 0x36 |   BGT    | Branch if src1 >  src2
+	 0x37 |   BGE    | Branch if src1 >= src2
+	 0x38 |   BOV    | Branch on ALU overflow
+	 0x39 |   BCY    | Branch on ALU carry
+	 0x3A |   BIE    | Branch if increment is equal (loops)
+	 0x3B |   BDE    | Branch if decrement is equal (loops)

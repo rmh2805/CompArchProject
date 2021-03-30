@@ -1,0 +1,6 @@
+Memory Management:
+	  OPC | Mnemonic | Description 
+	------+----------+------------------------
+	 0x20 |   MOV    | dst <- src
+	 0x21 |   SWP    | dst <- src, src <- dst
+	 0x22 |   CPY    | Memory block copy

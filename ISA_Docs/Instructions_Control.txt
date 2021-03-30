@@ -1,8 +1,8 @@
 CPU Control:
 	  OPC | Mnemonic | Description 
 	------+----------+------------------------
-	 0x00 |   NOP    | Noop
-	 0x01 |   HLT    | Halts the CPU
+	 0x00 |   HLT    | Halt
+	 0x01 |   NOP    | No Op (reserved)
 	 0x02 |   CLR    | dst <- $0
 	 0x03 |   DMP    | Dump value to trace
 	 0x04 |   OUT    | Output value to device 

@@ -11,7 +11,7 @@ Basic Arithmetic and Logic:
 	 0x17 |   XOR    | dst <- src1 ^ src2
 	 0x18 |   CMP    | dst <- ~src
 	 0x19 |   INC    | dst <- dst + 1
-	 0x1a |   DEC    | dst <- dst - 1
+	 0x1A |   DEC    | dst <- dst - 1
 
 - ADD: dst <- src1 + src2
 	- 2 Operands: 1) Reg or Mem; dst and src1

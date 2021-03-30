@@ -12,8 +12,8 @@ Address Modes:
 	1001 | <rs> <val> | Increment
 	1010 | <rs> <val> | Decrement
 	1011 | <rs> <val> | Scale
-	1100 | <rs> <val> | Deferred increment
-	1101 |            |
+	1100 | <rs> <val> | Preemptive increment (increment then use)
+	1101 | <rs> <val> | Delayed decrement (decrement then use)
 	1110 |            |
 	1111 |            |
 	

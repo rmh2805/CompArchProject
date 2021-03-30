@@ -3,11 +3,11 @@ Opcodes are a single byte
 CPU Control:
 	  OPC | Mnemonic | Description 
 	------+----------+------------------------
-	 0x00 |   NOP    | Noop
-	 0x01 |   HLT    | Halts the CPU
+	 0x00 |   HLT    | Halt
+	 0x01 |   NOP    | No Op (reserved)
 	 0x02 |   CLR    | dst <- $0
 	 0x03 |   DMP    | Dump value to trace
-	 0x04 |   OUT    | Output value to port
+	 0x04 |   OUT    | Output value to device 
 
 Basic Arithmetic and Logic:
 	  OPC | Mnemonic | Description 
@@ -22,7 +22,7 @@ Basic Arithmetic and Logic:
 	 0x17 |   XOR    | dst <- src1 ^ src2
 	 0x18 |   CMP    | dst <- ~src
 	 0x19 |   INC    | dst <- dst + 1
-	 0x1a |   DEC    | dst <- dst - 1
+	 0x1A |   DEC    | dst <- dst - 1
 
 Memory Management:
 	  OPC | Mnemonic | Description 
