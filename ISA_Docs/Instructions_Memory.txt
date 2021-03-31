@@ -4,3 +4,32 @@ Memory Management:
 	 0x20 |   MOV    | dst <- src
 	 0x21 |   SWP    | dst <- src, src <- dst
 	 0x22 |   CPY    | Memory block copy
+
+MOV: dst <- src
+	- 2 Operands: 1) Reg or Mem; dst
+	              2) Any; src
+
+SWP: dst <- src, src <- dst
+	- 2 Operands: 1) Reg or Mem; dst
+	              2) Reg or Mem; src
+
+CPY: Block copy, operation depends on number of args
+	- 2 Operands: C string copy
+	              1) Mem; dst
+	              2) Mem; src
+	
+	- 3 Operands: Selectable string copy
+	              1) Mem; dst
+	              2) Mem; src
+	              3) Any; selector [0: C string, 1: Pascal string (32-bit int),
+	                                Else: byte counter]
+	
+	- 4 Operands: Selectable limited string copy
+	              1) Mem; dst
+	              2) Mem; src
+	              3) Any; selector [0: C string, 
+	                                1: Pascal string (32-bit int),
+	                                Else: byte counter]
+	              4) Any; limit [0: disabled, 
+	                             Else: max nr bytes]
+

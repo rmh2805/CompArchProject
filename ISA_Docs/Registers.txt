@@ -1,18 +1,22 @@
 Register File
-    r0: Quick Access, GPR
-    r1: Quick Access, GPR
-    r2: GPR
-    r3: GPR
-    r4: GPR
-    r5: GPR
-    r6: GPR
-    r7: GPR
-    r8: GPR
-    r9: GPR
-    rA: GPR
-    rB: GPR
 
-    rC: Return Address Register
-    rD: Base Pointer
-    rE: Stack Pointer
-    rF: Quick Access, PC
+	 Number | Mnemonic | Quick | Description
+	--------+----------+-------+-------------
+       0    |    r0    |   Y   | GPR
+       1    |    r1    |   Y   | GPR
+       2    |    r2    |   N   | GPR
+       3    |    r3    |   N   | GPR
+       4    |    r4    |   N   | GPR
+       5    |    r5    |   N   | GPR
+       6    |    r6    |   N   | GPR
+       7    |    r7    |   N   | GPR
+       8    |    r8    |   N   | GPR
+       9    |    r9    |   N   | GPR
+       A    |    rA    |   N   | GPR
+       B    |    rB    |   N   | GPR
+       C    |    pR    |   N   | Return Pointer
+       D    |    pB    |   N   | Base Pointer
+       E    |    pS    |   N   | Stack Pointer
+       F    |    PC    |   Y   | Program Counter
+
+ - All registers are 32-bit

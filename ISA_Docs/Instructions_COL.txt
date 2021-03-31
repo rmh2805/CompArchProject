@@ -12,3 +12,12 @@ Change of Location:
 	 0x39 |   BCY    | Branch on ALU carry
 	 0x3A |   BIE    | Branch if increment is equal (loops)
 	 0x3B |   BDE    | Branch if decrement is equal (loops)
+
+JMP: PC <- dst
+    - 1 Operand: 1) Mem; dst
+    
+JAL: Function call  
+    - RTL: mem[pS - 4] <- pB, pB <- pS - 4  # Save and update base pointer
+           mem[pS - 8] <- pR, pS <- pS - 8  # Save return and update stack ptr
+           pR <- PC, PC <- dst              # Set new return and perform jump
+    - 1 Operand: 1) Mem; dst

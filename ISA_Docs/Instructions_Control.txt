@@ -7,9 +7,9 @@ CPU Control:
 	 0x03 |   DMP    | Dump value to trace
 	 0x04 |   OUT    | Output value to device 
 
-- NOP: A null operation
-
 - HLT: Halts the CPU
+
+- NOP: A null operation
 
 - CLR: dst <- $0
 	- 1 Operand: 1) Reg or Mem operand; dst
