@@ -8,16 +8,54 @@ Change of Location:
 	 0x35 |   BNE    | Branch if src1 != src2
 	 0x36 |   BGT    | Branch if src1 >  src2
 	 0x37 |   BGE    | Branch if src1 >= src2
-	 0x38 |   BOV    | Branch on ALU overflow
-	 0x39 |   BCY    | Branch on ALU carry
-	 0x3A |   BIE    | Branch if increment is equal (loops)
-	 0x3B |   BDE    | Branch if decrement is equal (loops)
+	 0x38 |   BIE    | Branch if increment is equal (loops)
+	 0x39 |   BDE    | Branch if decrement is equal (loops)
+	 0x3A |   BAO    | Branch on ALU overflow flag
+	 0x3B |   BAC    | Branch on ALU carry flag
 
 JMP: PC <- dst
-    - 1 Operand: 1) Mem; dst
+	- 1 Operand: 1) Mem; dst
     
 JAL: Function call  
-    - RTL: mem[pS - 4] <- pB, pB <- pS - 4  # Save and update base pointer
-           mem[pS - 8] <- pR, pS <- pS - 8  # Save return and update stack ptr
-           pR <- PC, PC <- dst              # Set new return and perform jump
-    - 1 Operand: 1) Mem; dst
+	- RTL: mem[pS - 4] <- pB, pB <- pS - 4  # Save and update base pointer
+	       mem[pS - 8] <- pR, pS <- pS - 8  # Save return and update stack ptr
+	       pR <- PC, PC <- dst              # Set new return and perform jump
+	
+	- 1 Operand: 1) Mem; dst
+
+RET: Function return
+	- RTL: PC <- pR, pR <- mem[pB - 4]      # Jump to call, pop return ptr
+	       pS <- mem[pB + 4], pB <- mem[pB] # Restore stack pointers
+	
+	- 0 Operands
+
+BEQ: if src1 == src2, goto dst
+	- 2 Operand: 1) Any; src1
+	             2) Mem; dst
+	             (src2 is an immediate 0)
+
+	- 3 Operand: Branch if src1 == src2
+	             1) Any; src1
+	             2) Any; src2
+	             2) Mem; dst
+
+BNE: if src1 != src2, goto dst
+	- Operands as in BEQ
+
+BGT: if src1 > src2, goto dst
+	- Operands as in BEQ
+
+BGE: if src1 >= src2, goto dst
+	- Operands as in BEQ
+
+BIE: src1 <- src1 + 1; if src1 == src2, goto dst
+	- Operands as in BEQ
+
+BDE: src1 <- src1 - 1; if src1 == src2, goto dst
+	- Operands as in BEQ
+
+BAO: if ALU overflow flag set, goto dst
+	- 1 Operand: 1) Mem; dst
+
+BAC: if ALU carry flag set, goto dst
+	- 1 Operand: 1)Mem; dst
