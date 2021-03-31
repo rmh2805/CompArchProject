@@ -55,7 +55,7 @@ BDE: src1 <- src1 - 1; if src1 == src2, goto dst
 	- Operands as in BEQ
 
 BAO: if ALU overflow flag set, goto dst
-	- 1 Operand: 1) Mem; dst
+	- Operands as in JMP
 
 BAC: if ALU carry flag set, goto dst
-	- 1 Operand: 1)Mem; dst
+	- Operands as in JMP
