@@ -1,8 +1,8 @@
 ===<Registers>===
 Register File
 
-	 Number | Mnemonic | Quick | Description
-	--------+----------+-------+-------------
+     Number | Mnemonic | Quick | Description
+    --------+----------+-------+-------------
        0    |    r0    |   Y   | GPR
        1    |    r1    |   Y   | GPR
        2    |    r2    |   N   | GPR
@@ -16,47 +16,47 @@ Register File
        A    |    rA    |   N   | GPR
        B    |    rB    |   N   | GPR
        C    |    pR    |   N   | Return Pointer
-       D    |    pB    |   N   | Base Pointer
+       D    |    pB    |   Y   | Base Pointer
        E    |    pS    |   N   | Stack Pointer
-       F    |    PC    |   Y   | Program Counter
+       F    |    PC    |   N   | Program Counter
 
  - All registers are 32-bit
 
 
 ===<Address Modes>===
 Operand type bytes:
-	
-	0000 |   <Code>   || Control Codes
-	0001 |  xx    xx  || Nybble Immediate
-	0010 |  00  <isz> || 1-4 byte immediate (follows directly)
-	0011 | <rs> <rsz> || Register
-	0100 | <rs> <rsz> || Register Indirect
-	0101 |  00  <isz> || Memory Indirect (immediate follows directly)
-	0110 | <rs> <rs2> || Index [EA = val(r1) + val(r2)]
-	0111 | <rs> <isz> || Displacement (immediate follows directly)
-	1000 |  00  <isz> || Absolute (immediate follows directly)
-	1001 | <rs> <val> || Increment (by val)
-	1010 | <rs> <val> || Decrement (by val)
-	1011 | <rs> <val> || Scale (detail in encoding section)
-	1100 | <rs> <val> || Preemptive Increment (increment then use)
-	1101 | <rs> <val> || Delayed Decrement (use then decrement)
-	1110 | <UNDEFINED>|| 
-	1111 | <UNDEFINED>||
-	
+
+    0000 |   <Code>   || Control Codes
+    0001 |  xx    xx  || Nybble Immediate
+    0010 |  00  <isz> || 1-4 byte immediate (follows directly)
+    0011 | <rs> <rsz> || Register
+    0100 | <rs> <rsz> || Register Indirect
+    0101 |  00  <isz> || Memory Indirect (immediate follows directly)
+    0110 | <rs> <rs2> || Index [EA = val(r1) + val(r2)]
+    0111 | <rs> <isz> || Displacement (immediate follows directly)
+    1000 |  00  <isz> || Absolute (immediate follows directly)
+    1001 | <rs> <val> || Increment (by val)
+    1010 | <rs> <val> || Decrement (by val)
+    1011 | <rs> <val> || Scale (detail in encoding section)
+    1100 | <rs> <val> || Preemptive Increment (increment then use)
+    1101 | <rs> <val> || Delayed Decrement (use then decrement)
+    1110 | <UNDEFINED>|| 
+    1111 | <UNDEFINED>||
+    
 Where:
     - Multi-word data is stored little endian
-	- <rsz>, <isz>, and <val> are 2-bit fields indicating sizes and increments from
-      1 to 4 (bytes)
-	- <rs> is a 2-bit field indicating a register
-		- 00: register 0
-		- 01: register 1
-		- 10: stack base pointer
-		- 11: reference to following byte (for index with two following bytes, 
+    - <rsz>, <isz>, and <val> are 2-bit fields indicating sizes and increments 
+      from 1 to 4 (bytes)
+    - <rs> is a 2-bit field indicating a register
+        - 00: register 0
+        - 01: register 1
+        - 10: stack base pointer
+        - 11: reference to following byte (for index with two following bytes, 
               rs2's comes after rs)
-	- <Code> specifies a control code
-		- 0000: Explicit end of operand list (e.g. for instrs which can take variable 
-                numbers of operands).
-		- 0001: Flag to sign extend the following operand's data before 
+    - <Code> specifies a control code
+        - 0000: Explicit end of operand list (e.g. for instrs which can take 
+                variable numbers of operands).
+        - 0001: Flag to sign extend the following operand's data before 
                 operation/storage.
 
 
@@ -64,54 +64,54 @@ Where:
 Opcodes are a single byte (Unspecified opcodes are noop)
 
 CPU Control:
-	  OPC | Mnemonic | Description 
-	------+----------+------------------------
-	 0x00 |   HLT    | Halt
-	 0x01 |   NOP    | No Op (reserved)
-	 0x02 |   CLR    | dst <- $0
-	 0x03 |   DMP    | Dump value to trace
-	 0x04 |   OUT    | Output value to device 
+      OPC | Mnemonic | Description 
+    ------+----------+------------------------
+     0x00 |   HLT    | Halt
+     0x01 |   NOP    | No Op (reserved)
+     0x02 |   CLR    | dst <- $0
+     0x03 |   DMP    | Dump value to trace
+     0x04 |   OUT    | Output value to device 
 
 Basic Arithmetic and Logic:
-	  OPC | Mnemonic | Description 
-	------+----------+------------------------
-	 0x10 |   ADD    | dst <- src1 + src2
-	 0x11 |   SUB    | dst <- src1 - src2
-	 0x12 |   MUL    | dst <- src1 * src2
-	 0x13 |   DIV    | dst <- src1 / src2
-	 0x14 |   MOD    | dst <- src1 % src2
-	 0x15 |   AND    | dst <- src1 & src2
-	 0x16 |   OR     | dst <- src1 | src2
-	 0x17 |   XOR    | dst <- src1 ^ src2
-	 0x18 |   CMP    | dst <- ~src
-	 0x19 |   INC    | dst <- dst + 1
-	 0x1A |   DEC    | dst <- dst - 1
+      OPC | Mnemonic | Description 
+    ------+----------+------------------------
+     0x10 |   ADD    | dst <- src1 + src2
+     0x11 |   SUB    | dst <- src1 - src2
+     0x12 |   MUL    | dst <- src1 * src2
+     0x13 |   DIV    | dst <- src1 / src2
+     0x14 |   MOD    | dst <- src1 % src2
+     0x15 |   AND    | dst <- src1 & src2
+     0x16 |   OR     | dst <- src1 | src2
+     0x17 |   XOR    | dst <- src1 ^ src2
+     0x18 |   CMP    | dst <- ~src
+     0x19 |   INC    | dst <- dst + 1
+     0x1A |   DEC    | dst <- dst - 1
 
 Memory Management:
-	  OPC | Mnemonic | Description 
-	------+----------+------------------------
-	 0x20 |   MOV    | dst <- src
-	 0x21 |   SWP    | dst <- src, src <- dst
-	 0x22 |   CPY    | Memory block copy
+      OPC | Mnemonic | Description 
+    ------+----------+------------------------
+     0x20 |   MOV    | dst <- src
+     0x21 |   SWP    | dst <- src, src <- dst
+     0x22 |   CPY    | Memory block copy
 
 Change of Location:
-	  OPC | Mnemonic | Description 
-	------+----------+------------------------
-	 0x31 |   JMP    | Jump to specified location
-	 0x32 |   JAL    | Function call
-	 0x33 |   RET    | Function return
-	 0x34 |   BEQ    | Branch if src1 == src2
-	 0x35 |   BNE    | Branch if src1 != src2
-	 0x36 |   BGT    | Branch if src1 >  src2
-	 0x37 |   BGE    | Branch if src1 >= src2
-	 0x38 |   BIE    | Branch if increment is equal (loops)
-	 0x39 |   BDE    | Branch if decrement is equal (loops)
-	 0x3A |   BAO    | Branch on ALU overflow flag
-	 0x3B |   BAC    | Branch on ALU carry flag
+      OPC | Mnemonic | Description 
+    ------+----------+------------------------
+     0x31 |   JMP    | Jump to specified location
+     0x32 |   JAL    | Function call
+     0x33 |   RET    | Function return
+     0x34 |   BEQ    | Branch if src1 == src2
+     0x35 |   BNE    | Branch if src1 != src2
+     0x36 |   BGT    | Branch if src1 >  src2
+     0x37 |   BGE    | Branch if src1 >= src2
+     0x38 |   BIE    | Branch if increment is equal (loops)
+     0x39 |   BDE    | Branch if decrement is equal (loops)
+     0x3A |   BAO    | Branch on ALU overflow flag
+     0x3B |   BAC    | Branch on ALU carry flag
 
 ===<Encoding Detail>===
-	- All instructions start with an opcode byte
-	- This is then followed by zero or more operands as specified by and in the
+    - All instructions start with an opcode byte
+    - This is then followed by zero or more operands as specified by and in the
       order of the explanations given below.
     - Each of these operands will follow one of the following formats:
         1) A null byte signifying an early end to the argument list
@@ -123,216 +123,216 @@ Change of Location:
 ===<Instruction Detail>===
 
 CPU Control:
-	  OPC | Mnemonic | Description 
-	------+----------+------------------------
-	 0x00 |   HLT    | Halt
-	 0x01 |   NOP    | No Op (reserved)
-	 0x02 |   CLR    | dst <- $0
-	 0x03 |   DMP    | Dump value to trace
-	 0x04 |   OUT    | Output value to device 
+      OPC | Mnemonic | Description 
+    ------+----------+------------------------
+     0x00 |   HLT    | Halt
+     0x01 |   NOP    | No Op (reserved)
+     0x02 |   CLR    | dst <- $0
+     0x03 |   DMP    | Dump value to trace
+     0x04 |   OUT    | Output value to device 
 
 - HLT: Halts the CPU
 
 - NOP: A null operation
 
 - CLR: dst <- $0
-	- 1 Operand: 1) Reg or Mem operand; dst
+    - 1 Operand: 1) Reg or Mem operand; dst
 
 - DMP: Dumps the value in dst to the trace
-	- 1 Operand: 1) Any operand; dst
+    - 1 Operand: 1) Any operand; dst
 
 - OUT: Outputs the value of src to a simulated device on port dst 
        (e.g. a line printer/terminal on device zero)
-	- 1 Operand: 1) Any operand; src
-	             (dst is $0)
-	
-	- 2 Operand: 1) Any operand; src
-	             2) Any operand; dst
+    - 1 Operand: 1) Any operand; src
+                 (dst is $0)
+    
+    - 2 Operand: 1) Any operand; src
+                 2) Any operand; dst
 
 
 
 Basic Arithmetic and Logic:
-	  OPC | Mnemonic | Description 
-	------+----------+------------------------
-	 0x10 |   ADD    | dst <- src1 + src2
-	 0x11 |   SUB    | dst <- src1 - src2
-	 0x12 |   MUL    | dst <- src1 * src2
-	 0x13 |   DIV    | dst <- src1 / src2
-	 0x14 |   MOD    | dst <- src1 % src2
-	 0x15 |   AND    | dst <- src1 & src2
-	 0x16 |   OR     | dst <- src1 | src2
-	 0x17 |   XOR    | dst <- src1 ^ src2
-	 0x18 |   CMP    | dst <- ~src
-	 0x19 |   INC    | dst <- dst + 1
-	 0x1A |   DEC    | dst <- dst - 1
+      OPC | Mnemonic | Description 
+    ------+----------+------------------------
+     0x10 |   ADD    | dst <- src1 + src2
+     0x11 |   SUB    | dst <- src1 - src2
+     0x12 |   MUL    | dst <- src1 * src2
+     0x13 |   DIV    | dst <- src1 / src2
+     0x14 |   MOD    | dst <- src1 % src2
+     0x15 |   AND    | dst <- src1 & src2
+     0x16 |   OR     | dst <- src1 | src2
+     0x17 |   XOR    | dst <- src1 ^ src2
+     0x18 |   CMP    | dst <- ~src
+     0x19 |   INC    | dst <- dst + 1
+     0x1A |   DEC    | dst <- dst - 1
 
 - ADD: dst <- src1 + src2
-	- 2 Operands: 1) Reg or Mem; dst and src1
-	              2) Any; src2
-	
-	- 3 Operands: 1) Reg or Mem; dst
-	              2) Any; src1
-	              3) Any; src2
+    - 2 Operands: 1) Reg or Mem; dst and src1
+                  2) Any; src2
+    
+    - 3 Operands: 1) Reg or Mem; dst
+                  2) Any; src1
+                  3) Any; src2
 
 - SUB: dst <- src1 - src2
-	- operands as in ADD
+    - operands as in ADD
 
 - MUL: dst <- src1 * src2, ovf <- (src1 * src2) >> |dst|
-	- 2 Operands: 1) Reg or Mem; dst and src1
-	              2) Any; src2
-	
-	- 3 Operands: 1) Reg or Mem; dst
-	              2) Any; src1
-	              3) Any; src2
-	
-	- 4 Operands: 1) Reg or Mem; dst
-	              2) Reg or Mem; ovf
-	              3) Any; src1
-	              4) Any; src2
+    - 2 Operands: 1) Reg or Mem; dst and src1
+                  2) Any; src2
+    
+    - 3 Operands: 1) Reg or Mem; dst
+                  2) Any; src1
+                  3) Any; src2
+    
+    - 4 Operands: 1) Reg or Mem; dst
+                  2) Reg or Mem; ovf
+                  3) Any; src1
+                  4) Any; src2
 
 - DIV: dst <- src1 / src2, mod <- src1 % src2
-	- 2 Operands: 1) Any; src1 (dst if !IMM)
-	              2) Any; src2 (mod if !IMM)
-	              (one of the two must not be IMM)
-	
-	- 3 Operands: 1) Reg or Mem; dst
-	              2) Any; src1 (mod if !IMM)
-	              3) Any; src2 (mod if !IMM and op2 !IMM)
-	
-	- 4 Operands: 1) Reg or Mem; dst
-	              2) Reg or Mem; mod
-	              3) Any; src1
-	              4) Any; src2
+    - 2 Operands: 1) Any; src1 (dst if !IMM)
+                  2) Any; src2 (mod if !IMM)
+                  (one of the two must not be IMM)
+    
+    - 3 Operands: 1) Reg or Mem; dst
+                  2) Any; src1 (mod if !IMM)
+                  3) Any; src2 (mod if !IMM and op2 !IMM)
+    
+    - 4 Operands: 1) Reg or Mem; dst
+                  2) Reg or Mem; mod
+                  3) Any; src1
+                  4) Any; src2
 
 - MOD: dst <- src1 % src2
-	- 3 Operands: 1) Reg or Mem; dst
-	              2) Any; src1
-	              3) Any; src2
+    - 3 Operands: 1) Reg or Mem; dst
+                  2) Any; src1
+                  3) Any; src2
 
 - AND: dst <- src1 & src2
-	- Operands as in ADD
+    - Operands as in ADD
 
 - OR: dst <- src1 | src2
-	- Operands as in ADD
+    - Operands as in ADD
 
 - XOR: dst <- src1 ^ src2
-	- Operands as in ADD
+    - Operands as in ADD
 
 - CMP: dst <- ~src
-	- 1 Operand: 1) Reg or Mem; dst, src
-	
-	- 2 Operand: 1) Reg or mem; dst
-	             2) Any; src
+    - 1 Operand: 1) Reg or Mem; dst, src
+    
+    - 2 Operand: 1) Reg or mem; dst
+                 2) Any; src
 
 - INC: dst <- dst + 1
-	- 1 Operand: 1) Reg or Mem; dst
+    - 1 Operand: 1) Reg or Mem; dst
 
 - DEC: dst <- dst - 1
-	- 1 Operand: 1) Reg or Mem; dst
+    - 1 Operand: 1) Reg or Mem; dst
 
 
 Memory Management:
-	  OPC | Mnemonic | Description 
-	------+----------+------------------------
-	 0x20 |   MOV    | dst <- src
-	 0x21 |   SWP    | dst <- src, src <- dst
-	 0x22 |   CPY    | Memory block copy
+      OPC | Mnemonic | Description 
+    ------+----------+------------------------
+     0x20 |   MOV    | dst <- src
+     0x21 |   SWP    | dst <- src, src <- dst
+     0x22 |   CPY    | Memory block copy
 
 MOV: dst <- src
-	- 2 Operands: 1) Reg or Mem; dst
-	              2) Any; src
+    - 2 Operands: 1) Reg or Mem; dst
+                  2) Any; src
 
 SWP: dst <- src, src <- dst
-	- 2 Operands: 1) Reg or Mem; dst
-	              2) Reg or Mem; src
+    - 2 Operands: 1) Reg or Mem; dst
+                  2) Reg or Mem; src
 
 CPY: Block copy, operation depends on number of args
-	- 2 Operands: C string copy
-	              1) Mem; dst
-	              2) Mem; src
-	
-	- 3 Operands: Selectable string copy
-	              1) Mem; dst
-	              2) Mem; src
-	              3) Any; selector [0: C string, 
+    - 2 Operands: C string copy
+                  1) Mem; dst
+                  2) Mem; src
+    
+    - 3 Operands: Selectable string copy
+                  1) Mem; dst
+                  2) Mem; src
+                  3) Any; selector [0: C string, 
                                     1: Pascal string (32-bit int),
-	                                Else: byte counter]
-	
-	- 4 Operands: Selectable limited string copy
-	              1) Mem; dst
-	              2) Mem; src
-	              3) Any; selector [0: C string, 
-	                                1: Pascal string (32-bit int),
-	                                Else: byte counter]
-	              4) Any; limit [0: disabled, 
-	                             Else: max nr bytes to copy]
+                                    Else: byte counter]
+    
+    - 4 Operands: Selectable limited string copy
+                  1) Mem; dst
+                  2) Mem; src
+                  3) Any; selector [0: C string, 
+                                    1: Pascal string (32-bit int),
+                                    Else: byte counter]
+                  4) Any; limit [0: disabled, 
+                                 Else: max nr bytes to copy]
 
 
 Change of Location:
-	  OPC | Mnemonic | Description 
-	------+----------+------------------------
-	 0x31 |   JMP    | Jump to specified location
-	 0x32 |   JAL    | Function call
-	 0x33 |   RET    | Function return
-	 0x34 |   BEQ    | Branch if src1 == src2
-	 0x35 |   BNE    | Branch if src1 != src2
-	 0x36 |   BGT    | Branch if src1 >  src2
-	 0x37 |   BGE    | Branch if src1 >= src2
-	 0x38 |   BIE    | Branch if increment is equal (loops)
-	 0x39 |   BDE    | Branch if decrement is equal (loops)
-	 0x3A |   BAO    | Branch on ALU overflow flag
-	 0x3B |   BAC    | Branch on ALU carry flag
+      OPC | Mnemonic | Description 
+    ------+----------+------------------------
+     0x31 |   JMP    | Jump to specified location
+     0x32 |   JAL    | Function call
+     0x33 |   RET    | Function return
+     0x34 |   BEQ    | Branch if src1 == src2
+     0x35 |   BNE    | Branch if src1 != src2
+     0x36 |   BGT    | Branch if src1 >  src2
+     0x37 |   BGE    | Branch if src1 >= src2
+     0x38 |   BIE    | Branch if increment is equal (loops)
+     0x39 |   BDE    | Branch if decrement is equal (loops)
+     0x3A |   BAO    | Branch on ALU overflow flag
+     0x3B |   BAC    | Branch on ALU carry flag
 
 JMP: PC <- dst
-	- 1 Operand: 1) Mem; dst
+    - 1 Operand: 1) Mem; dst
     
 JAL: Function call  
-	- RTL: mem[pS - 4] <- pB, pB <- pS - 4  # Save and update base pointer
-	       mem[pS - 8] <- pR, pS <- pS - 8  # Save return and update stack ptr
-	       pR <- PC, PC <- dst              # Set new return and perform jump
-	
-	- 1 Operand: 1) Mem; dst
+    - RTL: mem[pS - 4] <- pB, pB <- pS - 4  # Save and update base pointer
+           mem[pS - 8] <- pR, pS <- pS - 8  # Save return and update stack ptr
+           pR <- PC, PC <- dst              # Set new return and perform jump
+    
+    - 1 Operand: 1) Mem; dst
 
 RET: Function return
-	- RTL: PC <- pR, pR <- mem[pB - 4]      # Jump to call, pop return ptr
-	       pS <- mem[pB + 4], pB <- mem[pB] # Restore stack pointers
-	
-	- 0 Operands
+    - RTL: PC <- pR, pR <- mem[pB - 4]      # Jump to call, pop return ptr
+           pS <- mem[pB + 4], pB <- mem[pB] # Restore stack pointers
+    
+    - 0 Operands
 
 BEQ: if src1 == src2, goto dst
-	- 2 Operand: 1) Any; src1
-	             2) Mem; dst
-	             (src2 is an immediate 0)
+    - 2 Operand: 1) Any; src1
+                 2) Mem; dst
+                 (src2 is an immediate 0)
 
-	- 3 Operand: Branch if src1 == src2
-	             1) Any; src1
-	             2) Any; src2
-	             2) Mem; dst
+    - 3 Operand: Branch if src1 == src2
+                 1) Any; src1
+                 2) Any; src2
+                 2) Mem; dst
 
 BNE: if src1 != src2, goto dst
-	- Operands as in BEQ
+    - Operands as in BEQ
 
 BGT: if src1 > src2, goto dst
-	- Operands as in BEQ
+    - Operands as in BEQ
 
 BGE: if src1 >= src2, goto dst
-	- Operands as in BEQ
+    - Operands as in BEQ
 
 BIE: src1 <- src1 + 1; if src1 == src2, goto dst
-	- 2 Operand: 1) Reg or Mem; src1
-	             2) Mem; dst
-	             (src2 is an immediate 0)
+    - 2 Operand: 1) Reg or Mem; src1
+                 2) Mem; dst
+                 (src2 is an immediate 0)
 
-	- 3 Operand: Branch if src1 == src2
-	             1) Reg or Mem; src1
-	             2) Any; src2
-	             2) Mem; dst
+    - 3 Operand: Branch if src1 == src2
+                 1) Reg or Mem; src1
+                 2) Any; src2
+                 2) Mem; dst
 
 BDE: src1 <- src1 - 1; if src1 == src2, goto dst
-	- Operands as in BIE
+    - Operands as in BIE
 
 BAO: if ALU overflow flag set, goto dst
-	- Operands as in JMP
+    - Operands as in JMP
 
 BAC: if ALU carry flag set, goto dst
-	- Operands as in JMP
+    - Operands as in JMP
