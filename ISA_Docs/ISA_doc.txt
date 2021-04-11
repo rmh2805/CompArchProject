@@ -20,7 +20,7 @@ Register File
        E    |    pS    |   N   | Stack Pointer
        F    |    PC    |   N   | Program Counter
 
- - All registers are 32-bit
+ - All visible registers are 32-bit
 
 
 ===<Address Modes>===
