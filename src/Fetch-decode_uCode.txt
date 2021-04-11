@@ -1,6 +1,6 @@
 Fetch:
     <No OP>, <No OP>                # Space to ensure that uPC can start before first instruction
-    IncPC, IncPC                        # Halt on PC overflow, else increment
+    IncPC, IncPC                    # Halt on PC overflow, else increment
     
     Mar <- PC, <No OP>              # Prepare to pull in the next instr byte
     IR <- Mem[MAR], <No OP>         # Grab the next opcode
@@ -134,6 +134,7 @@ FetchOpIdx:
     uR1 <- MDR, <No OP>                 # Incorporate IMM byte into return
     
 FetchOpIdx2:
+    <No Op>, uR1 <- uR1 << 8
     if uR0 & 0x03 == 0x03, goto  uRet   # Skip grabbing the second reg byte if unneeded
 
     IncPC, IncPC                        # Halt on PC overflow, else increment
@@ -162,5 +163,14 @@ FetchOpDsp:
 FetchOpScl:
     uR2 <- MDR, uR0 <- uR0 & 0xFFFFFF00 # Move the scale param to ur2 and clear it from uR0
     uR2 <- uR2 << 8, <No OP>            # Make space in ur2 for the register byte 
+
+    # Read any scale register byte into low byte of ur2
+
+    # Read the operand type byte of the scaled operand
+
+    # fail on scale operand or on prefix byte 
+
+    # jump to operand type decode
+    
     uPC <- uRet, <No OP>                # Return
 
