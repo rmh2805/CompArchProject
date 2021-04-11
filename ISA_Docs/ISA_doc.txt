@@ -20,7 +20,10 @@ Register File
        E    |    pS    |   N   | Stack Pointer
        F    |    PC    |   N   | Program Counter
 
- - All visible registers are 32-bit
+ - All registers are 32-bit.
+ - Slow registers require 1 more memory read than quick registers.
+ - The program counter is incremented before use (points at last read program 
+   address).
 
 
 ===<Address Modes>===
