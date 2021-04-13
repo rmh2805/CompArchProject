@@ -1,0 +1,39 @@
+Micro Execute for each ALU Instructions.
+Assume OP1-OP4 values are already set. 
+
+uADD:
+   ur1 <- OP2 + OP3
+   goto writeback
+
+uSUB:
+   ur1 <- OP2 - OP3
+   goto writeback
+
+uAND:
+   ur1 <- OP2 & OP3
+   goto writeback
+
+uOR:
+   ur1 <- OP2 | OP3
+   goto writeback 
+
+uXOR:
+   ur1 <- OP2 ^ OP3
+   goto writeback 
+
+uINC:
+   ur1 <- OP2 + 1
+   goto writeback 
+
+uDEC:
+   ur1 <- OP2 - 1
+   goto writeback 
+
+uCMP:
+
+uMOD:
+
+uDIV:
+
+uMUL:
+
