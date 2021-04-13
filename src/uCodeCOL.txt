@@ -1,23 +1,35 @@
 Micro Execution RTL for COL
 
 uJMP:
+    goto writeback
 
 uJAL:
+    goto writeback
 
 uRET:
+    goto writeback
 
 uBEQ:
+    goto writeback
 
 uBNE:
+    goto writeback
 
 uBGT:
+    goto writeback
 
 uBGE:
+    goto writeback
 
 uBIE:
+    goto writeback
 
 uBDE:
+    goto writeback
 
 uBAO:
+    goto writeback
 
 uBAC:
+    goto writeback
+
