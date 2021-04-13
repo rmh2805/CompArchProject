@@ -22,14 +22,14 @@ uXOR:
    goto writeback 
 
 uINC:
-   ur1 <- OP2 + 1
-   goto writeback 
+   goto uADD
 
 uDEC:
-   ur1 <- OP2 - 1
-   goto writeback 
+   goto uSUB
 
 uCMP:
+   ur1 <- ~OP2
+   goto writeback
 
 uMOD:
 
