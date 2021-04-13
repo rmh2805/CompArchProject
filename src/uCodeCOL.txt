@@ -1,0 +1,23 @@
+Micro Execution RTL for COL
+
+uJMP:
+
+uJAL:
+
+uRET:
+
+uBEQ:
+
+uBNE:
+
+uBGT:
+
+uBGE:
+
+uBIE:
+
+uBDE:
+
+uBAO:
+
+uBAC:
