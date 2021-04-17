@@ -31,6 +31,12 @@ uCMP:
    ur1 <- ~OP2
    goto writeback
 
+uSLT:
+   uSUB(OP2, OP3)
+   ur1 < 0
+      ur1 <- 1
+   ur1 = 0
+
 uMOD:
 
 uDIV:
