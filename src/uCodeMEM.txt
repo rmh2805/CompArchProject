@@ -1,0 +1,14 @@
+These are the memory micro instructions! 
+
+uMOV:
+    OP2 <- OP3
+    uPC <- uRet
+
+uSWP:
+    OP4 <- OP2
+    OP2 <- OP3
+    OP3 <- OP4
+    uPC <- uRet
+
+uCPY:
+

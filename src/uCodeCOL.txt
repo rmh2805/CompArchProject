@@ -1,0 +1,42 @@
+Micro Execution RTL for COL
+
+uJMP:
+    uPC <- OP2
+
+uJAL:
+
+uRET:
+   uPC <- uRet
+
+uBEQ:
+    uRet <- uPC, goto uSUB    
+    ur1 == 0:
+    	uPC <- OP4
+    uPC <- uRet
+
+uBNE:
+    uRet <- uPC, goto uSUB    
+    ur1 != 0:
+    	uPC <- OP4
+    uPC <- uRet
+
+uBGT:
+    uRet <- uPC, goto uSLT
+    ur1 != 0 
+        uRet <- uPC, goto uBNE
+    uPC <- uRet
+
+uBGE:
+    uRet <- uPC, goto uSUB    
+    ur1 == 0:
+        uPC <- OP4
+    uPC <- uRet
+
+uBIE:
+
+uBDE:
+
+uBAO:
+
+uBAC:
+
