@@ -1,0 +1,46 @@
+Raymond Healy, Ian Campbell
+Computer Architecture Hardware Document
+
+Hardware Description 
+  Registers:
+    Programmer Visible Register File: 
+      - r0 - GPR
+      - r1 - GPR
+      - r2 - GPR 
+      - r3 - GPR 
+      - r4 - GPR 
+      - r5 - GPR 
+      - r6 - GPR 
+      - r7 - GPR 
+      - r8 - GPR
+      - r9 - GPR 
+      - rA - GPR
+      - rB - GPR
+      - pR - Return Pointer
+      - pB - Base Pointer
+      - pS - Stack Pointer 
+      - PC - Program Counter
+    Micro-Program Register File:
+      - uPC - Micro Program Counter
+      - uRet - Micro Return Register
+      - OP1 - Micro Argument register
+      - OP2 - Micro Argument register
+      - OP3 - Micro Argument register
+      - OP4 - Micro Argument register
+      - ur0 - Micro function return 
+      - ur1 - Micro function return
+      - ur2 - Micro function return
+      - uTmp - Micro Temporary register
+
+  Buses:
+
+  ALUs: 
+    2 Standard ARCH ALUs - Two ALUs allow us to do two parallel operations. All Registers
+    will be directed into both ALUs.
+
+  Memory:
+    Main Memory
+    Micro Control Unit Storage
+
+Control Unit Description 
+
