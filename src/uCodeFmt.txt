@@ -1,0 +1,70 @@
+Basic formats:
+    - Parallel
+    Bits   | 54-53 | 52-50 | 49-44 | 43-38 | 37-32 | 31-29 | 28-23 | 22-17 | 16-11 |   10-0   |
+    Fields |   00  |   A   |  RdA  |  RsA  |  RtA  |   B   |  RdB  |  RsB  |  RtB  | (unused) |
+
+    - Jump (A)
+    Bits   | 54-53 | 52-50 | 49-44 | 43-38 | 37-32 |  31-00  |
+    Fields |   01  |   A   |  RdA  |  RsA  |  RtA  | Address |
+
+    - Jump (B)
+    Bits   | 54-53 | 52-50 | 49-44 | 43-38 | 37-32 |  31-00  |
+    Fields |   10  |   B   |  RdB  |  RsB  |  RtB  | Address |
+    
+    - Conditional
+    Bits   | 54-53 |   52-50  |  51-44 | 43-38 | 37-36 | 35-32 |  31-00  |
+    Fields |   11  | (unused) | Rt/Imm |   Rs  |   00  |  type | Address |
+
+Conditional Types:
+        0: Equal        (rs == rt)
+        1: Not Equal    (rs != rt)
+        2: Bits Set     (rs & rt == rt)
+        3: Bits Not Set (rs & rt != rt)
+        4: Byte Eq      (rs == imm)
+        5: Byte Not Eq  (rs != imm)
+        6: Nybble 1 Eq  (rs & 0xF0 == imm)
+        7: Nybble 1 Neq (rs & 0xF0 != imm)
+        8: IR 0 Ops     (IR contains an opcode w/ 0 ops max)
+        9: IR 1 Op      (IR contains an opcode w/ 1 op max)
+        A: IR 2 Ops     (IR contains an opcode w/ 2 ops max)
+        B: IR 3 Ops     (IR contains an opcode w/ 3 ops max)
+
+Micro opcodes:
+    - A: 
+         0: No Op       | 1: MOV
+         2: SLL         | 3: SRL
+         4: OR          | 5: Sign Extend
+         6: XOR         | 7: 
+    - B: 
+         0: No Op       | 1: MOV
+         2: CMP         | 3: Mem Read
+         4: Mem Write   | 5: AND
+         6: ADD         | 7: SUB
+
+Registers:
+    - Immediates: 0x00 - 0x0F
+        0: 0            | 1: 1
+        2: 0xFFFFFF00   | 3: 0xFFFF0000
+        4: 0x0000FFFF   | 5: 0x00FFFFFF
+        6: 0x0C         | 7: 0x03
+        8: 0x10         | 9: 0xF0
+        A: 0x0F         | B: 0x08
+        C: 0x10         | D: 0x18
+
+    - System: 0x10 - 0x2F
+        10: uPC         | 11: uRet
+        12: uR0         | 13: uR1
+        14: uR2         | 15: uCnt
+        16: MDR         | 17: MAR
+        18: OP1Val      | 19: OP1Type
+        1A: OP2Val      | 1B: OP2Type
+        1C: OP3Val      | 1D: OP3Type
+        1E: OP4Val      | 1F: OP4Type
+        20: OP1Scale    | 21: OP2Scale
+        22: OP3Scale    | 23: OP4Scale
+        24: IR          | 25: uTmp
+
+    - Register File 0x30 - 0x3F
+        - As in the ISA doc
+
+
