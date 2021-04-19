@@ -20,6 +20,8 @@ Hardware Description
       - pB - Base Pointer
       - pS - Stack Pointer 
       - PC - Program Counter
+    Additional Registers:
+      - MDR - Memory Data Register
     Micro-Program Register File:
       - uPC - Micro Program Counter
       - uRet - Micro Return Register
@@ -33,14 +35,17 @@ Hardware Description
       - uTmp - Micro Temporary register
 
   Buses:
+    2 Standard ARCH Busses
+      - Data - 8 bit bus connected to main memory 
+      - Address - 32 bit bus also connected to main memory and both ALUs. 
 
-  ALUs: 
+  BusALUs: 
     2 Standard ARCH ALUs - Two ALUs allow us to do two parallel operations. All Registers
-    will be directed into both ALUs.
+    will be directed into both ALUs through the Address Bus.
 
   Memory:
-    Main Memory
-    Micro Control Unit Storage
+    Main Memory - Main memory storing program objects.
+    Micro Control Unit Storage - Secondary Memory Unit loaded with the Micro Program CU. 
 
 Control Unit Description 
 
