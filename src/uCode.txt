@@ -1,10 +1,10 @@
 Fetch:
-    <No OP>, <No OP>                # Space to ensure that uPC can start before first instruction
-    IncPC, IncPC                        # Halt on PC overflow, else increment
+    <No OP>, <No OP>                        # Space to ensure that uPC can start before first instruction
+    IncPC, IncPC                            # Halt on PC overflow, else increment
     
-    Mar <- PC, <No OP>              # Prepare to pull in the next instr byte
-    IR <- Mem[MAR], <No OP>         # Grab the next opcode
-    <No Op>, goto FetchOperands     # Fetch the operands for this instruction
+    MAR <- PC, <No OP>                      # Prepare to pull in the next instr byte
+    MDR <- Mem[MAR], <No OP>                # Grab the next opcode
+    IR <- MDR, goto FetchOperands           # Fetch the operands for this instruction
 
 FetchOperands:
     //if val(IR) in noOps, goto Decode      # Decode the instruction if it takes no operations
@@ -162,5 +162,21 @@ FetchOpDsp:
 FetchOpScl:
     uR2 <- MDR, uR0 <- uR0 & 0xFFFFFF00 # Move the scale param to ur2 and clear it from uR0
     uR2 <- uR2 << 8, <No OP>            # Make space in ur2 for the register byte 
-    uPC <- uRet, <No OP>                # Return
+
+    if MDR & 0x03 != 0x03, goto FetchOpScl1
+    
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte from data
+    MDR <- Mem[MAR], <No OP>            # Grab the register byte
+    uR2 <- uR2 | MDR, <No OP>           # Store the register byte into the return register
+
+FetchOpScl1: 
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte from data
+    MDR <- Mem[MAR], <No OP>            # Grab the operand type byte
+ 
+    if MDR & 0xF0 == 0x00, goto halt    # Fail on prefix byte
+    if MDR & 0xF0 == 0xB0, goto halt    # Fail on scale of scale
+
+    uR0 <- uR0 | MDR, goto FetchOpVal   # Store the op type byte in register, decode scaled op
 
