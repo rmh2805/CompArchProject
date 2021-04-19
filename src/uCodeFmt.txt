@@ -12,8 +12,23 @@ Basic formats:
     Fields |   10  |   B   |  RdB  |  RsB  |  RtB  | Address |
     
     - Conditional
-    Bits   | 54-53 | 52-50 | 49-44 | 43-38 | 37-32 |  31-00  |
-    Fields |   11  |       |       |       |  type | Address |
+    Bits   | 54-53 |   52-50  |  51-44 | 43-38 | 37-36 | 35-32 |  31-00  |
+    Fields |   11  | (unused) | Rt/Imm |   Rs  |   00  |  type | Address |
+
+Conditional Types:
+        0: Equal        (rs == rt)
+        1: Not Equal    (rs != rt)
+        2: Bits Set     (rs & rt == rt)
+        3: Bits Not Set (rs & rt != rt)
+        4: Byte Eq      (rs == imm)
+        5: Byte Not Eq  (rs != imm)
+        6: Nybble 1 Eq  (rs & 0xF0 == imm)
+        7: Nybble 1 Neq (rs & 0xF0 != imm)
+        8: IR 0 Ops     (IR contains an opcode w/ 0 ops max)
+        9: IR 1 Op      (IR contains an opcode w/ 1 op max)
+        A: IR 2 Ops     (IR contains an opcode w/ 2 ops max)
+        B: IR 3 Ops     (IR contains an opcode w/ 3 ops max)
+
 
 Registers:
     - Immediates: 0x00 - 0x0F
@@ -40,3 +55,5 @@ Registers:
 
     - Register File 0x30 - 0x3F
         - As in the ISA doc
+
+
