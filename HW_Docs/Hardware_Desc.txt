@@ -20,19 +20,29 @@ Hardware Description
       - pB - Base Pointer
       - pS - Stack Pointer 
       - PC - Program Counter
-    Additional Registers:
+    System Registers:
       - MDR - Memory Data Register
-    Micro-Program Register File:
+      - MAR - Memory Address Register
       - uPC - Micro Program Counter
       - uRet - Micro Return Register
-      - OP1 - Micro Argument register
-      - OP2 - Micro Argument register
-      - OP3 - Micro Argument register
-      - OP4 - Micro Argument register
-      - ur0 - Micro function return 
-      - ur1 - Micro function return
-      - ur2 - Micro function return
+      - OP1Val - Micro Argument register value
+      - OP2Val - Micro Argument register value
+      - OP3Val - Micro Argument register value
+      - OP4Val - Micro Argument register value
+      - OP1Type - Micro Argument register type
+      - OP2Type - Micro Argument register type
+      - OP3Type - Micro Argument register type
+      - OP4Type - Micro Argument register type
+      - OP1Scale - OP1 Scalar register
+      - OP2Scale - OP2 Scalar register
+      - OP3Scale - OP3 Scalar register
+      - OP4Scale - OP4 Scalar register
+      - uR0 - Micro function return 
+      - uR1 - Micro function return
+      - uR2 - Micro function return
+      - uCnt - Counter register
       - uTmp - Micro Temporary register
+      - IR - Instruction Register
 
   Buses:
     2 Standard ARCH Busses
