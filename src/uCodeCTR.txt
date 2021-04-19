@@ -1,0 +1,16 @@
+Control Instructions 
+
+uHLT:
+    exit()
+
+uNOP:
+    uPC <- uRet
+
+uCLR:
+    OP2 <- 0
+
+uDMP:
+    cout << OP2
+
+uOUT:
+    OP3 <- OP2
