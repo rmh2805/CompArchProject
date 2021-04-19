@@ -33,8 +33,20 @@ uBGE:
     uPC <- uRet
 
 uBIE:
+    uTmp <- OP3
+    OP3 <- 1
+    uRet <- uPC, goto uINC
+    OP2 <- ur1
+    uRet <- uPC, goto uBEQ     
+    uPC <- uRet
 
 uBDE:
+    uTmp <- OP3
+    OP3 <- 1
+    uRet <- uPC, goto uDEC
+    OP2 <- ur1
+    uRet <- uPC, goto uBEQ     
+    uPC <- uRet
 
 uBAO:
 
