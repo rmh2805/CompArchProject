@@ -3,39 +3,41 @@ Assume OP1-OP4 values are already set.
 
 uADD:
    ur1 <- OP2 + OP3
-   goto writeback
+   uPC <- uRet
 
 uSUB:
    ur1 <- OP2 - OP3
-   goto writeback
+   uPC <- uRet
 
 uAND:
    ur1 <- OP2 & OP3
-   goto writeback
+   uPC <- uRet
 
 uOR:
    ur1 <- OP2 | OP3
-   goto writeback 
+   uPC <- uRet
 
 uXOR:
    ur1 <- OP2 ^ OP3
-   goto writeback 
+   uPC <- uRet
 
 uINC:
-   goto uADD
+   uRet <- uPC, goto uADD
 
 uDEC:
-   goto uSUB
+   uRet <- uPC, goto uSUB
 
 uCMP:
    ur1 <- ~OP2
-   goto writeback
+   uPC <- uRet
 
 uSLT:
-   uSUB(OP2, OP3)
+   uRet <- uPC, goto uSUB
    ur1 < 0
       ur1 <- 1
-   ur1 = 0
+      uPC <- uRet
+   ur1 <- 0
+   uPC <- uRet
 
 uMOD:
 

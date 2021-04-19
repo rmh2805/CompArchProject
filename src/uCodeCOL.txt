@@ -1,49 +1,42 @@
 Micro Execution RTL for COL
 
 uJMP:
-    PC <- OP2
-    goto writeback
+    uPC <- OP2
 
 uJAL:
-    goto writeback
 
 uRET:
-    goto writeback
+   uPC <- uRet
 
-uBEQ: (implied stack setup)
-    uSUB(OP2, OP3)
+uBEQ:
+    uRet <- uPC, goto uSUB    
     ur1 == 0:
-    	PC <- OP4
-    goto writeback
+    	uPC <- OP4
+    uPC <- uRet
 
 uBNE:
-    uSUB(OP2, OP3)
+    uRet <- uPC, goto uSUB    
     ur1 != 0:
-    	PC <- OP4
-    goto writeback
+    	uPC <- OP4
+    uPC <- uRet
 
 uBGT:
-    uBEQ(OP2, OP3)
-  
-    goto writeback
+    uRet <- uPC, goto uSLT
+    ur1 != 0 
+        uRet <- uPC, goto uBNE
+    uPC <- uRet
 
 uBGE:
-    uSLT(OP2, OP3)
+    uRet <- uPC, goto uSUB    
     ur1 == 0:
-        PC <- OP4
-    goto writeback
+        uPC <- OP4
+    uPC <- uRet
 
 uBIE:
-    uINC(OP2, 1)
-    uBEQ(OP2, OP3, OP4)
 
 uBDE:
-    uDEC(OP2, 1)
-    uBEQ(OP2, OP3, OP4)
 
 uBAO:
-    goto writeback
 
 uBAC:
-    goto writeback
 
