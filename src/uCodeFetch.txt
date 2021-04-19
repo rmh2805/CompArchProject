@@ -12,7 +12,7 @@ FetchOperands:
     # Grab the first operand
     uRet <- uPC, goto GetOperand            # Micro function call
     OP1Type <- uR0, OP1Val <- uR1           # Store the type bytes & value bytes for the first operand
-    OPScale1 <- uR2 << 16, <No OP>          # Store the scale bytes for the first operand
+    OP1Scale <- uR2, <No OP>                # Store the scale bytes for the first operand
     
     if OP1Type == 0, goto InterpOperand     # If explicit end of operands, set others by default
     //if val(IR) in oneOp, goto Decode      # Break loop if this is the last operand
@@ -20,7 +20,7 @@ FetchOperands:
     # Grab the second operand
     uRet <- uPC, goto GetOperand            # Micro function call
     OP2Type <- uR0, OP2Val <- uR1           # Store the type bytes & value bytes for the second operand
-    OPScale1 <- uR2 | OPScale1, <No OP>     # Store the scale bytes for the second operand
+    OP2Scale <- uR2, <No OP>                # Store the scale bytes for the second operand
     
     if OP1Type == 0, goto InterpOperand     # If explicit end of operands, set others by default
     //if val(IR) in twoOp, goto Decode      # Break loop if this is the last operand
@@ -28,7 +28,7 @@ FetchOperands:
     # Grab the third operand
     uRet <- uPC, goto GetOperand            # Micro function call
     OP3Type <- uR0, OP3Val <- uR1           # Store the type bytes & value bytes for the third operand
-    OPScale2 <- uR2 << 16, <No OP>          # Store the scale bytes for the third operand
+    OP3Scale <- uR2, <No OP>                # Store the scale bytes for the third operand
     
     if OP1Type == 0, goto InterpOperand     # If explicit end of operands, set others by default
     //if val(IR) in threeOp, goto Decode    # Break loop if this is the last operand
@@ -36,12 +36,131 @@ FetchOperands:
     # Grab the fourth operand
     uRet <- uPC, goto GetOperand            # Micro function call
     OP4Type <- uR0, OP4Val <- uR1           # Store the type bytes & value bytes for the fourth operand
-    OPScale2 <- uR2 | OPScale2, <No OP>     # Store the scale bytes for the fourth operand
+    OP4Scale <- uR2, <No OP>                # Store the scale bytes for the fourth operand
     
     <No OP>, goto Decode                    # Max Nr of operands grabbed, decode
 
 InterpOperand:
-    // todo
+    # Control instructions
+    if IR == 0x04, goto InterpDmp           # Interpret DMP operands
+
+    # ALU instructions
+    if IR == 0x10, goto InterpAdd           # Interpret ADD operands
+    if IR == 0x11, goto InterpAdd           # Interpret SUB operands
+    if IR == 0x15, goto InterpAdd           # Interpret AND operands
+    if IR == 0x16, goto InterpAdd           # Interpret OR operands
+    if IR == 0x17, goto InterpAdd           # Interpret XOR operands
+
+    if IR == 0x12, goto InterpMul           # Interpret MUL operands
+    if IR == 0x13, goto InterpDiv           # Interpret DIV operands
+    if IR == 0x18, goto InterpCmp           # Interpret CMP operands
+
+    # Memory instructions
+    if IR == 0x22, goto InterpCpy           # Interpret CPY operands
+
+    # COL instructions
+    if IR == 0x34, goto InterpBeq           # Interpret BEQ operands
+    if IR == 0x35, goto InterpBeq           # Interpret BNE operands
+    if IR == 0x36, goto InterpBeq           # Interpret BGT operands
+    if IR == 0x37, goto InterpBeq           # Interpret BGE operands
+
+    if IR == 0x38, goto InterpBeq           # Interpret BIE operands
+    if IR == 0x39, goto InterpBeq           # Interpret BDE operands
+
+    # Failure
+    <No Op>, goto halt                      # Unable to interpret these ops
+
+InterpDmp:
+    if OP1Type == 0, goto halt              # Unable to interpret DMP from 0 ops
+    OP2Val <- 0, OP2Type <- 0x10            # Op2 gets an immediate 0
+    <No Op>, goto Decode
+
+InterpAdd:
+    if OP1Type == 0, goto halt              # Unable to interpret ADD from 0 ops
+    if OP2Type == 0, goto halt              # Unable to interpret ADD from 1 op
+
+    OP3Type <- OP2Type, OP3Val <- OP2Val    # Op 3 <- Op 2, Op 2 <- Op 1
+    OP3Scale <- OP2Scale, OP2Type <- OP1Type
+    OP2Val <- OP1Val, OP1Scale <- OP2Scale
+    
+    <No Op>, goto Decode
+
+InterpMul:
+    if OP1Type == 0, goto halt              # Unable to interpret MUL from 0 ops
+    if OP2Type == 0, goto halt              # Unable to interpret MUL from 1 op
+    if OP3Type != 0, goto InterpMul1        # Branch of for interp from 3 ops
+
+    # Interpret MUL from 2 ops
+    OP4Val <- OP2Val, OP3Val <- OP1Val      # Op 3 <- Op1, Op4 <- Op2
+    OP4Type <- OP2Type, OP3Type <- OP1Type  
+    OP4Scale <- OP2Scale, OP3Scale <- OP1Scale
+
+    <No Op>, goto InterpMul2
+
+InterpMul1:
+    # Interpret MUL from 3 ops
+    OP4Val <- OP3Val, OP3Val <- OP2Val      # Op 3 <- Op2, Op4 <- Op3
+    OP4Type <- OP3Type, OP3Type <- OP2Type  
+    OP4Scale <- OP3Scale, OP3Scale <- OP2Scale
+
+InterpMul2:
+    OP2Val <- 0, OP2Type <- 0       # Op2 <- 0
+    OP2Scale <- 0, <No Op>
+
+    <No Op>, goto Decode
+
+InterpDiv:
+    if OP1Type == 0, goto halt              # Unable to interpret DIV from 0 ops
+    if OP2Type == 0, goto halt              # Unable to interpret DIV from 1 op
+    if OP3Type != 0, goto InterpDiv1        # Branch of for interp from 3 ops
+
+    # Interpret DIV from 2 ops
+    OP4Val <- OP2Val, OP3Val <- OP1Val      # Op 3 <- Op1, Op4 <- Op2
+    OP4Type <- OP2Type, OP3Type <- OP1Type  
+    OP4Scale <- OP2Scale, OP3Scale <- OP1Scale
+
+    <No Op>, goto Decode
+
+InterpDiv1:
+    # Interpret DIV from 3 ops
+    OP4Val <- OP3Val, OP3Val <- OP2Val      # Op 3 <- Op2, Op4 <- Op3
+    OP4Type <- OP3Type, OP3Type <- OP2Type  
+    OP4Scale <- OP3Scale, OP3Scale <- OP2Scale
+
+    # If Op 2 is an immediate, Op 2 <- Op 4
+    if OP2Type & 0xF0 == 0x10, goto InterpDiv2
+    if OP2Type & 0xF0 != 0x20, goto Decode
+
+InterpDiv2:
+    OP2Val <- OP4Val, OP2Type <- OP4Type
+    OP2Scale <- OP4Scale, goto Decode
+
+InterpCmp:
+    if OP1Type == 0, goto halt              # Unable to interpret CMP from 0 ops
+
+    OP2Type <- OP1Type, OP2Val <- OP1Val    # Op 2 <- Op 1
+    OP2Scale <- OP2Scale, goto Decode
+
+InterpCpy:
+    if OP1Type == 0, goto halt              # Unable to interpret CPY from 0 ops
+    if OP2Type == 0, goto halt              # Unable to interpret CPY from 1 op
+    if OP3Type != 0, goto InterpCpy1        # Skip to step 4 if op 3 set
+
+    OP3Type <- 0x10, <No Op>                # Set Op 3 to a 0 immediate
+
+InterpCpy1:
+    OP4Type <- 0x10, goto Decode            # Set Op 4 to a 0 immediate
+
+InterpBeq:
+    if OP1Type == 0, goto halt              # Unable to interpret BEQ from 0 ops
+
+    # Op 3 <- Op 2
+    OP3Type <- OP2Type, OP3Val <- OP2Val
+    OP3Scale <- OP2Scale, <No Op>
+
+    # Op 2 <- 0
+    OP3Type <- 0x10, goto Decode
+
 
 Decode:
     // todo
