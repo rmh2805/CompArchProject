@@ -34,12 +34,12 @@ Micro opcodes:
          0: No Op       | 1: MOV
          2: SLL         | 3: SRL
          4: OR          | 5: Sign Extend
-         6: XOR         | 7: 
+         6: XOR         | 7: AND
     - B: 
          0: No Op       | 1: MOV
          2: CMP         | 3: Mem Read
-         4: Mem Write   | 5: AND
-         6: ADD         | 7: SUB
+         4: Mem Write   | 5: SUB
+         6: ADD         | 7: 
 
 Registers:
     - Immediates: 0x00 - 0x0F
