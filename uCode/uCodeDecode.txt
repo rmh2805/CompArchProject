@@ -1,0 +1,107 @@
+Decode:
+    if IR in noOps, goto DecodeBranch
+
+    if IR == 0x02, goto DecodeBranch        # Decode for CLR (handled in Writeback)
+    if IR == 0x03, goto DecodeDmp           # Decode for DMP
+    if IR == 0x04, goto DecodeOut           # Decode for OUT
+
+    if IR == 0x10, goto DecodeAdd           # Decode for ADD
+    if IR == 0x11, goto DecodeAdd           # Decode for SUB
+    if IR == 0x12, goto DecodeMul           # Decode for MUL
+    if IR == 0x13, goto DecodeMul           # Decode for DIV
+    if IR == 0x14, goto DecodeMod           # Decode for MOD
+    if IR == 0x15, goto DecodeAdd           # Decode for AND
+    if IR == 0x16, goto DecodeAdd           # Decode for OR
+    if IR == 0x17, goto DecodeAdd           # Decode for XOR
+    if IR == 0x18, goto DecodeCmp           # Decode for CMP
+    if IR == 0x19, goto DecodeInc           # Decode for INC
+    if IR == 0x1A, goto DecodeInc           # Decode for DEC
+
+    if IR == 0x20, goto DecodeMov           # Decode for MOV
+    if IR == 0x21, goto DecodeSwp           # Decode for SWP
+    if IR == 0x22, goto DecodeCpy           # Decode for CPY
+
+    if IR == 0x31, goto DecodeJmp           # Decode for JMP
+    if IR == 0x32, goto DecodeJal           # Decode for JAL
+    if IR == 0x34, goto DecodeBeq           # Decode for BEQ
+    if IR == 0x35, goto DecodeBeq           # Decode for BNE
+    if IR == 0x36, goto DecodeBeq           # Decode for BGT
+    if IR == 0x37, goto DecodeBeq           # Decode for BGE
+    if IR == 0x38, goto DecodeBie           # Decode for BIE
+    if IR == 0x39, goto DecodeBie           # Decode for BDE
+    if IR == 0x3A, goto DecodeJmp           # Decode for BAO
+    if IR == 0x3B, goto DecodeJmp           # Decode for BAC
+
+DecodeClr:
+
+DecodeDmp:
+
+DecodeOut:
+
+DecodeAdd:
+
+DecodeMul:
+
+DecodeMod:
+
+DecodeCmp:
+
+DecodeInc:
+
+DecodeMov:
+
+DecodeSwp:
+
+DecodeCpy:
+
+DecodeJmp:
+
+DecodeJal:
+
+DecodeBeq:
+
+DecodeBie:
+
+DecodeBranch:
+    # Control Instructions
+    if IR == 0x00, goto HLT
+    if IR == 0x02, goto CLR
+    if IR == 0x03, goto DMP
+    if IR == 0x04, goto OUT
+
+    # ALU Instructions
+    if IR == 0x10, goto ADD
+    if IR == 0x11, goto SUB
+    if IR == 0x12, goto MUL
+    if IR == 0x13, goto DIV
+
+    if IR == 0x14, goto MOD
+    if IR == 0x15, goto AND
+    if IR == 0x16, goto OR
+    if IR == 0x17, goto XOR
+
+    if IR == 0x18, goto CMP
+    if IR == 0x19, goto INC
+    if IR == 0x1A, goto DEC
+
+    # Memory Instructions
+    if IR == 0x20, goto MOV
+    if IR == 0x21, goto SWP
+    if IR == 0x22, goto CPY
+
+    # COL Instructions
+    if IR == 0x31 goto JMP
+    if IR == 0x32 goto JAL
+    if IR == 0x33 goto RET
+
+    if IR == 0x34 goto BEQ
+    if IR == 0x35 goto BNE
+    if IR == 0x36 goto BGT
+    if IR == 0x37 goto BGE
+
+    if IR == 0x38 goto BIE
+    if IR == 0x39 goto BDE
+    if IR == 0x3A goto BAO
+    if IR == 0x3B goto BAC
+
+    <No Op>, goto NOP

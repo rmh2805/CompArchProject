@@ -1,0 +1,51 @@
+# This microfunction will return the value stored within a (programmer visible) 
+# register and restore uRet to a passed value on its return
+# Args:
+#   uCnt: The index into the register file
+#   uR2: The uRet of the caller (restored on exit)
+# Uses:
+#   No others
+# Returns:
+#   uR0: The value from the specified register
+#
+RegVal:
+    if uCnt != 0x00, goto +1
+    uR0 <- Regs[0], goto RegValRet
+    if uCnt != 0x01, goto +1
+    uR0 <- Regs[1], goto RegValRet
+    if uCnt != 0x02, goto +1
+    uR0 <- Regs[2], goto RegValRet
+    if uCnt != 0x03, goto +1
+    uR0 <- Regs[3], goto RegValRet
+
+    if uCnt != 0x04, goto +1
+    uR0 <- Regs[4], goto RegValRet
+    if uCnt != 0x05, goto +1
+    uR0 <- Regs[5], goto RegValRet
+    if uCnt != 0x06, goto +1
+    uR0 <- Regs[6], goto RegValRet
+    if uCnt != 0x07, goto +1
+    uR0 <- Regs[7], goto RegValRet
+    
+    if uCnt != 0x08, goto +1
+    uR0 <- Regs[8], goto RegValRet
+    if uCnt != 0x09, goto +1
+    uR0 <- Regs[9], goto RegValRet
+    if uCnt != 0x0A, goto +1
+    uR0 <- Regs[10], goto RegValRet
+    if uCnt != 0x0B, goto +1
+    uR0 <- Regs[11], goto RegValRet
+    
+    if uCnt != 0x0C, goto +1
+    uR0 <- Regs[12], goto RegValRet
+    if uCnt != 0x0D, goto +1
+    uR0 <- Regs[13], goto RegValRet
+    if uCnt != 0x0E, goto +1
+    uR0 <- Regs[14], goto RegValRet
+    if uCnt != 0x0F, goto +1
+    uR0 <- Regs[15], goto RegValRet
+
+RegValRet:
+    uPC <- uRet, uRet <- uR2
+
+

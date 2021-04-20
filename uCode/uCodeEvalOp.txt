@@ -1,0 +1,189 @@
+# This microfunction will evaluate a provided operand (without any scaling or prefix handling)
+# Args:
+#   uCnt: The operand's OpVal
+#   uR1: The operand's OpType
+# Uses:
+#   uTmp, uR2
+# Returns:
+#   uR0: The computed EA (for memory operands) or value (for registers and immediates)
+#
+EvalOp:
+    if uR1 & 0xF0 == 0x00, goto halt        # Somehow got a prefix byte here
+    if uR1 & 0xF0 == 0x10, goto EvalNyb     # Grab nybble imediate
+    if uR1 & 0xF0 == 0x20, goto EvalImm     # Immediate already evaluated
+    if uR1 & 0xF0 == 0x30, goto EvalReg     # Grab register value
+    
+    if uR1 & 0xF0 == 0x40, goto EvalReg     # Grab register value (as EA)
+    if uR1 & 0xF0 == 0x50, goto EvalMem     # Grab memory value (as EA)
+    if uR1 & 0xF0 == 0x60, goto EvalIdx     # Calculate index EA
+    if uR1 & 0xF0 == 0x70, goto EvalDsp     # Calculate displacement EA
+    
+    if uR1 & 0xF0 == 0x80, goto EvalImm     # EA grabbed as immediate
+    if uR1 & 0xF0 == 0x90, goto EvalReg     # Evaluate (post) increment arg
+    if uR1 & 0xF0 == 0xA0, goto EvalDec     # Evaluate (pre) decrement arg
+    if uR1 & 0xF0 == 0xB0, goto halt        # Somehow got a scale byte here
+
+    if uR1 & 0xF0 == 0xC0, goto EvalInc     # Evaluate (pre)  increment arg
+    if uR1 & 0xF0 == 0xD0, goto EvalReg     # Evaluage (post) increment arg
+
+EvalNyb:
+    uR0 <- uR1 & 0x0F, uPC <- uRet          # Grab nybble immediate and return
+
+EvalImm:
+    uR0 <- uCnt, uPC <- uRet                # Grab passed immediate and return
+
+EvalReg:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+    
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto EvalReg1           # Grab reg 0 and goto truncation
+    
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto EvalReg1           # Grab reg 1 and goto truncation
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto EvalReg1          # Grab reg 1 and goto truncation
+
+    uR2 <- uRet, <No Op>                    # Save uRet for called fxn to restore
+    uRet <- uPC, goto RegVal                # Grab the value of the register per the second byte
+
+EvalReg1:
+    uTmp <- uR1 & 0x03, <No Op>             # grab the rsz field
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting low byte
+    uR0 <- uR0 & 0xFF, uPC <- uRet          # truncate and return
+    if uTmp != 0x01, goto +1                # Skip unless targeting low half
+    uR0 <- uR0 & 0x0000FFFF, uPC <- uRet    # truncate and return
+    if uTmp != 0x10, goto +1                # Skip unless targeting low 3 bytes
+    uR0 <- uR0 & 0x00FFFFFF, uPC <- uRet    # truncate and return
+    uPC <- uRet, <No Op>                    # return with full value
+
+EvalMem:
+    MAR <- uCnt, <No Op>                    # Read the address' first byte
+    MDR <- Mem[MAR], uCnt <- uCnt + 1
+    uR0 <- MDR, <No Op>
+
+    MAR <- uCnt, uR0 << 0x08                # Read the address' second byte
+    MDR <- Mem[MAR], uCnt <- uCnt + 1
+    uR0 <- uR0 | MDR, <No Op>
+    
+    MAR <- uCnt, uR0 << 0x08                # Read the address' third byte
+    MDR <- Mem[MAR], uCnt <- uCnt + 1
+    uR0 <- uR0 | MDR, <No Op>
+    
+    MAR <- uCnt, uR0 << 0x08                # Read the address' fourth byte
+    MDR <- Mem[MAR], uCnt <- uCnt + 1
+    uR0 <- uR0 | MDR, uPC <- uRet           # Return
+
+EvalIdx:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto EvalIdx1           # Grab reg 0 and goto second grab
+
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto EvalIdx1           # Grab reg 1 and goto second grab
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto EvalIdx1          # Grab reg 1 and goto second grab
+
+    uR2 <- uRet, <No Op>                    # Save uRet for called fxn to restore
+    uRet <- uPC, goto RegVal                # Grab the value of the register per the second byte
+
+EvalIdx1:
+    uR1 <- uR0, uTmp <- uR1 & 0x03          # Store result and prepare to grab second op
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto EvalIdx2           # Grab reg 0 and goto sum
+
+    if uTmp != 0x01, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto EvalIdx2           # Grab reg 1 and goto sum
+
+    if uTmp != 0x02, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto EvalIdx2          # Grab reg 1 and goto sum
+
+    uR2 <- uRet, <No Op>                    # Save uRet for called fxn to restore
+    uRet <- uPC, goto RegVal                # Grab the value of the register per the second byte
+
+EvalIdx2:
+    uR0 <- uR0 + uR1, uPC <- uRet           # Sum the values and return
+
+EvalDsp:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto EvalDsp1           # Grab reg 0 and goto summation
+
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto EvalDsp1           # Grab reg 1 and goto summation
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto EvalDsp1          # Grab reg 1 and goto summation
+
+    uCnt <- uR1 >> 0x18, uR1 <- uCnt        # uCnt <- register specifier byte, uR1 <- immediate
+    uR2 <- uRet, <No Op>                    # Save uRet for called fxn to restore
+    uRet <- uPC, goto RegVal                # Grab the value of the register per the second byte
+    uCnt <- uR1, <No Op>                    # Return immediate to uCnt
+
+EvalDsp1:
+    uR0 <- uR0 + uCnt, uPc <- uRet          # Calculate EA and return
+
+EvalInc:
+    uR2 <- 1, goto EvalDec1
+
+EvalDec:
+    uR2 <- 0, <No Op>
+    uR2 <- uTmp - 1, <No Op>
+
+EvalDec1:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    Regs[0] <- Regs[0] + uR2, goto EvalReg  # Modify reg 0 and grab reg
+
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    Regs[1] <- Regs[1] + uR2, goto EvalReg  # Modify reg 1 and grab reg
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    Regs[12] <- Regs[12] + uR2, goto EvalReg
+
+
+    # Increment registers based on the follow-on byte
+    if uCnt != 0x00, goto +1
+    Regs[0] <- Regs[0] + uR2, goto EvalReg
+    if uCnt != 0x01, goto +1
+    Regs[1] <- Regs[1] + uR2, goto EvalReg
+    if uCnt != 0x02, goto +1
+    Regs[2] <- Regs[2] + uR2, goto EvalReg
+    if uCnt != 0x03, goto +1
+    Regs[3] <- Regs[3] + uR2, goto EvalReg
+
+    if uCnt != 0x04, goto +1
+    Regs[4] <- Regs[4] + uR2, goto EvalReg
+    if uCnt != 0x05, goto +1
+    Regs[5] <- Regs[5] + uR2, goto EvalReg
+    if uCnt != 0x06, goto +1
+    Regs[6] <- Regs[6] + uR2, goto EvalReg
+    if uCnt != 0x07, goto +1
+    Regs[7] <- Regs[7] + uR2, goto EvalReg
+
+    if uCnt != 0x08, goto +1
+    Regs[8] <- Regs[8] + uR2, goto EvalReg
+    if uCnt != 0x09, goto +1
+    Regs[9] <- Regs[9] + uR2, goto EvalReg
+    if uCnt != 0x0A, goto +1
+    Regs[10] <- Regs[10] + uR2, goto EvalReg
+    if uCnt != 0x0B, goto +1
+    Regs[11] <- Regs[11] + uR2, goto EvalReg
+
+    if uCnt != 0x0C, goto +1
+    Regs[12] <- Regs[12] + uR2, goto EvalReg
+    if uCnt != 0x0D, goto +1
+    Regs[13] <- Regs[13] + uR2, goto EvalReg
+    if uCnt != 0x0E, goto +1
+    Regs[14] <- Regs[14] + uR2, goto EvalReg
+    if uCnt != 0x0F, goto +1
+    Regs[15] <- Regs[15] + uR2, goto EvalReg
+
+
+    <No Op>, goto halt                      # Halt on bad register
