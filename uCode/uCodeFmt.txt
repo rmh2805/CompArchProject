@@ -16,8 +16,8 @@ Basic formats:
     Fields |   11  | (unused) | Rt/Imm |   Rs  |   00  |  type | Address |
 
 Conditional Types:
-        0: Equal        (rs == rt)
-        1: Not Equal    (rs != rt)
+        0: Equal        (rs == rt) (rt references some immediate "register")
+        1: Not Equal    (rs != rt)(rt references some immediate "register")
         2: Bits Set     (rs & imm == imm)
         3: Bits Not Set (rs & imm != imm)
         4: Byte Eq      (rs == imm)
@@ -44,13 +44,13 @@ Micro opcodes:
 Registers:
     - Immediates: 0x00 - 0x0F
         0: 0            | 1: 1
-        2: 0xFFFFFF00   | 3: 0xFFFF0000
+        2: 0xFFFFFF00   | 3: 
         4: 0x0000FFFF   | 5: 0x00FFFFFF
         6: 0x0C         | 7: 0x03
         8: 0x10         | 9: 0xFF
-        A: 0x0F         | B: 0x08
-        C: 0x10         | D: 0x18
-        E: 0x0D         | F: 0x02
+        A: 0x0F         | B: 
+        C: 0x10         | D: 
+        E: 0x0D         | F: 
 
     - System: 0x10 - 0x2F
         10: uPC         | 11: uRet
