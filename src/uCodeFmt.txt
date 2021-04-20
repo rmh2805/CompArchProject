@@ -63,6 +63,7 @@ Registers:
         20: OP1Scale    | 21: OP2Scale
         22: OP3Scale    | 23: OP4Scale
         24: IR          | 25: uTmp
+        26: Port 0      | 27: 
 
     - Register File 0x30 - 0x3F
         - As in the ISA doc
