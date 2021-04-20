@@ -2,42 +2,28 @@ Micro Execute for each ALU Instructions.
 Assume OP1-OP4 values are already set. 
 
 uADD:
-   ur1 <- OP2 + OP3
-   uPC <- uRet
+   uR0 <- OP2Val + OP3Val, goto Writeback
 
 uSUB:
-   ur1 <- OP2 - OP3
-   uPC <- uRet
+   uR0 <- OP2Val - OP3Val, goto Writeback
 
 uAND:
-   ur1 <- OP2 & OP3
-   uPC <- uRet
+   uR0 <- OP2Val & OP3Val, goto Writeback
 
 uOR:
-   ur1 <- OP2 | OP3
-   uPC <- uRet
+   uR0 <- OP2Val | OP3Val, goto Writeback
 
 uXOR:
-   ur1 <- OP2 ^ OP3
-   uPC <- uRet
+   uR0 <- OP2Val ^ OP3Val, goto Writeback
 
 uINC:
-   uRet <- uPC, goto uADD
+   uR0 <- OP1Val + 1, goto Writeback
 
 uDEC:
-   uRet <- uPC, goto uSUB
+   uR0 <- OP1Val - 1, goto Writeback
 
 uCMP:
-   ur1 <- ~OP2
-   uPC <- uRet
-
-uSLT:
-   uRet <- uPC, goto uSUB
-   ur1 < 0
-      ur1 <- 1
-      uPC <- uRet
-   ur1 <- 0
-   uPC <- uRet
+   uR0 <- ~OP2Val, goto Writeback
 
 uMOD:
 
