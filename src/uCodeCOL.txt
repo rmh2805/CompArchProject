@@ -1,54 +1,58 @@
-Micro Execution RTL for COL
+Micro Execution RTL for COLJMP:
+    PC <- OP1Val, goto Writeback
 
-uJMP:
-    uPC <- OP2
+JAL:
+   //todo
+   <No Op>, goto Writeback
 
-uJAL:
+RET:
+   //todo
+   <No Op>, goto Writeback
 
-uRET:
-   uPC <- uRet
+BEQ:
+    uTmp <- OP1Val - OP2Val, <No OP>
+    if uTmp != 0, goto Writeback
+    PC <- OP3Val, goto Writeback
 
-uBEQ:
-    uRet <- uPC, goto uSUB    
-    ur1 == 0:
-    	uPC <- OP4
-    uPC <- uRet
+BNE:
+    uTmp <- OP1Val - OP2Val, <No OP>
+    if uTmp == 0, goto Writeback
+    PC <- OP3Val, goto Writeback
 
-uBNE:
-    uRet <- uPC, goto uSUB    
-    ur1 != 0:
-    	uPC <- OP4
-    uPC <- uRet
+BGT:
+    uTmp <- OP2Val - OP1Val, <No Op>    # uTmp <- src2 - src1
+    uTmp <- uTmp >> 24, <No Op>         # Retain the high byte of uTmp
 
-uBGT:
-    uRet <- uPC, goto uSLT
-    ur1 != 0 
-        uRet <- uPC, goto uBNE
-    uPC <- uRet
+    if uTmp & 0x80 != 0x80, goto Writeback
+    PC <- OP3Val, goto Writeback
 
-uBGE:
-    uRet <- uPC, goto uSUB    
-    ur1 == 0:
-        uPC <- OP4
-    uPC <- uRet
+BGE:
+    uTmp <- OP1Val - OP2Val, <No Op>    # uTmp <- src1 - src2
+    uTmp <- uTmp >> 24, <No Op>         # Retain the high byte of uTmp
 
-uBIE:
-    uTmp <- OP3
-    OP3 <- 1
-    uRet <- uPC, goto uINC
-    OP2 <- ur1
-    uRet <- uPC, goto uBEQ     
-    uPC <- uRet
+    if uTmp & 0x80 == 0x80, goto Writeback
+    PC <- OP3Val, goto Writeback
 
-uBDE:
-    uTmp <- OP3
-    OP3 <- 1
-    uRet <- uPC, goto uDEC
-    OP2 <- ur1
-    uRet <- uPC, goto uBEQ     
-    uPC <- uRet
+BIE:
+    <No Op>, uTmp <- OP1Val + 1         # Compute the basic increment
+    uR0 <- uTmp, uTmp <- uTmp - OP2Val  # Save the incremented value and compare with src2
+    
+    if uTmp != 0, goto Writeback
+    PC <- OP3Val, goto Writeback
 
-uBAO:
 
-uBAC:
+BDE:
+    <No Op>, uTmp <- OP1Val - 1         # Compute the basic decrement
+    uR0 <- uTmp, uTmp <- uTmp - OP2Val  # Save the decremented value and compare with src2
+    
+    if uTmp != 0, goto Writeback
+    PC <- OP3Val, goto Writeback
+
+BAO:
+   //todo
+   <No Op>, goto Writeback
+
+BAC:
+   //todo
+   <No Op>, goto Writeback
 
