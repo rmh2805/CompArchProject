@@ -26,8 +26,14 @@ CMP:
    uR0 <- ~OP2Val, goto Writeback
 
 MOD:
+   //todo 
+   <No Op>, goto Writeback
 
 DIV:
+   //todo
+   <No Op>, goto Writeback
 
 MUL:
+   //todo
+   <No Op>, goto Writeback
 
