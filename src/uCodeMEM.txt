@@ -1,14 +1,13 @@
 These are the memory micro instructions! 
 
 uMOV:
-    OP2 <- OP3
-    uPC <- uRet
+    uR0 <- OP1Val, goto Writeback
 
 uSWP:
-    OP4 <- OP2
-    OP2 <- OP3
-    OP3 <- OP4
-    uPC <- uRet
+    uR0 <- OP1Val, ur1 <-OP2Val
+    <No Op>, goto Writeback
 
 uCPY:
+    //todo
+    <No Op>, goto Writeback
 
