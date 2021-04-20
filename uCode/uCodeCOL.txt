@@ -4,24 +4,27 @@ JMP:
     PC <- OP1Val, goto Writeback
 
 JAL:
-   MAR <- pS - 4, <No Op>
-   Mem[MAR] <- pB, <No Op>
-   pB <- pS - 4, <No Op>
-   MAR <- pS - 8, <No Op>
-   Mem[MAR] <- pR, pS <- pS - 8 
-   pR <- PC, <No Op>
-   PC <- dst, goto Writeback
+    MAR <- pS - 4, <No Op>
+    MDR <- pB
+    Mem[MAR] <- MDR, <No Op>
+    pB <- pS - 4, <No Op>
+    MAR <- pS - 8, <No Op>
+    MDR <- pR, <No Op>
+    Mem[MAR] <- MDR, <No Op>
+    pS <- pS - 8, <No Op>
+    pR <- PC, <No Op>
+    PC <- OP1Val, goto Writeback
 
 RET:
-   PC <- pR, MAR <- pB - 4
-   MDR <- Mem[MAR], <No Op>
-   pR <- MDR, <No Op>
-   MAR <- pB + 4, <No Op>
-   MDR <- Mem[MAR], <No Op>
-   pS <- MDR, <No Op>
-   MAR <- pB, <No Op>
-   MDR <- Mem[MAR], <No Op>
-   pB <- MDR, goto Writeback
+    PC <- pR, MAR <- pB - 4
+    MDR <- Mem[MAR], <No Op>
+    pR <- MDR, <No Op>
+    MAR <- pB + 4, <No Op>
+    MDR <- Mem[MAR], <No Op>
+    pS <- MDR, <No Op>
+    MAR <- pB, <No Op>
+    MDR <- Mem[MAR], <No Op>
+    pB <- MDR, goto Writeback
 
 BEQ:
     uTmp <- OP1Val - OP2Val, <No OP>
