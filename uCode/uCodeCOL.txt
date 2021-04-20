@@ -5,12 +5,15 @@ JMP:
 
 JAL:
     MAR <- pS - 4, <No Op>
-    Mem[MAR] <- pB, <No Op>
+    MDR <- pB
+    Mem[MAR] <- MDR, <No Op>
     pB <- pS - 4, <No Op>
     MAR <- pS - 8, <No Op>
-    Mem[MAR] <- pR, pS <- pS - 8 
+    MDR <- pR, <No Op>
+    Mem[MAR] <- MDR, <No Op>
+    pS <- pS - 8, <No Op>
     pR <- PC, <No Op>
-    PC <- dst, goto Writeback
+    PC <- OP1Val, goto Writeback
 
 RET:
     PC <- pR, MAR <- pB - 4
