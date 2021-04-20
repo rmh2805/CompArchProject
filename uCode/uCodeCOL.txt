@@ -4,38 +4,31 @@ JMP:
     PC <- OP1Val, goto Writeback
 
 JAL:
-    MAR <- pS - 4, MDR <- pB,
-    Mem[MAR] <- MDR, <No Op>
+    uTmp <- pB, UR0 <- pS - 4
+    uCnt <- 0x03, <No Op>
 
-    uTmp <- pB >> 4
-    MAR <- pS - 5, MDR <- uTmp
+loop_write_pb:
+    MAR <- uCnt, MDR <- uTmp
     Mem[MAR] <- MDR, <No Op>
+    
+    uTmp <- uTmp >> 8, uR0 <- uR0 - 1
+    if uCnt == 0x00, goto break_pb
+    uCnt <- uCnt - 1, goto loop_write_pb
 
-    uTmp <- pB >> 8
-    MAR <- pS - 6, MDR <- uTmp
-    Mem[MAR] <- MDR, <No Op>
-
-    uTmp <- pB >> 12
-    MAR <- pS - 7, MDR <- uTmp
-    Mem[MAR] <- MDR, <No Op>
-
+break_pb:
     pB <- pS - 4, <No Op>
+    uTmp <- pR, UR0 <- pS - 8
+    uCnt <- 0x03, <No Op>
 
-    MAR <- pS - 8, MDR <- pR
+loop_write_pr:
+    MAR <- uCnt, MDR <- uTmp
     Mem[MAR] <- MDR, <No Op>
+    
+    uTmp <- uTmp >> 8, uR0 <- uR0 - 1
+    if uCnt == 0x00, goto break_pr
+    uCnt <- uCnt - 1, goto loop_write_pr
 
-    uTmp <- pR >> 4
-    MAR <- pS - 9, MDR <- uTmp
-    Mem[MAR] <- MDR, <No Op>
-
-    uTmp <- pR >> 8
-    MAR <- pS - 10, MDR <- uTmp
-    Mem[MAR] <- MDR, <No Op>
-
-    uTmp <- pR >> 12
-    MAR <- pS - 11, MDR <- uTmp
-    Mem[MAR] <- MDR, <No Op>
-
+break_pr:
     pS <- pS - 8, pR <- PC
     PC <- OP1Val, goto Writeback
 
