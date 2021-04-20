@@ -165,6 +165,102 @@ InterpBeq:
 Decode:
     // todo
 
+# This microfunction will evaluate a provided operand (without any scaling or prefix handling)
+# Args:
+#   uCnt: The operand's OpVal
+#   uR1: The operand's OpType
+#
+# Returns:
+#   uR0: The computed EA (for memory operands) or value (for registers and immediates)
+#
+EvalOp:
+    if uR1 & 0xF0 == 0x00, goto halt        # Somehow got a prefix byte here
+    if uR1 & 0xF0 == 0x10, goto EvalNyb     # Grab nybble imediate
+    if uR1 & 0xF0 == 0x20, goto EvalImm     # Immediate already evaluated
+    if uR1 & 0xF0 == 0x30, goto EvalReg     # Grab register value
+    
+    if uR1 & 0xF0 == 0x40, goto EvalReg     # Grab register value (as EA)
+    if uR1 & 0xF0 == 0x50, goto EvalMem     # Grab memory value (as EA)
+    if uR1 & 0xF0 == 0x60, goto EvalIdx     # Calculate index EA
+    if uR1 & 0xF0 == 0x70, goto EvalDsp     # Calculate displacement EA
+    
+    if uR1 & 0xF0 == 0x80, goto EvalImm     # EA grabbed as immediate
+    if uR1 & 0xF0 == 0x90, goto EvalReg     # Evaluate (post) increment arg
+    if uR1 & 0xF0 == 0xA0, goto EvalDec     # Evaluate (pre) decrement arg
+    if uR1 & 0xF0 == 0xB0, goto halt        # Somehow got a scale byte here
+
+    if uR1 & 0xF0 == 0xC0, goto EvalInc     # Evaluate (pre)  increment arg
+    if uR1 & 0xF0 == 0xD0, goto EvalReg     # Evaluage (post) increment arg
+
+EvalNyb:
+    uR0 <- uR1 & 0x0F, uPC <- uRet          # Grab nybble immediate and return
+
+EvalImm:
+    uR0 <- uCnt, uPC <- uRet                # Grab passed immediate and return
+
+EvalReg:
+    
+
+EvalMem:
+
+EvalIdx:
+
+EvalDsp:
+
+EvalInc:
+
+EvalDec:
+    uPC <- uRet, <No Op>
+
+# This microfunction will return the value stored within a (programmer visible) 
+# register and restore uRet to a passed value on its return
+#   uCnt: The index into the register file
+#   uR1: The uRet of the caller (restored on exit)
+#
+# Returns:
+#   uR0: The value from the specified register
+#
+RegVal:
+    if uCnt != 0x00, goto +1
+    uR0 <- Regs[0], goto RegValRet
+    if uCnt != 0x01, goto +1
+    uR0 <- Regs[1], goto RegValRet
+    if uCnt != 0x02, goto +1
+    uR0 <- Regs[2], goto RegValRet
+    if uCnt != 0x03, goto +1
+    uR0 <- Regs[3], goto RegValRet
+
+    if uCnt != 0x04, goto +1
+    uR0 <- Regs[4], goto RegValRet
+    if uCnt != 0x05, goto +1
+    uR0 <- Regs[5], goto RegValRet
+    if uCnt != 0x06, goto +1
+    uR0 <- Regs[6], goto RegValRet
+    if uCnt != 0x07, goto +1
+    uR0 <- Regs[7], goto RegValRet
+    
+    if uCnt != 0x08, goto +1
+    uR0 <- Regs[8], goto RegValRet
+    if uCnt != 0x09, goto +1
+    uR0 <- Regs[9], goto RegValRet
+    if uCnt != 0x0A, goto +1
+    uR0 <- Regs[10], goto RegValRet
+    if uCnt != 0x0B, goto +1
+    uR0 <- Regs[11], goto RegValRet
+    
+    if uCnt != 0x0C, goto +1
+    uR0 <- Regs[12], goto RegValRet
+    if uCnt != 0x0D, goto +1
+    uR0 <- Regs[13], goto RegValRet
+    if uCnt != 0x0E, goto +1
+    uR0 <- Regs[14], goto RegValRet
+    if uCnt != 0x0F, goto +1
+    uR0 <- Regs[15], goto RegValRet
+
+RegValRet:
+    uPC <- uRet, uRet <- uR1
+
+
 # This microfunction will return the next operand from memory
 # Returns:
 #   uR0: Returns op type and prefix bytes. LSB is always the base operand type. 
