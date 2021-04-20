@@ -22,7 +22,7 @@ Hardware description:
       - PC - Program counter
     System registers:
       - MDR       - Memory data register
-      - MAR       - Memory Address register
+      - MAR       - Memory Address register for each memory
       - uPC       - Micro program counter
       - uRet      - Micro return register
       - OP1Val    - Micro argument register value
@@ -44,16 +44,36 @@ Hardware description:
       - uTmp      - Micro temporary register
       - IR        - Instruction register
       - uIR       - Micro instruction register
+   Immediate Registers
+      - These all hold immediate values we want to make things easier.
+      - 0
+      - 1
+      - 0xFFFFFF00
+      - 0xFFFF0000
+      - 0x0000FFFF
+      - 0x00FFFFFF
+      - 0x0C
+      - 0x03
+      - 0x10
+      - 0xF0
+      - 0x0F
+      - 0x08
+      - 0x10
+      - 0x18
 
   Buses:
-    2 Standard ARCH Busses
-      - Data - 8 bit bus for extracting data from memory.
-      - Address - 32 bit bus also connected to main memory and both ALUs. 
+    6 Standard ARCH Busses all busses are 32 bits.
+      - ALU 1 Out - This takes output from the ALUs and passes it to all registers and memory.
+      - ALU 2 Out - Same as above
+      - ALU 1 A - This takes the A input from O1 output of all register files and goes to ALU1 input A
+      - ALU 1 B - This takes the B input from O2 outptu of all register files and goes to ALU1 input B
+      - ALU 2 A - This takes the A input from O3 output of all register files and goes to ALU2 input A
+      - ALU 2 B - This takes the B input from O4 output of all register files and goes to ALU2 input B
 
   BusALUs: 
     2 ARCH BusALUs - Two ALUs allowing us to do two parallel operations. All 
                      registers will be connected to the inputs of the ALUs, and 
-                     all writeable registers will be connected to their outputs.
+                     all writeable registers will be connected to their outputs via busses.
 
   Memory:
     Main Memory - Main memory storing user programs and data.
