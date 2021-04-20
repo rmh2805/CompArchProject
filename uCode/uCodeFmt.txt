@@ -18,8 +18,8 @@ Basic formats:
 Conditional Types:
         0: Equal        (rs == rt)
         1: Not Equal    (rs != rt)
-        2: Bits Set     (rs & rt == rt)
-        3: Bits Not Set (rs & rt != rt)
+        2: Bits Set     (rs & imm == imm)
+        3: Bits Not Set (rs & imm != imm)
         4: Byte Eq      (rs == imm)
         5: Byte Not Eq  (rs != imm)
         6: Nybble 1 Eq  (rs & 0xF0 == imm)
