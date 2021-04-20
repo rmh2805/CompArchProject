@@ -30,10 +30,17 @@ MOD:
    <No Op>, goto Writeback
 
 DIV:
-   //todo
-   <No Op>, goto Writeback
+    
 
 MUL:
-   //todo
-   <No Op>, goto Writeback
+   uCnt <- 0x1F, uR0 <- 0
+DoubleAddLoop:
+   uR0 <- uR0 << 1, <No Op>
+   if OP1Val & 0x01 == 0x01, goto +1
+   uR0 <- uR0 + OP2Val, <No Op>
+ 
+   if uCnt == 0, goto Writeback
+   OP1Val <- OP1Val >> 1, uCnt <- uCnt - 1
+   <No Op>, goto DoubleAddLoop
 
+   <No Op>, goto Writeback
