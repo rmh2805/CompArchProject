@@ -1,61 +1,67 @@
 Raymond Healy, Ian Campbell
 Computer Architecture Hardware Document
 
-Hardware Description 
+Hardware description:
   Registers:
-    Programmer Visible Register File: 
+    Programmer visible register file: 
       - r0 - GPR
       - r1 - GPR
-      - r2 - GPR 
-      - r3 - GPR 
-      - r4 - GPR 
-      - r5 - GPR 
-      - r6 - GPR 
-      - r7 - GPR 
+      - r2 - GPR
+      - r3 - GPR
+      - r4 - GPR
+      - r5 - GPR
+      - r6 - GPR
+      - r7 - GPR
       - r8 - GPR
-      - r9 - GPR 
+      - r9 - GPR
       - rA - GPR
       - rB - GPR
-      - pR - Return Pointer
-      - pB - Base Pointer
-      - pS - Stack Pointer 
-      - PC - Program Counter
-    System Registers:
-      - MDR - Memory Data Register
-      - MAR - Memory Address Register
-      - uPC - Micro Program Counter
-      - uRet - Micro Return Register
-      - OP1Val - Micro Argument register value
-      - OP2Val - Micro Argument register value
-      - OP3Val - Micro Argument register value
-      - OP4Val - Micro Argument register value
-      - OP1Type - Micro Argument register type
-      - OP2Type - Micro Argument register type
-      - OP3Type - Micro Argument register type
-      - OP4Type - Micro Argument register type
-      - OP1Scale - OP1 Scalar register
-      - OP2Scale - OP2 Scalar register
-      - OP3Scale - OP3 Scalar register
-      - OP4Scale - OP4 Scalar register
-      - uR0 - Micro function return 
-      - uR1 - Micro function return
-      - uR2 - Micro function return
-      - uCnt - Counter register
-      - uTmp - Micro Temporary register
-      - IR - Instruction Register
+      - pR - Return pointer
+      - pB - Base pointer
+      - pS - Stack pointer
+      - PC - Program counter
+    System registers:
+      - MDR       - Memory data register
+      - MAR       - Memory Address register
+      - uPC       - Micro program counter
+      - uRet      - Micro return register
+      - OP1Val    - Micro argument register value
+      - OP2Val    - Micro argument register value
+      - OP3Val    - Micro argument register value
+      - OP4Val    - Micro argument register value
+      - OP1Type   - Micro argument register type
+      - OP2Type   - Micro argument register type
+      - OP3Type   - Micro argument register type
+      - OP4Type   - Micro argument register type
+      - OP1Scale  - OP1 scalar register
+      - OP2Scale  - OP2 scalar register
+      - OP3Scale  - OP3 scalar register
+      - OP4Scale  - OP4 scalar register
+      - uR0       - Micro function return 
+      - uR1       - Micro function return
+      - uR2       - Micro function return
+      - uCnt      - Counter register
+      - uTmp      - Micro temporary register
+      - IR        - Instruction register
+      - uIR       - Micro instruction register
 
   Buses:
     2 Standard ARCH Busses
-      - Data - 8 bit bus connected to main memory 
+      - Data - 8 bit bus for extracting data from memory.
       - Address - 32 bit bus also connected to main memory and both ALUs. 
 
   BusALUs: 
-    2 Standard ARCH ALUs - Two ALUs allow us to do two parallel operations. All Registers
-    will be directed into both ALUs through the Address Bus.
+    2 ARCH BusALUs - Two ALUs allowing us to do two parallel operations. All 
+                     registers will be connected to the inputs of the ALUs, and 
+                     all writeable registers will be connected to their outputs.
 
   Memory:
-    Main Memory - Main memory storing program objects.
-    Micro Control Unit Storage - Secondary Memory Unit loaded with the Micro Program CU. 
+    Main Memory - Main memory storing user programs and data.
+    Micro Control Storage - Secondary memory unit loaded with the micro program.
+  
+  Misc:
+    Output: One simulated line printer, used by the OUT operation and connected 
+            to the OP Val registers
 
 Control Unit Description 
 
