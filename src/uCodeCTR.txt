@@ -1,16 +1,18 @@
 Control Instructions 
 
-uHLT:
-    exit()
+HLT:
+    <No Op>, goto halt
 
-uNOP:
-    uPC <- uRet
+NOP:
+    <No Op>, goto Writeback
 
-uCLR:
-    OP2 <- 0
+CLR:
+    uR0 <- 0, goto Writeback
 
-uDMP:
-    cout << OP2
+DMP:
+    //Track in trace
+    <No Op>, goto Writeback
 
-uOUT:
-    OP3 <- OP2
+OUT:
+    //this can be expanded to include more devices, for now just print to device 0 always
+    Dev0 <- OP1Val, goto Writeback
