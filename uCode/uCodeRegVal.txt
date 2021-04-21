@@ -1,5 +1,6 @@
-# This microfunction will return the value stored within a (programmer visible) 
-# register and restore uRet to a passed value on its return
+# RegVal:
+#   This microfunction will return the value stored within a (programmer 
+#   visible) register and restore uRet to a passed value on its return
 # Args:
 #   uCnt: The index into the register file
 #   uR2: The uRet of the caller (restored on exit)

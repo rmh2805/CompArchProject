@@ -1,11 +1,14 @@
-# This microfunction will evaluate a provided operand (without any scaling or prefix handling)
+# EvalOp:
+#   This microfunction will evaluate a provided operand (without any scaling, 
+#   prefix handling, or EA dereferencing)
 # Args:
 #   uCnt: The operand's OpVal
 #   uR1: The operand's OpType
 # Uses:
 #   uTmp, uR2
 # Returns:
-#   uR0: The computed EA (for memory operands) or value (for registers and immediates)
+#   uR0: The computed EA (for memory operands) or value (for registers and 
+#        immediates)
 #
 EvalOp:
     if uR1 & 0xF0 == 0x00, goto halt        # Somehow got a prefix byte here
@@ -44,8 +47,8 @@ EvalReg:
     if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
     uR0 <- Regs[12], goto EvalReg1          # Grab reg 1 and goto truncation
 
-    uR2 <- uRet, <No Op>                    # Save uRet for called fxn to restore
-    uRet <- uPC, goto RegVal                # Grab the value of the register per the second byte
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab the register's value
 
 EvalReg1:
     uTmp <- uR1 & 0x03, <No Op>             # grab the rsz field
@@ -87,11 +90,11 @@ EvalIdx:
     if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
     uR0 <- Regs[12], goto EvalIdx1          # Grab reg 1 and goto second grab
 
-    uR2 <- uRet, <No Op>                    # Save uRet for called fxn to restore
-    uRet <- uPC, goto RegVal                # Grab the value of the register per the second byte
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab register's value
 
 EvalIdx1:
-    uR1 <- uR0, uTmp <- uR1 & 0x03          # Store result and prepare to grab second op
+    uR1 <- uR0, uTmp <- uR1 & 0x03          # Store result and prepare for 2nd
 
     if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
     uR0 <- Regs[0], goto EvalIdx2           # Grab reg 0 and goto sum
@@ -102,8 +105,8 @@ EvalIdx1:
     if uTmp != 0x02, goto +1                # Skip unless targeting base pointer
     uR0 <- Regs[12], goto EvalIdx2          # Grab reg 1 and goto sum
 
-    uR2 <- uRet, <No Op>                    # Save uRet for called fxn to restore
-    uRet <- uPC, goto RegVal                # Grab the value of the register per the second byte
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab the register's value
 
 EvalIdx2:
     uR0 <- uR0 + uR1, uPC <- uRet           # Sum the values and return
@@ -120,9 +123,9 @@ EvalDsp:
     if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
     uR0 <- Regs[12], goto EvalDsp1          # Grab reg 1 and goto summation
 
-    uCnt <- uR1 >> 0x18, uR1 <- uCnt        # uCnt <- register specifier byte, uR1 <- immediate
-    uR2 <- uRet, <No Op>                    # Save uRet for called fxn to restore
-    uRet <- uPC, goto RegVal                # Grab the value of the register per the second byte
+    uCnt <- uR1 >> 0x18, uR1 <- uCnt        # uCnt <- reg specifier, uR1 <- imm
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab register's value
     uCnt <- uR1, <No Op>                    # Return immediate to uCnt
 
 EvalDsp1:
