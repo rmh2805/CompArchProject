@@ -22,7 +22,7 @@ Decode:
     if IR == 0x22, goto DecodeCpy           # Decode for CPY
 
     if IR == 0x31, goto DecodeJmp           # Decode for JMP
-    if IR == 0x32, goto DecodeJal           # Decode for JAL
+    if IR == 0x32, goto DecodeJmp           # Decode for JAL
     if IR == 0x34, goto DecodeBeq           # Decode for BEQ
     if IR == 0x35, goto DecodeBeq           # Decode for BNE
     if IR == 0x36, goto DecodeBeq           # Decode for BGT
@@ -187,11 +187,22 @@ DecodeCpy2:
     uRet <- uPC, goto ScaleOp
     OP2Val <- uR0, goto DecodeMul1 
 
-
-
 DecodeJmp:
+    # Check that Op 1 is a memory op
+    if OP1Type & 0xF0 == 0x40, goto DecodeJmp1
+    if OP1Type & 0xF0 == 0x50, goto DecodeJmp1
+    if OP1Type & 0xF0 == 0x60, goto DecodeJmp1
+    if OP1Type & 0xF0 == 0x70, goto DecodeJmp1
+    if OP1Type & 0xF0 == 0x80, goto DecodeJmp1
 
-DecodeJal:
+    <No Op>, goto halt              # Halt (op1 must be memory)
+
+DecodeJmp1:
+    uCnt <- OP1Val, uR1 <- OP1Type  # Get OP 1's EA
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP1Scale, uR1 <- uR0    # Scale OP 1
+    uRet <- uPC, goto ScaleOp
+    OP1Val <- uR0, goto DecodeBranch
 
 DecodeBeq:
 
