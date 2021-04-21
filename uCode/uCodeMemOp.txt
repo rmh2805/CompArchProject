@@ -1,0 +1,29 @@
+# MemOp:
+#   This microfunction will grab an operand from memory from its EA
+# Args:
+#   uCnt: The (pre-scaled) EA of the 
+#   uR1: The related OpType
+# Uses:
+#   uTmp, uCnt
+# Returns:
+#   uR0: The value from OpVal with prefixes applied (and memory accessed) (run 
+#        EvalOp and ScaleOp first to get EA)
+#
+MemOp:
+    # If this is an EA, we must grab it from memory
+    if uR1 & 0xF0 == 0x40, goto MemOp1          # Register indirect
+    if uR1 & 0xF0 == 0x50, goto MemOp1          # Memory indirect
+    if uR1 & 0xF0 == 0x60, goto MemOp1          # Index
+    if uR1 & 0xF0 == 0x70, goto MemOp1          # Displacement
+    if uR1 & 0xF0 == 0x80, goto MemOp1          # Absolute
+
+    uPC <- uRet, <No Op>                        # Non-memory operands can skip
+MemOp1:
+    uTmp <- 0x03, <No Op>
+MemOp2:
+    MAR <- uCnt, uR0 <- uR0 << 8
+    MDR <- mem[MAR], <No Op>
+    uR0 <- uR0 | MDR, <No Op>
+
+    if uCnt == 0x00, goto uRet
+    uTmp <- uTmp - 1, goto GetValMem2
