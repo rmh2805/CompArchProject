@@ -1,0 +1,13 @@
+# MemRet:
+#   This microfunction will write out the provided value to the provided operand
+# Args:
+#   uCnt: The OPVal to target from
+#   uR0: The OPType to target
+#   uR1: A pre-calculated EA (because EvalOp is a nightmare)
+#   uR2: The value to store (run through PrefixRet)
+# Uses:
+#   uTmp
+# Returns:
+#
+MemRet:
+    uPC <- uRet, <No Op>
