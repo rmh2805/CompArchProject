@@ -135,9 +135,10 @@ DecodeInc:
     OP2Type <- OP1Type, OP2Val <- OP1Val
     OP2Scale <- OP1Scale, goto DecodeCmp
 
-DecodeMov:
-
 DecodeSwp:
+    if OP2Type & 0xF0 == 0x10, goto halt 
+    if OP2Type & 0xF0 == 0x20, goto halt 
+    <No Op>, goto DecodeCmp
 
 DecodeCpy:
 
