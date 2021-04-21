@@ -1,5 +1,6 @@
-# This microfunction will grab the full value of a given operand (memory 
-# access and prefix bytes)
+# ScaleOp:
+#   This microfunction will grab the full value of a given operand (memory 
+#   access and prefix bytes)
 # Args:
 #   uCnt: The operand's OpScale
 #   uR1: The operand's OpVal
