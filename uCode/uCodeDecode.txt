@@ -118,8 +118,22 @@ DecodeDiv1:
     <No Op>, goto DecodeMul1
 
 DecodeCmp:
+    if OP1Type & 0xF0 == 0x10, goto halt 
+    if OP1Type & 0xF0 == 0x20, goto halt 
+
+    uCnt <- OP2Val, uR1 <- OP2Type  # Get the Val/EA for Op 2
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP2Scale, uR1 <- uR0    # Scale Op 2
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP2Type     # Get memory value of Op 2
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 2
+    OP2Val <- uR0, goto DecodeBranch
 
 DecodeInc:
+    # Duplicate OP1 for writeback, then decode like cmp
+    OP2Type <- OP1Type, OP2Val <- OP1Val
+    OP2Scale <- OP1Scale, goto DecodeCmp
 
 DecodeMov:
 
