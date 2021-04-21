@@ -38,12 +38,12 @@ DecodeDmp:
 
     uCnt <- OP1Scale, uR1 <- uR0    # Scale Op 1
     uRet <- uPC, goto ScaleOp
-
+    
     uCnt <- uR0, uR1 <- OP1Type     # Get memory value of Op 1
     uRet <- uPC, goto MemOp
 
     uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 1 and execute
-    Op1Val <- uR0, goto DecodeBranch
+    OP1Val <- uR0, goto DecodeBranch
 
 DecodeOut:
     uCnt <- OP2Val, uR1 <- OP2Type  # Get the Val/EA for Op2
@@ -56,9 +56,30 @@ DecodeOut:
     uRet <- uPC, goto MemOp
 
     uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 2 and then get Op 1
-    Op2Val <- uR0, goto DecodeDmp
+    OP2Val <- uR0, goto DecodeDmp
 
 DecodeAdd:
+    # Halt on immediate destination
+    if OP1Type & 0xF0 == 0x10, goto Halt
+    if OP2Type & 0xF0 == 0x20, goto Halt
+
+    uCnt <- OP2Val, uR1 <- OP2Type  # Get the Val/EA for Op 2
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP2Scale, uR1 <- uR0    # Scale Op 2
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP2Type     # Get memory value of Op 2
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 2
+    OP2Val <- uR0, <No Op>
+
+    uCnt <- OP3Val, uR1 <- OP3Type  # Get the Val/EA for Op 3
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP3Scale, uR1 <- uR0    # Scale Op 3
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP3Type     # Get memory value of Op 3
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 3 and execute
+    OP3val <- uR0, goto DecodeBranch
 
 DecodeMul:
 
