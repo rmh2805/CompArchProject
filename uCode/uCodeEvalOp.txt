@@ -192,15 +192,15 @@ EvalDec1:
     <No Op>, goto halt                      # Halt on bad register
 
 EvalPDc:
-    uCnt <- uRet, <No Op>
+    uRet2 <- uRet, <No Op>
     uRet <- uPC, goto EvalReg
-    uRet <- uCnt, uR2 <- 0
+    uRet <- uRet2, uR2 <- 0
     uR2 <- uR2 - 1, goto EvalPIc1
 
 EvalPIc:
-    uCnt <- uRet, <No Op>
+    uRet2 <- uRet, <No Op>
     uRet <- uPC, goto EvalReg
-    uRet <- uCnt, uR2 <- 1
+    uRet <- uRet2, uR2 <- 1
 
 EvalPIc1:
     uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
