@@ -205,6 +205,21 @@ DecodeJmp1:
     OP1Val <- uR0, goto DecodeBranch
 
 DecodeBeq:
+    # Check that Op 1 is a memory op
+    if OP3Type & 0xF0 == 0x40, goto DecodeBeq1
+    if OP3Type & 0xF0 == 0x50, goto DecodeBeq1
+    if OP3Type & 0xF0 == 0x60, goto DecodeBeq1
+    if OP3Type & 0xF0 == 0x70, goto DecodeBeq1
+    if OP3Type & 0xF0 == 0x80, goto DecodeBeq1
+
+    <No Op>, goto halt              # Halt (op3 must be memory)
+
+DecodeBeq1:
+    uCnt <- OP3Val, uR1 <- OP3Type  # Get OP 3's EA
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP3Scale, uR1 <- uR0    # Scale OP 3
+    uRet <- uPC, goto ScaleOp
+    OP3Val <- uR0, goto DecodeOut
 
 DecodeBie:
 
