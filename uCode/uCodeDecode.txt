@@ -32,11 +32,13 @@ Decode:
     if IR == 0x3A, goto DecodeJmp           # Decode for BAO
     if IR == 0x3B, goto DecodeJmp           # Decode for BAC
 
-DecodeClr:
-
 DecodeDmp:
+    uCnt <- OP1Val, uR1 <- OP1Type
+    uRet <- uPC, goto EvalOp
+    OP1Val <- uR0, <No Op>
 
 DecodeOut:
+    
 
 DecodeAdd:
 

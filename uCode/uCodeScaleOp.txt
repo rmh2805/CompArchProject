@@ -1,0 +1,44 @@
+# This microfunction will grab the full value of a given operand (memory 
+# access and prefix bytes)
+# Args:
+#   uCnt: The operand's OpScale
+#   uR1: The operand's OpVal
+# Uses:
+#   uTmp, uR2
+# Returns:
+#   uR0: The value from OpVal with scaling applied (run EvalOp first for base)
+#
+ScaleOp:
+    uR2 <- uCnt >> 8, <No Op>
+
+    uTmp <- uR2 & 0x0C, <No Op>             # Grab the rs value
+    
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto ScaleOp1           # Grab reg 0 and goto truncation
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto ScaleOp1           # Grab reg 1 and goto truncation
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto ScaleOp1          # Grab reg 1 and goto truncation
+
+    uTmp <- uCnt, uCnt <- uCnt & 0xFF       # Set uCnt for regVal
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab the value of the register
+    uCnt <- uTmp, <No Op>                   # Restore uCnt
+
+ScaleOp1:
+    uCnt <- uCnt >> 8, <No Op>              # Can discard the reg byte now
+    uCnt <- uCnt & 0x03, <No Op>            # Extract val field
+    
+    if uCnt != 0x00, goto +1                # if idx not scaled by 1, skip next
+    uR0 <- uR1 + uR0, uPC <- uRet           # Add reg value to base and return
+
+    uTmp <- uR0 << 1, uR2 <- uR0            # Store base and double of indexes
+    uR0 <- uR1 + uTmp, <No Op>              # Set base return to base + 2*idx
+
+    if uCnt == 0x01, goto uRet              # If scaled by 2, return now
+    
+    if uCnt != 0x02, goto +1                # Skip next if scaled by 4
+    uR0 <- uR0 + uCnt, uPC <- uRet          # Add idx to return scale by 3
+
+    uR0 <- uR0 + uTmp, uPC <- uRet          # Add 2*idx to return scale by 4
+
