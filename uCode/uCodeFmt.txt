@@ -67,6 +67,28 @@ Registers:
         26: uRet2       | 27: 
 
     - Register File 0x30 - 0x3F
-        - As in the ISA doc
+        30: r0          | 31: r1
+        32: r2          | 33: r3
+        34: r4          | 35: r5
+        36: r6          | 37: r7
+        38: r8          | 39: r9
+        3A: rA          | 3B: rB
+        3C: pR          | 3D: pB
+        3E: pS          | 3F: PC
 
+Execution: 
+    The RTL for microcode execution is incredibly basic
 
+        uIR <- CS[MAR'];
+        <Execution>;
+        MAR' <- uPC + 1, uPC <- uPC + 1;
+    
+    The execution will depend on the loaded microinstruction:
+          Conditional: if <condition>, uPC <- uIR
+                 Jump: uPC <- uIR
+                No Op: <nothing>
+                  Mov: RdX <- RsX # where X denotes the field. Performed through
+                                  # ALU
+        ALU operation: RdX <- RsX <op> RtX # RtX unused for single operand ops
+             Mem Read: MDR <- Mem[MAR]
+            Mem Write: Mem[MAR] <- MDR
