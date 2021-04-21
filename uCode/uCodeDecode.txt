@@ -33,12 +33,30 @@ Decode:
     if IR == 0x3B, goto DecodeJmp           # Decode for BAC
 
 DecodeDmp:
-    uCnt <- OP1Val, uR1 <- OP1Type
+    uCnt <- OP1Val, uR1 <- OP1Type  # Get the Val/EA for Op1
     uRet <- uPC, goto EvalOp
-    OP1Val <- uR0, <No Op>
+
+    uCnt <- OP1Scale, uR1 <- uR0    # Scale Op 1
+    uRet <- uPC, goto ScaleOp
+
+    uCnt <- uR0, uR1 <- OP1Type     # Get memory value of Op 1
+    uRet <- uPC, goto MemOp
+
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 1 and execute
+    Op1Val <- uR0, goto DecodeBranch
 
 DecodeOut:
-    
+    uCnt <- OP2Val, uR1 <- OP2Type  # Get the Val/EA for Op2
+    uRet <- uPC, goto EvalOp
+
+    uCnt <- OP2Scale, uR1 <- uR0    # Scale Op 2
+    uRet <- uPC, goto ScaleOp
+
+    uCnt <- uR0, uR1 <- OP2Type     # Get memory value of Op 2
+    uRet <- uPC, goto MemOp
+
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 2 and then get Op 1
+    Op2Val <- uR0, goto DecodeDmp
 
 DecodeAdd:
 
