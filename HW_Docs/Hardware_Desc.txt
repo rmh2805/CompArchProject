@@ -83,5 +83,12 @@ Hardware description:
     Output: One simulated line printer, used by the OUT operation and connected 
             to the OP Val registers
 
-Control Unit Description 
+Control Unit Description: 
+    We utilize a microprogrammed control unit. The document detailing its 
+  instruction format is attached, including a description of the RTL for 
+  the microinstruction fetch-execute cycle.
+
+    Also provided are 2 documents, one containing the fetch, decode, and 
+  writeback RTL to implement our ISA, and the other containing the RTL for the 
+  instructions outlined in our ISA proposal.
 
