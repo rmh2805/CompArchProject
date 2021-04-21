@@ -17,7 +17,7 @@ Decode:
     if IR == 0x19, goto DecodeInc           # Decode for INC
     if IR == 0x1A, goto DecodeInc           # Decode for DEC
 
-    if IR == 0x20, goto DecodeMov           # Decode for MOV
+    if IR == 0x20, goto DecodeCmp           # Decode for MOV
     if IR == 0x21, goto DecodeSwp           # Decode for SWP
     if IR == 0x22, goto DecodeCpy           # Decode for CPY
 
