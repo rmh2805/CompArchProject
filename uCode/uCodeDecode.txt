@@ -138,6 +138,13 @@ DecodeInc:
 DecodeSwp:
     if OP2Type & 0xF0 == 0x10, goto halt 
     if OP2Type & 0xF0 == 0x20, goto halt 
+
+    # Save ops for writeback
+    OP3Type <- OP1Type, OP4Type <- OP2Type
+    OP3Val <- OP1Val, OP4Val <- OP2Val
+    OP3Scale <- OP1Scale, OP4Scale <- OP2Scale
+
+    # Finish decode like CMP
     <No Op>, goto DecodeCmp
 
 DecodeCpy:
