@@ -1,0 +1,15 @@
+#! /bin/bash
+
+echo "          ############################################################" > uCodeExec.txt
+echo "          ###                                                      ###" >> uCodeExec.txt
+echo "          ###                   Execute Microcode                  ###" >> uCodeExec.txt
+echo "          ###                                                      ###" >> uCodeExec.txt
+echo "          ############################################################" >> uCodeExec.txt
+echo "" >> uCodeExec.txt
+cat uCodeALU.txt >> uCodeExec.txt
+echo "" >> uCodeExec.txt
+cat uCodeCOL.txt >> uCodeExec.txt
+echo "" >> uCodeExec.txt
+cat uCodeCTR.txt >> uCodeExec.txt
+echo "" >> uCodeExec.txt
+cat uCodeMEM.txt >> uCodeExec.txt

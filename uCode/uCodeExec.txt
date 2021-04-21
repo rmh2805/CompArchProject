@@ -1,0 +1,273 @@
+          ############################################################
+          ###                                                      ###
+          ###                   Execute Microcode                  ###
+          ###                                                      ###
+          ############################################################
+
+Micro Execute for each ALU Instructions.
+Assume OP1-OP4 values are already set. 
+
+ADD:
+   uR0 <- OP2Val + OP3Val, goto Writeback
+
+SUB:
+   uR0 <- OP2Val - OP3Val, goto Writeback
+
+AND:
+   uR0 <- OP2Val & OP3Val, goto Writeback
+
+OR:
+   uR0 <- OP2Val | OP3Val, goto Writeback
+
+XOR:
+   uR0 <- OP2Val ^ OP3Val, goto Writeback
+
+INC:
+   uR0 <- OP1Val + 1, goto Writeback
+
+DEC:
+   uR0 <- OP1Val - 1, goto Writeback
+
+CMP:
+   uR0 <- ~OP2Val, goto Writeback
+
+DIV:
+    uRet <- uPC, goto DoDiv
+    <No Op>, goto Writeback
+
+MOD:
+    OP4Val <- OP3Val, OP3Val <- OP2Val
+    uRet <- uPC, goto DoDiv
+    uR0 <- uR1, goto Writeback
+
+DoDiv:
+    uR0 <- 0, uR2 <- 0 // Set div to 0
+    uTmp <- OP3Val >> 0x18, <No Op>
+    if uTmp & 0x80 != 0x80, goto +2
+    OP3Val <- ~OP3Val, uR2 <- uR2 + 1
+    OP3Val <- OP3Val + 1, <No Op>
+
+    uTmp <- OP4Val >> 0x18, <No Op>
+    if uTmp & 0x80 != 0x80 , goto + 2
+    OP4Val <- ~OP4Val, uR2 <- uR2 + 1
+    OP4Val <- OP4Val + 1, <No Op>
+
+DoDiv1:
+    OP3Val <- OP3Val - OP4Val, <No OP>
+    uTmp <- OP3Val >> 0x18, <No Op>
+
+    if uTmp & 0x80 == 0x80, goto DIV2
+    uR0 <- uR0 + 1, goto DIV1
+
+DoDiv2:
+    uR1 <- OP3Val + OP4Val, <No Op>
+    if uR2 != 0x01, goto uRet
+    uR0 <- ~uR0, <No Op>
+    uR0 <- uR0 + 1, uPC <- uRet
+
+MUL:
+   uCnt <- 0x1F, uR0 <- 0
+DoubleAddLoop:
+   uR0 <- uR0 << 1, <No Op>
+   if OP1Val & 0x01 == 0x01, goto +1
+   uR0 <- uR0 + OP2Val, <No Op>
+ 
+   if uCnt == 0, goto Writeback
+   OP1Val <- OP1Val >> 1, uCnt <- uCnt - 1
+   <No Op>, goto DoubleAddLoop
+
+   <No Op>, goto Writeback
+
+Micro Execution RTL for COL
+
+JMP:
+    PC <- OP1Val, goto Writeback
+
+JAL:
+    uTmp <- pB, uR0 <- pS - 4
+    uCnt <- 0x03, <No Op>
+
+jal_loop_write_pb:
+    MAR <- uCnt, MDR <- uTmp
+    Mem[MAR] <- MDR, <No Op>
+    
+    uTmp <- uTmp >> 8, uR0 <- uR0 - 1
+    if uCnt == 0x00, goto jal_break_pb
+    uCnt <- uCnt - 1, goto jal_loop_write_pb
+
+jal_break_pb:
+    pB <- pS - 4, <No Op> // Quickly reset pB
+    uTmp <- pR, uR0 <- pS - 8 // Setup uTmp and uR0 again for pS
+    uCnt <- 0x03, <No Op> // Reset uCnt
+
+jal_loop_write_pr:
+    MAR <- uCnt, MDR <- uTmp
+    Mem[MAR] <- MDR, <No Op>
+    
+    uTmp <- uTmp >> 8, uR0 <- uR0 - 1
+    if uCnt == 0x00, goto break_pr
+    uCnt <- uCnt - 1, goto loop_write_pr
+
+jal_break_pr:
+    pS <- pS - 8, pR <- PC
+    PC <- OP1Val, goto Writeback
+
+RET:
+    PC <- pR, <No Op> // Set return point
+    // Setup for pR read
+    uTmp <- pR, uR0 <- pB - 4
+    uCnt <- 0x03, <No Op>
+
+ret_loop_read_pr:
+    MAR <- uR0, <No Op>
+    MDR <- Mem[MAR], uTmp <- uTmp << 0x08 // Shift for next byte
+    uTmp <- uTmp | MDR, uR0 <- uR0 - 1 // Insert next byte
+    if uCnt == 0x00, goto ret_break_pr
+    uCnt <- uCnt - 1, goto ret_loop_read_pr
+
+ret_break_pr:
+    // Setup for pS read
+    uTmp <- pS, uR0 <- pB + 4
+    uCnt <- 0x03, <No Op>
+
+ret_loop_read_ps:
+    // Do ps Read
+    MAR <- uR0, <No Op>
+    MDR <- Mem[MAR], uTmp <- uTmp << 0x08 // Shift for next byte
+    uTmp <- uTmp | MDR, uR0 <- uR0 - 1 // Insert next byte
+    if uCnt == 0x00, goto ret_break_pr
+    uCnt <- uCnt - 1, goto ret_loop_read_pr
+
+ret_break_ps:
+    // Setup for pB read
+    uTmp <- pB, uR0 <- pB
+    uCnt <- 0x03, <No Op>
+
+ret_loop_read_pb:
+    // Do pB read
+    MAR <- uR0, <No Op>
+    MDR <- Mem[MAR], uTmp <- uTmp << 0x08 // Shift for next byte
+    uTmp <- uTmp | MDR, uR0 <- uR0 - 1 // Insert next byte
+    if uCnt == 0x00, goto ret_break_pr
+    uCnt <- uCnt - 1, goto ret_loop_read_pr
+
+ret_break_pb:
+    goto Writeback, <No Op>
+
+BEQ:
+    uTmp <- OP1Val - OP2Val, <No OP>
+    if uTmp != 0, goto Writeback
+    PC <- OP3Val, goto Writeback
+
+BNE:
+    uTmp <- OP1Val - OP2Val, <No OP>
+    if uTmp == 0, goto Writeback
+    PC <- OP3Val, goto Writeback
+
+BGT:
+    uTmp <- OP2Val - OP1Val, <No Op>    # uTmp <- src2 - src1
+    uTmp <- uTmp >> 24, <No Op>         # Retain the high byte of uTmp
+
+    if uTmp & 0x80 != 0x80, goto Writeback
+    PC <- OP3Val, goto Writeback
+
+BGE:
+    uTmp <- OP1Val - OP2Val, <No Op>    # uTmp <- src1 - src2
+    uTmp <- uTmp >> 24, <No Op>         # Retain the high byte of uTmp
+
+    if uTmp & 0x80 == 0x80, goto Writeback
+    PC <- OP3Val, goto Writeback
+
+BIE:
+    <No Op>, uTmp <- OP1Val + 1         # Compute the basic increment
+    uR0 <- uTmp, uTmp <- uTmp - OP2Val  # Save the incremented value and compare with src2
+    
+    if uTmp != 0, goto Writeback
+    PC <- OP3Val, goto Writeback
+
+
+BDE:
+    <No Op>, uTmp <- OP1Val - 1         # Compute the basic decrement
+    uR0 <- uTmp, uTmp <- uTmp - OP2Val  # Save the decremented value and compare with src2
+    
+    if uTmp != 0, goto Writeback
+    PC <- OP3Val, goto Writeback
+
+BAO:
+   <No Op>, uTmp <- ALU.OVERFLOW
+   if uTmp != 1, goto Writeback
+   PC <- OP1Val, goto Writeback
+
+BAC:
+   <No Op>, uTmp <- ALU.CARRY
+   if uTmp != 1, goto Writeback
+   PC <- OP1Val, goto Writeback
+
+
+Control Instructions 
+
+HLT:
+    <No Op>, goto halt
+
+NOP:
+    <No Op>, goto Writeback
+
+CLR:
+    uR0 <- 0, goto Writeback
+
+DMP:
+    //Track in trace
+    <No Op>, goto Writeback
+
+OUT:
+    //this can be expanded to include more devices, for now just print to device 0 always
+    Dev0 <- OP1Val, goto Writeback
+
+These are the memory micro instructions! 
+
+MOV:
+    uR0 <- OP1Val, goto Writeback
+
+SWP:
+    uR0 <- OP1Val, ur1 <-OP2Val
+    <No Op>, goto Writeback
+
+CPY:
+    if OP4Val != 0, goto +1
+    OP4Val <- OP4Val - 1, <No Op>  # OP4Val <- 2^32 - 1, more than enough to catch all reasonable limits
+    if OP3Val == 0, goto CPY_C
+    if OP3Val == 1, goto CPY_P
+    uCnt <- OP3Val, goto CPY_P_1
+
+CPY_C:
+    MAR <- OP1Val, OP1Val <- OP1Val + 1
+    MDR <- Mem[MAR], MAR <- OP2Val
+    Mem[MAR] <- MDR, <No Op>
+    OP4Val <- OP4Val - 1, <No Op>
+    
+    if MDR == 0, goto Writeback
+    if OP4Val == 0, goto Writeback
+    
+    OP2Val <- OP2Val + 1, goto CPY_C
+
+CPY_P:
+    if OP4Val == 0x00, goto Writeback
+
+    MAR <- OP1Val, OP1Val <- OP1Val + 1
+    MDR <- Mem[MAR], MAR <- OP2Val
+    Mem[MAR] <- MDR, uCnt <- MDR
+    OP4Val <- OP4Val - 1, <No Op>
+    
+    if OP4Val == 0x00, goto Writeback
+
+CPY_P_1:
+    MAR <- OP1Val, OP1Val <- OP1Val + 1
+    MDR <- Mem[MAR], MAR <- OP2Val
+    Mem[MAR] <- MDR, <No Op>
+    uCnt <- uCnt - 1, <No Op>
+    OP4Val <- OP4Val - 1, <No Op>
+    
+    if uCnt == 0, goto Writeback
+    if OP4Val == 0, goto Writeback
+    
+    OP2Val <- OP2Val + 1, goto CPY_P_1
