@@ -33,9 +33,20 @@ Clearable pS("PS", kRegSize);
 Memory m("Main Memory", kAddrBusSize, kDataBusSize);
 
 //=========================================<uPU Objects>==========================================//
+Memory micro_m("Micro Control Storage", kAddrBusSize, kDataBusSize);
 
 void connect() {
-    
+       m.MAR().connectsTo(ALU1Out.OUT());
+       m.MAR().connectsTo(ALU2Out.OUT());	
+
+       mdr.connectsTo(ALU1Out.OUT());
+       mdr.connectsTo(ALU2Out.OUT());
+       mdr.connectsTo(m.WRITE());
+       mdr.connectsTo(m.READ());
+       mdr.connectsTo(ALU1A.IN());
+       mdr.connectsTo(ALU1B.IN());
+       mdr.connectsTo(ALU2A.IN());
+       mdr.connectsTo(ALU2B.IN());
 }
 
 void execute(const char * codeFile, const char * uCodeFile) {
