@@ -26,11 +26,52 @@ CMP:
    uR0 <- ~OP2Val, goto Writeback
 
 MOD:
-   //todo 
-   <No Op>, goto Writeback
+    uR0 <- 0, uR2 <- 0 // Set div to 0
+    uTmp <- OP3Val >> 0x18, <No Op>
+    if uTmp & 0x80 != 0x80, goto +2
+    OP3Val <- ~OP3Val, <No Op>
+    OP3Val <- OP3Val + 1, <No Op>
 
+    uTmp <- OP4Val >> 0x18, <No Op>
+    if uTmp & 0x80 != 0x80 , goto + 2
+    OP4Val <- ~OP4Val, <No Op>
+    OP4Val <- OP4Val + 1, <No Op>
+
+MOD1:
+    OP3Val <- OP3Val - OP4Val, <No OP>
+    uTmp <- OP3Val >> 0x18, <No Op>
+
+    if uTmp & 0x80 == 0x80, goto MOD2
+    <No Op>, goto MOD1
+
+MOD2:
+    uR0 <- OP3Val + OP4Val, goto Writeback
+
+// This works for only positive
 DIV:
-    
+    uR0 <- 0, uR2 <- 0 // Set div to 0
+    uTmp <- OP3Val >> 0x18, <No Op>
+    if uTmp & 0x80 != 0x80, goto +2
+    OP3Val <- ~OP3Val, uR2 <- uR2 + 1
+    OP3Val <- OP3Val + 1, <No Op>
+
+    uTmp <- OP4Val >> 0x18, <No Op>
+    if uTmp & 0x80 != 0x80 , goto + 2
+    OP4Val <- ~OP4Val, uR2 <- uR2 + 1
+    OP4Val <- OP4Val + 1, <No Op>
+
+DIV1:
+    OP3Val <- OP3Val - OP4Val, <No OP>
+    uTmp <- OP3Val >> 0x18, <No Op>
+
+    if uTmp & 0x80 == 0x80, goto DIV2
+    uR0 <- uR0 + 1, goto DIV1
+
+DIV2:
+    uR1 <- OP3Val + OP4Val, <No Op>
+    if uR2 != 0x01, goto WriteBack
+    uR0 <- ~uR0, <No Op>
+    uR0 <- uR0 + 1, goto Writeback
 
 MUL:
    uCnt <- 0x1F, uR0 <- 0
