@@ -144,10 +144,50 @@ DecodeSwp:
     OP3Val <- OP1Val, OP4Val <- OP2Val
     OP3Scale <- OP1Scale, OP4Scale <- OP2Scale
 
-    # Finish decode like CMP
-    <No Op>, goto DecodeCmp
+    # Decode Op 1 then branch to CMP
+    uCnt <- OP1Val, uR1 <- OP1Type  # Get the Val/EA for Op 1
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP1Scale, uR1 <- uR0    # Scale Op 1
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP1Type     # Get memory value of Op 1
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 1
+    OP1Val <- uR0, goto DecodeCmp
 
 DecodeCpy:
+    # Check that Op 1 is a memory op
+    if OP1Type & 0xF0 == 0x40, goto DecodeCpy1
+    if OP1Type & 0xF0 == 0x50, goto DecodeCpy1
+    if OP1Type & 0xF0 == 0x60, goto DecodeCpy1
+    if OP1Type & 0xF0 == 0x70, goto DecodeCpy1
+    if OP1Type & 0xF0 == 0x80, goto DecodeCpy1
+
+    <No Op>, goto halt              # Halt (op1 must be memory)
+
+DecodeCpy1:
+    # Check that Op 2 is a memory op
+    if OP2Type & 0xF0 == 0x40, goto DecodeCpy2
+    if OP2Type & 0xF0 == 0x50, goto DecodeCpy2
+    if OP2Type & 0xF0 == 0x60, goto DecodeCpy2
+    if OP2Type & 0xF0 == 0x70, goto DecodeCpy2
+    if OP2Type & 0xF0 == 0x80, goto DecodeCpy2
+
+    <No Op>, goto halt              # Halt (op2 must be memory)
+
+DecodeCpy2:
+    uCnt <- OP1Val, uR1 <- OP1Type  # Get OP 1's EA
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP1Scale, uR1 <- uR0    # Scale OP 1
+    uRet <- uPC, goto ScaleOp
+    OP1Val <- uR0, <No Op>
+    
+    uCnt <- OP2Val, uR1 <- OP2Type  # Get OP 2's EA
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP2Scale, uR1 <- uR0    # Scale OP2
+    uRet <- uPC, goto ScaleOp
+    OP2Val <- uR0, goto DecodeMul1 
+
+
 
 DecodeJmp:
 
