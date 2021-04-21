@@ -74,6 +74,8 @@ WritebackInc:
     OP1Val <- OP2Val, OP1Type <- OP2Type    # Restore original operand values
     OP1Scale <- OP2Scale, goto WritebackAdd # And then writeback as in ADD
 
-WritebackCmp:
-
 WritebackSwp:
+    OP1Val <- OP3Val, OP2Val <- OP4Val      # Op 1 <- Op 3, Op 2 <- Op 4
+    OP1Type <- OP3Type, OP2Type <- OP4Type
+    OP1Scale <- OP3Scale, OP4Scale <- OP2Scale
+    <No Op>, goto WritebackMul              # Returns and targets now match
