@@ -8,7 +8,7 @@ Decode:
     if IR == 0x10, goto DecodeAdd           # Decode for ADD
     if IR == 0x11, goto DecodeAdd           # Decode for SUB
     if IR == 0x12, goto DecodeMul           # Decode for MUL
-    if IR == 0x13, goto DecodeMul           # Decode for DIV
+    if IR == 0x13, goto DecodeDiv           # Decode for DIV
     if IR == 0x14, goto DecodeMod           # Decode for MOD
     if IR == 0x15, goto DecodeAdd           # Decode for AND
     if IR == 0x16, goto DecodeAdd           # Decode for OR
@@ -38,7 +38,7 @@ DecodeDmp:
 
     uCnt <- OP1Scale, uR1 <- uR0    # Scale Op 1
     uRet <- uPC, goto ScaleOp
-    
+
     uCnt <- uR0, uR1 <- OP1Type     # Get memory value of Op 1
     uRet <- uPC, goto MemOp
 
@@ -59,9 +59,9 @@ DecodeOut:
     OP2Val <- uR0, goto DecodeDmp
 
 DecodeAdd:
-    # Halt on immediate destination
+    # Halt on immediate dst
     if OP1Type & 0xF0 == 0x10, goto Halt
-    if OP2Type & 0xF0 == 0x20, goto Halt
+    if OP1Type & 0xF0 == 0x20, goto Halt
 
     uCnt <- OP2Val, uR1 <- OP2Type  # Get the Val/EA for Op 2
     uRet <- uPC, goto EvalOp
@@ -82,6 +82,42 @@ DecodeAdd:
     OP3val <- uR0, goto DecodeBranch
 
 DecodeMul:
+    # Halt on immediate dst
+    if OP1Type & 0xF0 == 0x10, goto Halt
+    if OP1Type & 0xF0 == 0x20, goto Halt
+    <No Op>, goto DecodeMul1
+
+DecodeMul1:
+    uCnt <- OP4Val, uR1 <- OP4Type  # Get the Val/EA for Op 4
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP4Scale, uR1 <- uR0    # Scale Op 4
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP4Type     # Get memory value of Op 4
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 4
+    OP4Val <- uR0, <No Op>
+
+    uCnt <- OP3Val, uR1 <- OP3Type  # Get the Val/EA for Op 3
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP3Scale, uR1 <- uR0    # Scale Op 3
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP3Type     # Get memory value of Op 3
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 3 and execute
+    OP3val <- uR0, goto DecodeBranch
+
+DecodeDiv:
+    # If dst is immediate, check if mod is
+    if OP1Type & 0xF0 == 0x10, goto DecodeDiv1 
+    if OP1Type & 0xF0 == 0x20, goto DecodeDiv1
+    <No Op>, goto DecodeMul1
+
+DecodeDiv1:
+    # Halt if mod is also immediate
+    if OP2Type & 0xF0 == 0x10, goto halt 
+    if OP2Type & 0xF0 == 0x20, goto halt
+    <No Op>, goto DecodeMul1
+
 
 DecodeMod:
 
