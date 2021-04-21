@@ -222,6 +222,9 @@ DecodeBeq1:
     OP3Val <- uR0, goto DecodeOut
 
 DecodeBie:
+    if OP1Type & 0xF0 == 0x10, goto halt
+    if OP1Type & 0xF0 == 0x20, goto halt 
+    <No Op>, goto DecodeBeq
 
 DecodeBranch:
     # Control Instructions
