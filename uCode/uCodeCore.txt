@@ -1,0 +1,1254 @@
+          ############################################################
+          ###                                                      ###
+          ###                    Fetch Microcode                   ###
+          ###                                                      ###
+          ############################################################
+
+Fetch:
+    <No OP>, <No OP>                        # Space to ensure that uPC can start
+                                            # before first instruction
+    IncPC, IncPC                            # Halt on PC overflow, else incr
+    
+    MAR <- PC, <No OP>                      # Prepare to pull in the next byte
+    MDR <- Mem[MAR], <No OP>                # Grab the next opcode
+    IR <- MDR, goto FetchOperands           # Fetch the operands for instruction
+
+FetchOperands:
+    if IR in noOps, goto Decode             # Decode instr w/ no ops
+    
+    # Grab the first operand
+    uRet <- uPC, goto GetOperand            # Micro function call
+    OP1Type <- uR0, OP1Val <- uR1           # Store first operand info
+    OP1Scale <- uR2, <No OP>
+    
+    if OP1Type == 0, goto InterpOperand     # Fill in on explicit end of ops
+    if IR in oneOp, goto Decode             # Break if one op instruction
+    
+    # Grab the second operand
+    uRet <- uPC, goto GetOperand            # Micro function call
+    OP2Type <- uR0, OP2Val <- uR1           # Store second operand info
+    OP2Scale <- uR2, <No OP>
+
+    if OP2Type == 0, goto InterpOperand     # Fill in on explicit end of ops
+    if IR in twoOps, goto Decode            # Break if two op instruction
+    
+    # Grab the third operand
+    uRet <- uPC, goto GetOperand            # Micro function call
+    OP3Type <- uR0, OP3Val <- uR1           # Store third operand info
+    OP3Scale <- uR2, <No OP>
+    
+    if OP3Type == 0, goto InterpOperand     # Fill in on explicit end of ops
+    if IR in threeOps, goto Decode          # Break if three op instruction
+    
+    # Grab the fourth operand
+    uRet <- uPC, goto GetOperand            # Micro function call
+    OP4Type <- uR0, OP4Val <- uR1           # Store fourth operand info
+    OP4Scale <- uR2, <No OP>
+    
+    if OP4Type == 0, goto InterpOperand     # Fill in on explicit end of ops
+    <No OP>, goto Decode                    # Break on max nr of ops
+
+InterpOperand:
+    # Control instructions
+    if IR == 0x04, goto InterpDmp           # Interpret DMP operands
+
+    # ALU instructions
+    if IR == 0x10, goto InterpAdd           # Interpret ADD operands
+    if IR == 0x11, goto InterpAdd           # Interpret SUB operands
+    if IR == 0x15, goto InterpAdd           # Interpret AND operands
+    if IR == 0x16, goto InterpAdd           # Interpret OR operands
+    if IR == 0x17, goto InterpAdd           # Interpret XOR operands
+
+    if IR == 0x12, goto InterpMul           # Interpret MUL operands
+    if IR == 0x13, goto InterpDiv           # Interpret DIV operands
+    if IR == 0x18, goto InterpCmp           # Interpret CMP operands
+
+    # Memory instructions
+    if IR == 0x22, goto InterpCpy           # Interpret CPY operands
+
+    # COL instructions
+    if IR == 0x34, goto InterpBeq           # Interpret BEQ operands
+    if IR == 0x35, goto InterpBeq           # Interpret BNE operands
+    if IR == 0x36, goto InterpBeq           # Interpret BGT operands
+    if IR == 0x37, goto InterpBeq           # Interpret BGE operands
+
+    if IR == 0x38, goto InterpBeq           # Interpret BIE operands
+    if IR == 0x39, goto InterpBeq           # Interpret BDE operands
+
+    # Failure
+    <No Op>, goto halt                      # Unable to interpret these ops
+
+InterpDmp:
+    if OP1Type == 0, goto halt              # Unable to interpret DMP from 0 ops
+    OP2Val <- 0, OP2Type <- 0x10            # Op2 gets an immediate 0
+    <No Op>, goto Decode
+
+InterpAdd:
+    if OP1Type == 0, goto halt              # Unable to interpret ADD from 0 ops
+    if OP2Type == 0, goto halt              # Unable to interpret ADD from 1 op
+
+    OP3Type <- OP2Type, OP3Val <- OP2Val    # Op 3 <- Op 2, Op 2 <- Op 1
+    OP3Scale <- OP2Scale, OP2Type <- OP1Type
+    OP2Val <- OP1Val, OP1Scale <- OP2Scale
+    
+    <No Op>, goto Decode
+
+InterpMul:
+    if OP1Type == 0, goto halt              # Unable to interpret MUL from 0 ops
+    if OP2Type == 0, goto halt              # Unable to interpret MUL from 1 op
+    if OP3Type != 0, goto InterpMul1        # Branch of for interp from 3 ops
+
+    # Interpret MUL from 2 ops
+    OP4Val <- OP2Val, OP3Val <- OP1Val      # Op 3 <- Op1, Op4 <- Op2
+    OP4Type <- OP2Type, OP3Type <- OP1Type  
+    OP4Scale <- OP2Scale, OP3Scale <- OP1Scale
+
+    <No Op>, goto InterpMul2
+
+InterpMul1:
+    # Interpret MUL from 3 ops
+    OP4Val <- OP3Val, OP3Val <- OP2Val      # Op 3 <- Op2, Op4 <- Op3
+    OP4Type <- OP3Type, OP3Type <- OP2Type  
+    OP4Scale <- OP3Scale, OP3Scale <- OP2Scale
+
+InterpMul2:
+    OP2Val <- 0, OP2Type <- 0       # Op2 <- 0
+    OP2Scale <- 0, <No Op>
+
+    <No Op>, goto Decode
+
+InterpDiv:
+    if OP1Type == 0, goto halt              # Unable to interpret DIV from 0 ops
+    if OP2Type == 0, goto halt              # Unable to interpret DIV from 1 op
+    if OP3Type != 0, goto InterpDiv1        # Branch of for interp from 3 ops
+
+    # Interpret DIV from 2 ops
+    OP4Val <- OP2Val, OP3Val <- OP1Val      # Op 3 <- Op1, Op4 <- Op2
+    OP4Type <- OP2Type, OP3Type <- OP1Type  
+    OP4Scale <- OP2Scale, OP3Scale <- OP1Scale
+
+    <No Op>, goto Decode
+
+InterpDiv1:
+    # Interpret DIV from 3 ops
+    OP4Val <- OP3Val, OP3Val <- OP2Val      # Op 3 <- Op2, Op4 <- Op3
+    OP4Type <- OP3Type, OP3Type <- OP2Type  
+    OP4Scale <- OP3Scale, OP3Scale <- OP2Scale
+
+    # If Op 2 is an immediate, Op 2 <- Op 4
+    if OP2Type & 0xF0 == 0x10, goto InterpDiv2
+    if OP2Type & 0xF0 != 0x20, goto Decode
+
+InterpDiv2:
+    OP2Val <- OP4Val, OP2Type <- OP4Type
+    OP2Scale <- OP4Scale, goto Decode
+
+InterpCmp:
+    if OP1Type == 0, goto halt              # Unable to interpret CMP from 0 ops
+
+    OP2Type <- OP1Type, OP2Val <- OP1Val    # Op 2 <- Op 1
+    OP2Scale <- OP2Scale, goto Decode
+
+InterpCpy:
+    if OP1Type == 0, goto halt              # Unable to interpret CPY from 0 ops
+    if OP2Type == 0, goto halt              # Unable to interpret CPY from 1 op
+    if OP3Type != 0, goto InterpCpy1        # Skip to step 4 if op 3 set
+
+    OP3Type <- 0x10, <No Op>                # Set Op 3 to a 0 immediate
+
+InterpCpy1:
+    OP4Type <- 0x10, goto Decode            # Set Op 4 to a 0 immediate
+
+InterpBeq:
+    if OP1Type == 0, goto halt              # Unable to interpret BEQ from 0 ops
+
+    # Op 3 <- Op 2
+    OP3Type <- OP2Type, OP3Val <- OP2Val
+    OP3Scale <- OP2Scale, <No Op>
+
+    # Op 2 <- 0
+    OP3Type <- 0x10, goto Decode
+
+
+
+          ############################################################
+          ###                                                      ###
+          ###                   Decode Microcode                   ###
+          ###                                                      ###
+          ############################################################
+
+Decode:
+    if IR in noOps, goto DecodeBranch
+
+    if IR == 0x02, goto DecodeBranch        # Decode for CLR (writeback only)
+    if IR == 0x03, goto DecodeDmp           # Decode for DMP
+    if IR == 0x04, goto DecodeOut           # Decode for OUT
+
+    if IR == 0x10, goto DecodeAdd           # Decode for ADD
+    if IR == 0x11, goto DecodeAdd           # Decode for SUB
+    if IR == 0x12, goto DecodeMul           # Decode for MUL
+    if IR == 0x13, goto DecodeDiv           # Decode for DIV
+    if IR == 0x14, goto DecodeAdd           # Decode for MOD
+    if IR == 0x15, goto DecodeAdd           # Decode for AND
+    if IR == 0x16, goto DecodeAdd           # Decode for OR
+    if IR == 0x17, goto DecodeAdd           # Decode for XOR
+    if IR == 0x18, goto DecodeCmp           # Decode for CMP
+    if IR == 0x19, goto DecodeInc           # Decode for INC
+    if IR == 0x1A, goto DecodeInc           # Decode for DEC
+
+    if IR == 0x20, goto DecodeCmp           # Decode for MOV
+    if IR == 0x21, goto DecodeSwp           # Decode for SWP
+    if IR == 0x22, goto DecodeCpy           # Decode for CPY
+
+    if IR == 0x31, goto DecodeJmp           # Decode for JMP
+    if IR == 0x32, goto DecodeJmp           # Decode for JAL
+    if IR == 0x34, goto DecodeBeq           # Decode for BEQ
+    if IR == 0x35, goto DecodeBeq           # Decode for BNE
+    if IR == 0x36, goto DecodeBeq           # Decode for BGT
+    if IR == 0x37, goto DecodeBeq           # Decode for BGE
+    if IR == 0x38, goto DecodeBie           # Decode for BIE
+    if IR == 0x39, goto DecodeBie           # Decode for BDE
+    if IR == 0x3A, goto DecodeJmp           # Decode for BAO
+    if IR == 0x3B, goto DecodeJmp           # Decode for BAC
+
+DecodeDmp:
+    uCnt <- OP1Val, uR1 <- OP1Type  # Get the Val/EA for Op1
+    uRet <- uPC, goto EvalOp
+
+    uCnt <- OP1Scale, uR1 <- uR0    # Scale Op 1
+    uRet <- uPC, goto ScaleOp
+
+    uCnt <- uR0, uR1 <- OP1Type     # Get memory value of Op 1
+    uRet <- uPC, goto MemOp
+
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 1 and execute
+    OP1Val <- uR0, goto DecodeBranch
+
+DecodeOut:
+    uCnt <- OP2Val, uR1 <- OP2Type  # Get the Val/EA for Op2
+    uRet <- uPC, goto EvalOp
+
+    uCnt <- OP2Scale, uR1 <- uR0    # Scale Op 2
+    uRet <- uPC, goto ScaleOp
+
+    uCnt <- uR0, uR1 <- OP2Type     # Get memory value of Op 2
+    uRet <- uPC, goto MemOp
+
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 2 and then get Op 1
+    OP2Val <- uR0, goto DecodeDmp
+
+DecodeAdd:
+    # Halt on immediate dst
+    if OP1Type & 0xF0 == 0x10, goto Halt
+    if OP1Type & 0xF0 == 0x20, goto Halt
+
+    uCnt <- OP2Val, uR1 <- OP2Type  # Get the Val/EA for Op 2
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP2Scale, uR1 <- uR0    # Scale Op 2
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP2Type     # Get memory value of Op 2
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 2
+    OP2Val <- uR0, <No Op>
+
+    uCnt <- OP3Val, uR1 <- OP3Type  # Get the Val/EA for Op 3
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP3Scale, uR1 <- uR0    # Scale Op 3
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP3Type     # Get memory value of Op 3
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 3 and execute
+    OP3val <- uR0, goto DecodeBranch
+
+DecodeMul:
+    # Halt on immediate dst
+    if OP1Type & 0xF0 == 0x10, goto Halt
+    if OP1Type & 0xF0 == 0x20, goto Halt
+
+DecodeMul1:
+    uCnt <- OP4Val, uR1 <- OP4Type  # Get the Val/EA for Op 4
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP4Scale, uR1 <- uR0    # Scale Op 4
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP4Type     # Get memory value of Op 4
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 4
+    OP4Val <- uR0, <No Op>
+
+    uCnt <- OP3Val, uR1 <- OP3Type  # Get the Val/EA for Op 3
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP3Scale, uR1 <- uR0    # Scale Op 3
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP3Type     # Get memory value of Op 3
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 3 and execute
+    OP3val <- uR0, goto DecodeBranch
+
+DecodeDiv:
+    # If dst is immediate, check if mod is
+    if OP1Type & 0xF0 == 0x10, goto DecodeDiv1 
+    if OP1Type & 0xF0 == 0x20, goto DecodeDiv1
+    <No Op>, goto DecodeMul1
+
+DecodeDiv1:
+    # Halt if mod is also immediate
+    if OP2Type & 0xF0 == 0x10, goto halt 
+    if OP2Type & 0xF0 == 0x20, goto halt
+    <No Op>, goto DecodeMul1
+
+DecodeCmp:
+    if OP1Type & 0xF0 == 0x10, goto halt 
+    if OP1Type & 0xF0 == 0x20, goto halt 
+
+    uCnt <- OP2Val, uR1 <- OP2Type  # Get the Val/EA for Op 2
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP2Scale, uR1 <- uR0    # Scale Op 2
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP2Type     # Get memory value of Op 2
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 2
+    OP2Val <- uR0, goto DecodeBranch
+
+DecodeInc:
+    # Duplicate OP1 for writeback, then decode like cmp
+    OP2Type <- OP1Type, OP2Val <- OP1Val
+    OP2Scale <- OP1Scale, goto DecodeCmp
+
+DecodeSwp:
+    if OP2Type & 0xF0 == 0x10, goto halt 
+    if OP2Type & 0xF0 == 0x20, goto halt 
+
+    # Save ops for writeback
+    OP3Type <- OP1Type, OP4Type <- OP2Type
+    OP3Val <- OP1Val, OP4Val <- OP2Val
+    OP3Scale <- OP1Scale, OP4Scale <- OP2Scale
+
+    # Decode Op 1 then branch to CMP
+    uCnt <- OP1Val, uR1 <- OP1Type  # Get the Val/EA for Op 1
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP1Scale, uR1 <- uR0    # Scale Op 1
+    uRet <- uPC, goto ScaleOp
+    uCnt <- uR0, uR1 <- OP1Type     # Get memory value of Op 1
+    uRet <- uPC, goto MemOp
+    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 1
+    OP1Val <- uR0, goto DecodeCmp
+
+DecodeCpy:
+    # Check that Op 1 is a memory op
+    if OP1Type & 0xF0 == 0x40, goto DecodeCpy1
+    if OP1Type & 0xF0 == 0x50, goto DecodeCpy1
+    if OP1Type & 0xF0 == 0x60, goto DecodeCpy1
+    if OP1Type & 0xF0 == 0x70, goto DecodeCpy1
+    if OP1Type & 0xF0 == 0x80, goto DecodeCpy1
+
+    <No Op>, goto halt              # Halt (op1 must be memory)
+
+DecodeCpy1:
+    # Check that Op 2 is a memory op
+    if OP2Type & 0xF0 == 0x40, goto DecodeCpy2
+    if OP2Type & 0xF0 == 0x50, goto DecodeCpy2
+    if OP2Type & 0xF0 == 0x60, goto DecodeCpy2
+    if OP2Type & 0xF0 == 0x70, goto DecodeCpy2
+    if OP2Type & 0xF0 == 0x80, goto DecodeCpy2
+
+    <No Op>, goto halt              # Halt (op2 must be memory)
+
+DecodeCpy2:
+    uCnt <- OP1Val, uR1 <- OP1Type  # Get OP 1's EA
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP1Scale, uR1 <- uR0    # Scale OP 1
+    uRet <- uPC, goto ScaleOp
+    OP1Val <- uR0, <No Op>
+    
+    uCnt <- OP2Val, uR1 <- OP2Type  # Get OP 2's EA
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP2Scale, uR1 <- uR0    # Scale OP2
+    uRet <- uPC, goto ScaleOp
+    OP2Val <- uR0, goto DecodeMul1 
+
+DecodeJmp:
+    # Check that Op 1 is a memory op
+    if OP1Type & 0xF0 == 0x40, goto DecodeJmp1
+    if OP1Type & 0xF0 == 0x50, goto DecodeJmp1
+    if OP1Type & 0xF0 == 0x60, goto DecodeJmp1
+    if OP1Type & 0xF0 == 0x70, goto DecodeJmp1
+    if OP1Type & 0xF0 == 0x80, goto DecodeJmp1
+
+    <No Op>, goto halt              # Halt (op1 must be memory)
+
+DecodeJmp1:
+    uCnt <- OP1Val, uR1 <- OP1Type  # Get OP 1's EA
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP1Scale, uR1 <- uR0    # Scale OP 1
+    uRet <- uPC, goto ScaleOp
+    OP1Val <- uR0, goto DecodeBranch
+
+DecodeBeq:
+    # Check that Op 1 is a memory op
+    if OP3Type & 0xF0 == 0x40, goto DecodeBeq1
+    if OP3Type & 0xF0 == 0x50, goto DecodeBeq1
+    if OP3Type & 0xF0 == 0x60, goto DecodeBeq1
+    if OP3Type & 0xF0 == 0x70, goto DecodeBeq1
+    if OP3Type & 0xF0 == 0x80, goto DecodeBeq1
+
+    <No Op>, goto halt              # Halt (op3 must be memory)
+
+DecodeBeq1:
+    uCnt <- OP3Val, uR1 <- OP3Type  # Get OP 3's EA
+    uRet <- uPC, goto EvalOp
+    uCnt <- OP3Scale, uR1 <- uR0    # Scale OP 3
+    uRet <- uPC, goto ScaleOp
+    OP3Val <- uR0, goto DecodeOut
+
+DecodeBie:
+    if OP1Type & 0xF0 == 0x10, goto halt
+    if OP1Type & 0xF0 == 0x20, goto halt 
+    <No Op>, goto DecodeBeq
+
+DecodeBranch:
+    # Control Instructions
+    if IR == 0x00, goto HLT
+    if IR == 0x02, goto CLR
+    if IR == 0x03, goto DMP
+    if IR == 0x04, goto OUT
+
+    # ALU Instructions
+    if IR == 0x10, goto ADD
+    if IR == 0x11, goto SUB
+    if IR == 0x12, goto MUL
+    if IR == 0x13, goto DIV
+
+    if IR == 0x14, goto MOD
+    if IR == 0x15, goto AND
+    if IR == 0x16, goto OR
+    if IR == 0x17, goto XOR
+
+    if IR == 0x18, goto CMP
+    if IR == 0x19, goto INC
+    if IR == 0x1A, goto DEC
+
+    # Memory Instructions
+    if IR == 0x20, goto MOV
+    if IR == 0x21, goto SWP
+    if IR == 0x22, goto CPY
+
+    # COL Instructions
+    if IR == 0x31 goto JMP
+    if IR == 0x32 goto JAL
+    if IR == 0x33 goto RET
+
+    if IR == 0x34 goto BEQ
+    if IR == 0x35 goto BNE
+    if IR == 0x36 goto BGT
+    if IR == 0x37 goto BGE
+
+    if IR == 0x38 goto BIE
+    if IR == 0x39 goto BDE
+    if IR == 0x3A goto BAO
+    if IR == 0x3B goto BAC
+
+    <No Op>, goto NOP
+
+          ############################################################
+          ###                                                      ###
+          ###                  Writeback Microcode                 ###
+          ###                                                      ###
+          ############################################################
+
+Writeback:
+    if IR in noOps, goto Fetch
+
+    if IR == 0x02, goto WritebackAdd        # Writeback for CLR 
+    if IR == 0x03, goto Fetch               # Writeback for DMP (none)
+    if IR == 0x04, goto Fetch               # Writeback for OUT (none)
+
+    if IR == 0x10, goto WritebackAdd        # Writeback for ADD
+    if IR == 0x11, goto WritebackAdd        # Writeback for SUB
+    if IR == 0x12, goto WritebackMul        # Writeback for MUL
+    if IR == 0x13, goto WritebackMul        # Writeback for DIV
+    if IR == 0x14, goto WritebackAdd        # Writeback for MOD
+    if IR == 0x15, goto WritebackAdd        # Writeback for AND
+    if IR == 0x16, goto WritebackAdd        # Writeback for OR
+    if IR == 0x17, goto WritebackAdd        # Writeback for XOR
+    if IR == 0x18, goto WritebackAdd        # Writeback for CMP
+    if IR == 0x19, goto WritebackInc        # Writeback for INC
+    if IR == 0x1A, goto WritebackInc        # Writeback for DEC
+
+    if IR == 0x20, goto WritebackAdd        # Writeback for MOV
+    if IR == 0x21, goto WritebackSwp        # Writeback for SWP
+    if IR == 0x22, goto Fetch               # Writeback for CPY (none)
+
+    if IR == 0x31, goto Fetch               # Writeback for JMP (none)
+    if IR == 0x32, goto Fetch               # Writeback for JAL (none)
+    if IR == 0x34, goto Fetch               # Writeback for BEQ (none)
+    if IR == 0x35, goto Fetch               # Writeback for BNE (none)
+    if IR == 0x36, goto Fetch               # Writeback for BGT (none)
+    if IR == 0x37, goto Fetch               # Writeback for BGE (none)
+    if IR == 0x38, goto Fetch               # Writeback for BIE (none)
+    if IR == 0x39, goto Fetch               # Writeback for BDE (none)
+    if IR == 0x3A, goto Fetch               # Writeback for BAO (none)
+    if IR == 0x3B, goto Fetch               # Writeback for BAC (none)
+
+WritebackAdd:
+    # Apply prefixes (and truncation) to this value
+    uR1 <- OP1Type, <No Op>
+    uRet <- uPC, goto PrefixRet
+    OP4Val <- uR0, <No Op>                  # Stash the value for later
+
+    # Calculate Scaled EA in case of memory OP 1
+    uCnt <- OP1Val, uR1 <- OP1Type
+    uRet <- uPC, goto MemRet
+    uCnt <- OP1Scale, uR1 <- uR0
+    uRet <- uPC, goto ScaleOp
+
+    # Write out with known values
+    uR1 <- uR0, uR0 <- OP1Type
+    uCnt <- OP1Val, uR2 <- OP4Val
+    uRet <- uPC, goto WriteRet
+    <No Op>, goto Fetch
+
+WritebackMul:
+    OP3Val <- uR0, uR0 <- uR1               # Store uR0 for later, work on uR1
+
+    # Apply prefixes (and truncation) to second return
+    uR1 <- OP2Type, <No Op>
+    uRet <- uPC, goto PrefixRet
+    OP4Val <- uR0, <No Op>                  # Stash the value for later
+
+    # Calculate Scaled EA in case of memory OP 2
+    uCnt <- OP2Val, uR1 <- OP2Type
+    uRet <- uPC, goto MemRet
+    uCnt <- OP2Scale, uR1 <- uR0
+    uRet <- uPC, goto ScaleOp
+
+    # Write out with known values
+    uR1 <- uR0, uR0 <- OP1Type
+    uCnt <- OP2Val, uR2 <- OP4Val
+    uRet <- uPC, goto WriteRet
+    uR0 <- OP3Val, goto WritebackAdd        # And write out for first operand
+
+WritebackInc:
+    OP1Val <- OP2Val, OP1Type <- OP2Type    # Restore original operand values
+    OP1Scale <- OP2Scale, goto WritebackAdd # And then writeback as in ADD
+
+WritebackSwp:
+    OP1Val <- OP3Val, OP2Val <- OP4Val      # Op 1 <- Op 3, Op 2 <- Op 4
+    OP1Type <- OP3Type, OP2Type <- OP4Type
+    OP1Scale <- OP3Scale, OP4Scale <- OP2Scale
+    <No Op>, goto WritebackMul              # Returns and targets now match
+
+          ############################################################
+          ###                                                      ###
+          ###                    Helper Microcode                  ###
+          ###                                                      ###
+          ############################################################
+
+# EvalOp:
+#   This microfunction will evaluate a provided operand (without any scaling, 
+#   prefix handling, or EA dereferencing)
+# Args:
+#   uCnt: The operand's OpVal
+#   uR1: The operand's OpType
+# Uses:
+#   uTmp, uR2
+# Returns:
+#   uR0: The computed EA (for memory operands) or value (for registers and 
+#        immediates)
+#
+EvalOp:
+    if uR1 & 0xF0 == 0x00, goto halt        # Somehow got a prefix byte here
+    if uR1 & 0xF0 == 0x10, goto EvalNyb     # Grab nybble imediate
+    if uR1 & 0xF0 == 0x20, goto EvalImm     # Immediate already evaluated
+    if uR1 & 0xF0 == 0x30, goto EvalReg     # Grab register value
+    
+    if uR1 & 0xF0 == 0x40, goto EvalReg     # Grab register value (as EA)
+    if uR1 & 0xF0 == 0x50, goto EvalMem     # Grab memory value (as EA)
+    if uR1 & 0xF0 == 0x60, goto EvalIdx     # Calculate index EA
+    if uR1 & 0xF0 == 0x70, goto EvalDsp     # Calculate displacement EA
+    
+    if uR1 & 0xF0 == 0x80, goto EvalImm     # EA grabbed as immediate
+    if uR1 & 0xF0 == 0x90, goto EvalReg     # Evaluate (post) increment arg
+    if uR1 & 0xF0 == 0xA0, goto EvalDec     # Evaluate (pre) decrement arg
+    if uR1 & 0xF0 == 0xB0, goto EvalPDc     # Somehow got a scale byte here
+
+    if uR1 & 0xF0 == 0xC0, goto EvalInc     # Evaluate (pre)  increment arg
+    if uR1 & 0xF0 == 0xD0, goto EvalPIc     # Evaluage (post) increment arg
+
+EvalNyb:
+    uR0 <- uR1 & 0x0F, uPC <- uRet          # Grab nybble immediate and return
+
+EvalImm:
+    uR0 <- uCnt, uPC <- uRet                # Grab passed immediate and return
+
+EvalReg:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+    
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto EvalReg1           # Grab reg 0 and goto truncation
+    
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto EvalReg1           # Grab reg 1 and goto truncation
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto EvalReg1          # Grab reg 1 and goto truncation
+
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab the register's value
+
+EvalReg1:
+    uTmp <- uR1 & 0x03, <No Op>             # grab the rsz field
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting low byte
+    uR0 <- uR0 & 0xFF, uPC <- uRet          # truncate and return
+    if uTmp != 0x01, goto +1                # Skip unless targeting low half
+    uR0 <- uR0 & 0x0000FFFF, uPC <- uRet    # truncate and return
+    if uTmp != 0x10, goto +1                # Skip unless targeting low 3 bytes
+    uR0 <- uR0 & 0x00FFFFFF, uPC <- uRet    # truncate and return
+    uPC <- uRet, <No Op>                    # return with full value
+
+EvalMem:
+    MAR <- uCnt, <No Op>                    # Read the address' first byte
+    MDR <- Mem[MAR], uCnt <- uCnt + 1
+    uR0 <- MDR, <No Op>
+
+    MAR <- uCnt, uR0 << 0x08                # Read the address' second byte
+    MDR <- Mem[MAR], uCnt <- uCnt + 1
+    uR0 <- uR0 | MDR, <No Op>
+    
+    MAR <- uCnt, uR0 << 0x08                # Read the address' third byte
+    MDR <- Mem[MAR], uCnt <- uCnt + 1
+    uR0 <- uR0 | MDR, <No Op>
+    
+    MAR <- uCnt, uR0 << 0x08                # Read the address' fourth byte
+    MDR <- Mem[MAR], uCnt <- uCnt + 1
+    uR0 <- uR0 | MDR, uPC <- uRet           # Return
+
+EvalIdx:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto EvalIdx1           # Grab reg 0 and goto second grab
+
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto EvalIdx1           # Grab reg 1 and goto second grab
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto EvalIdx1          # Grab reg 1 and goto second grab
+
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab register's value
+
+EvalIdx1:
+    uR1 <- uR0, uTmp <- uR1 & 0x03          # Store result and prepare for 2nd
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto EvalIdx2           # Grab reg 0 and goto sum
+
+    if uTmp != 0x01, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto EvalIdx2           # Grab reg 1 and goto sum
+
+    if uTmp != 0x02, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto EvalIdx2          # Grab reg 1 and goto sum
+
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab the register's value
+
+EvalIdx2:
+    uR0 <- uR0 + uR1, uPC <- uRet           # Sum the values and return
+
+EvalDsp:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto EvalDsp1           # Grab reg 0 and goto summation
+
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto EvalDsp1           # Grab reg 1 and goto summation
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto EvalDsp1          # Grab reg 1 and goto summation
+
+    uCnt <- uR1 >> 0x18, uR1 <- uCnt        # uCnt <- reg specifier, uR1 <- imm
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab register's value
+    uCnt <- uR1, <No Op>                    # Return immediate to uCnt
+
+EvalDsp1:
+    uR0 <- uR0 + uCnt, uPc <- uRet          # Calculate EA and return
+
+EvalInc:
+    uR2 <- uR1 & 0x03, <No Ops>
+    uR2 <- uR2 + 1, goto EvalDec1
+
+EvalDec:
+    uR2 <- 0, uTmp <- uR1 & 0x03
+    uTmp <- uTmp + 1, <No Op>
+    uR2 <- uR2 - uTmp, <No Op>
+
+EvalDec1:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    Regs[0] <- Regs[0] + uR2, goto EvalReg  # Modify reg 0 and grab reg
+
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    Regs[1] <- Regs[1] + uR2, goto EvalReg  # Modify reg 1 and grab reg
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    Regs[12] <- Regs[12] + uR2, goto EvalReg
+
+
+    # Increment registers based on the follow-on byte
+    if uCnt != 0x00, goto +1
+    Regs[0] <- Regs[0] + uR2, goto EvalReg
+    if uCnt != 0x01, goto +1
+    Regs[1] <- Regs[1] + uR2, goto EvalReg
+    if uCnt != 0x02, goto +1
+    Regs[2] <- Regs[2] + uR2, goto EvalReg
+    if uCnt != 0x03, goto +1
+    Regs[3] <- Regs[3] + uR2, goto EvalReg
+
+    if uCnt != 0x04, goto +1
+    Regs[4] <- Regs[4] + uR2, goto EvalReg
+    if uCnt != 0x05, goto +1
+    Regs[5] <- Regs[5] + uR2, goto EvalReg
+    if uCnt != 0x06, goto +1
+    Regs[6] <- Regs[6] + uR2, goto EvalReg
+    if uCnt != 0x07, goto +1
+    Regs[7] <- Regs[7] + uR2, goto EvalReg
+
+    if uCnt != 0x08, goto +1
+    Regs[8] <- Regs[8] + uR2, goto EvalReg
+    if uCnt != 0x09, goto +1
+    Regs[9] <- Regs[9] + uR2, goto EvalReg
+    if uCnt != 0x0A, goto +1
+    Regs[10] <- Regs[10] + uR2, goto EvalReg
+    if uCnt != 0x0B, goto +1
+    Regs[11] <- Regs[11] + uR2, goto EvalReg
+
+    if uCnt != 0x0C, goto +1
+    Regs[12] <- Regs[12] + uR2, goto EvalReg
+    if uCnt != 0x0D, goto +1
+    Regs[13] <- Regs[13] + uR2, goto EvalReg
+    if uCnt != 0x0E, goto +1
+    Regs[14] <- Regs[14] + uR2, goto EvalReg
+    if uCnt != 0x0F, goto +1
+    Regs[15] <- Regs[15] + uR2, goto EvalReg
+
+
+    <No Op>, goto halt                      # Halt on bad register
+
+EvalPDc:
+    uRet2 <- uRet, <No Op>
+    uRet <- uPC, goto EvalReg
+    uRet <- uRet2, uTmp <- uR1 & 0x03
+    uR2 <- 0, uTmp <- uTmp + 1
+    uR2 <- uR2 - uTmp, goto EvalPIc1
+
+EvalPIc:
+    uRet2 <- uRet, <No Op>
+    uRet <- uPC, goto EvalReg
+    uRet <- uRet2, uR2 <- uR1 & 0x03
+    uR2 <- uR2 + 1, <No Op>
+
+EvalPIc1:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    Regs[0] <- Regs[0] + uR2, goto uRet     # Modify reg 0 and return
+
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    Regs[1] <- Regs[1] + uR2, goto uRet     # Modify reg 1 and return
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    Regs[12] <- Regs[12] + uR2, goto uRet   # Modify base ptr and return
+
+
+    # Increment registers based on the follow-on byte
+    if uCnt != 0x00, goto +1
+    Regs[0] <- Regs[0] + uR2, goto uRet
+    if uCnt != 0x01, goto +1
+    Regs[1] <- Regs[1] + uR2, goto uRet
+    if uCnt != 0x02, goto +1
+    Regs[2] <- Regs[2] + uR2, goto uRet
+    if uCnt != 0x03, goto +1
+    Regs[3] <- Regs[3] + uR2, goto uRet
+
+    if uCnt != 0x04, goto +1
+    Regs[4] <- Regs[4] + uR2, goto uRet
+    if uCnt != 0x05, goto +1
+    Regs[5] <- Regs[5] + uR2, goto uRet
+    if uCnt != 0x06, goto +1
+    Regs[6] <- Regs[6] + uR2, goto uRet
+    if uCnt != 0x07, goto +1
+    Regs[7] <- Regs[7] + uR2, goto uRet
+
+    if uCnt != 0x08, goto +1
+    Regs[8] <- Regs[8] + uR2, goto uRet
+    if uCnt != 0x09, goto +1
+    Regs[9] <- Regs[9] + uR2, goto uRet
+    if uCnt != 0x0A, goto +1
+    Regs[10] <- Regs[10] + uR2, goto uRet
+    if uCnt != 0x0B, goto +1
+    Regs[11] <- Regs[11] + uR2, goto uRet
+
+    if uCnt != 0x0C, goto +1
+    Regs[12] <- Regs[12] + uR2, goto uRet
+    if uCnt != 0x0D, goto +1
+    Regs[13] <- Regs[13] + uR2, goto uRet
+    if uCnt != 0x0E, goto +1
+    Regs[14] <- Regs[14] + uR2, goto uRet
+    if uCnt != 0x0F, goto +1
+    Regs[15] <- Regs[15] + uR2, goto uRet
+
+
+    <No Op>, goto halt                      # Halt on bad register
+
+
+# GetOperand:
+#   This microfunction will return the next operand from memory
+# Returns:
+#   uR0: Returns op type and prefix bytes. LSB is always the base operand type. 
+#        For displacement operand, MSB is the register specifier byte (or 0). 2 
+#        prefix bytes returned in displacement operands, 3 otherwise.
+#
+#   uR1: Returns the op value. Either immediate or register byte. For index 
+#        operand, byte order is `<null> <null> <reg byte 1> <reg byte 2>`.
+#
+#   uR2: Returns any scale bytes (scale operand byte followed by scale reg byte)
+#        Null if not a scaled operand.
+#        
+GetOperand:
+    uR0 <- 0, uR1 <- 0                  # Clear the return registers
+    uR2 <- 0, <No OP>
+
+GetOpType:
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    
+    MAR <- PC, <No OP>                  # Prepare to pull in the next op byte
+    MDR <- Mem[MAR], uR0 <- uR0 << 0x08 # Pull next op byte, move back prefixes
+    uR0 <- uR0 | MDR, <No OP>           # Insert next type byte into type buffer
+    
+    if MDR != 0, goto GetOpType2        # Skip if not operand terminator
+    if uR0 != 0, goto halt              # Halt on Illegal operand (prefix bytes 
+                                        # on an opcode terminator)
+    
+    uPC <- uRet, <No OP>                # Return since this is a legal 
+                                        # terminator encoding
+    
+GetOpType2:
+    if MDR & 0xF0 == 0, goto GetOpType  # If this was a prefix byte, grab next
+    <No OP>, goto FetchOpVal            # Else, decode the operand type
+
+uRet:
+    uPC <- uRet, <No OP>                # Return (No further data to grab)
+
+FetchOpVal:
+    # Break out to second stage fetch
+    if MDR & 0xF0 == 0x10, goto uRet        # Done (nybble immediate)
+    
+    if MDR & 0xF0 == 0x20, goto FetchOpImm  # Fetch imm (for immediate)
+    if MDR & 0xF0 == 0x50, goto FetchOpImm  # Fetch imm (for mem indirect)
+    if MDR & 0xF0 == 0x80, goto FetchOpImm  # Fetch imm (for absolute address)
+    
+    if MDR & 0xF0 == 0x30, goto FetchOpReg  # Fetch reg (for register)
+    if MDR & 0xF0 == 0x40, goto FetchOpReg  # Fetch reg (for indirect)
+    if MDR & 0xF0 == 0x90, goto FetchOpReg  # Fetch reg (for reg increment) 
+    if MDR & 0xF0 == 0xA0, goto FetchOpReg  # Fetch reg (for decrement)
+    
+    if MDR & 0xF0 == 0x60, goto FetchOpIdx  # Fetch an index operand
+    if MDR & 0xF0 == 0x70, goto FetchOpDsp  # Fetch a displacement operand
+    if MDR & 0xF0 == 0xB0, goto FetchOpScl  # Fetch a scale operand
+    
+    <No OP>, goto halt                      # Halt on Invalid address mode
+
+FetchOpImm:
+    uCnt <- MDR & 0x03, <No OP>         # Set the immediate width counter
+
+FetchOpImmLoop:
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte
+    MDR <- Mem[MAR], uR1 <- uR1 << 0x08 # Grab next byte and prepare space
+    uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
+
+    if uCnt == 0, goto uRet             # Return on zero counter, else loop
+    uCnt <- uCnt - 1, goto FetchOpImmLoop
+
+FetchOpReg:
+    # Skip grabbing the second byte if it isn't specified
+    if MDR & 0x0C == 0x0C, goto FetchOpReg2
+    uPC <- uRet, <No OP>                # Return
+
+FetchOpReg2:
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte
+    MDR <- Mem[MAR], uR1 <- uR1 << 0x08 # Grab next byte and prepare space
+    uR1 <- uR1 | MDR, <No OP>           # Incorporate reg byte into return
+    
+    uPC <- uRet, <No OP>                # Return
+
+FetchOpIdx:
+    # Skip grabbing the first register byte if not specified
+    if uR0 & 0x0C == 0x0C, goto FetchOpIdx2
+     
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte
+    MDR <- Mem[MAR], uR1 <- uR1 << 0x08 # Grab next byte and prepare space
+    uR1 <- MDR, <No OP>                 # Incorporate IMM byte into return
+    
+FetchOpIdx2:
+    <No Op>, uR1 <- uR1 << 0x08
+    if uR0 & 0x03 == 0x03, goto  uRet   # Possibly skip mem read
+
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte 
+    MDR <- Mem[MAR], uR1 <- uR1 << 0x08 # Grab next byte and prepare space 
+    uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
+    
+    uPC <- uRet, <No OP>                # Return
+
+FetchOpDsp:
+    uR0 <- uR0 & 0x00FFFFFF, uCnt <- 0  # Clear the MSB of uR0 and the count reg
+    
+    # Skip to grabbing IMM if not specified
+    if MDR & 0x0C == 0x0C, goto FetchOpImm
+
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte 
+    MDR <- Mem[MAR], <No OP>            # Grab the register byte
+    uCnt <- MDR, <No OP>                # Store the register byte in temp reg
+    
+    uCnt <- uCnt << 0x18, <No OP>       # Shift the register byte up three bytes
+    uR0 <- uR0 | uCnt, <No OP>          # Store the register byte in uR0
+
+    <No OP>, goto FetchOpImm            # Grab the immediate for this mode
+
+FetchOpScl:
+    uR2 <- MDR, uR0 <- uR0 & 0xFFFFFF00 # Move the scale param to ur2 and 
+                                        # clear it from uR0
+    uR2 <- uR2 << 0x08, <No OP>         # Make space in ur2 for the reg byte
+
+    if MDR & 0x03 != 0x03, goto FetchOpScl1
+    
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte 
+    MDR <- Mem[MAR], <No OP>            # Grab the register byte
+    uR2 <- uR2 | MDR, <No OP>           # Store the register byte
+
+FetchOpScl1: 
+    IncPC, IncPC                        # Halt on PC overflow, else increment
+    MAR <- PC, <No OP>                  # Prepare to grab the next byte
+    MDR <- Mem[MAR], <No OP>            # Grab the operand type byte
+ 
+    if MDR & 0xF0 == 0x00, goto halt    # Fail on prefix byte
+    if MDR & 0xF0 == 0xB0, goto halt    # Fail on scale of scale
+
+    uR0 <- uR0 | MDR, goto FetchOpVal   # Store the op type byte in register, 
+                                        # decode scaled op
+
+
+# MemOp:
+#   This microfunction will grab an operand from memory from its EA
+# Args:
+#   uCnt: The (pre-scaled) EA to grab
+#   uR1: The related OpType
+# Uses:
+#   uTmp, uCnt
+# Returns:
+#   uR0: The value referenced by the operand, grabbed from mem if necessary
+#
+MemOp:
+    # If this is an EA, we must grab it from memory
+    if uR1 & 0xF0 == 0x40, goto MemOp1          # Register indirect
+    if uR1 & 0xF0 == 0x50, goto MemOp1          # Memory indirect
+    if uR1 & 0xF0 == 0x60, goto MemOp1          # Index
+    if uR1 & 0xF0 == 0x70, goto MemOp1          # Displacement
+    if uR1 & 0xF0 == 0x80, goto MemOp1          # Absolute
+
+    uPC <- uRet, <No Op>                        # Non-memory operands can skip
+MemOp1:
+    uTmp <- 0x03, <No Op>
+MemOp2:
+    MAR <- uCnt, uR0 <- uR0 << 8
+    MDR <- mem[MAR], <No Op>
+    uR0 <- uR0 | MDR, <No Op>
+
+    if uCnt == 0x00, goto uRet
+    uTmp <- uTmp - 1, goto GetValMem2
+# MemRet:
+#   This microfunction will perform any calculations to determine an EA for 
+#   return
+# Args:
+#   uCnt: The OPVal to calculate
+#   uR1: The OPType to calculate
+# Uses:
+#   uTmp, uCnt
+# Returns:
+#   uR0: The calculated EA (passed value)
+#
+MemRet:
+    # Check that this is a memory Op (if so, eval its EA)
+    if OP1Type & 0xF0 == 0x40, goto EvalOp
+    if OP1Type & 0xF0 == 0x50, goto EvalOp
+    if OP1Type & 0xF0 == 0x60, goto EvalOp
+    if OP1Type & 0xF0 == 0x70, goto EvalOp
+    if OP1Type & 0xF0 == 0x80, goto EvalOp
+
+    <No Op>, uPC <- uRet
+# Prefix Op:
+#   This microfunction will apply prefix bytes to a value
+# Args:
+#   uR0: The value to handle
+#   uR1: The related OpType
+# Uses:
+#   uTmp
+# Returns:
+#   uR0: The value from OpVal with prefixes applied (and memory accessed) (run 
+#        EvalOp and ScaleOp first to get value/EA)
+#
+PrefixOp:
+    if uR1 & 0xF0 != 0x70, goto PrefixOp2   # Start loop if not displacement
+    uR1 <- uR1 & 0x00FFFFFF, goto PrefixOp2 # Yeet reg byte, start loop
+
+PrefixOp1:
+    uTmp <- uR1 & 0xFF, <No Op>             # Grab the next prefix byte
+    
+    if uTmp == 0x00, goto uRet              # Break on null byte
+    
+    if uTmp != 0x01, goto +1                # if sign extension, extend sign
+    uR0 <- signExtend(uR0), goto PrefixOp2
+
+    <No Op>, goto halt                      # halt on unrecognized prefix
+    
+PrefixOp2:
+    uR1 <- uR1 >> 8, goto PrefixOp1
+
+# PrefixRet:
+#   This microfunction will apply prefix bytes to a return value
+# Args:
+#   uR0: The value to handle
+#   uR1: The related OpType
+# Uses:
+#   uTmp
+# Returns:
+#   uR0: The return with prefixes applied (and any truncation)
+#
+PrefixRet:
+    # This is the same as PrefixOp *unless* this is a truncated Register
+    if uR1 & 0xF0 != 0x30, goto PrefixOp 
+
+    uTmp <- uR1 & 0x03, <No Op>
+
+    if uTmp != 0x00, goto +1
+    uR0 <- uR0 & 0xFF, goto PrefixOp
+    if uTmp != 0x01, goto +1
+    uR0 <- uR0 & 0x0000FFFF, goto PrefixOp
+    if uTmp != 0x02, goto +1
+    uR0 <- uR0 & 0x00FFFFFF, goto PrefixOp
+    <No Op>, goto PrefixOp
+
+# RegVal:
+#   This microfunction will return the value stored within a (programmer 
+#   visible) register and restore uRet to a passed value on its return
+# Args:
+#   uCnt: The index into the register file
+#   uR2: The uRet of the caller (restored on exit)
+# Uses:
+#   No others
+# Returns:
+#   uR0: The value from the specified register
+#
+RegVal:
+    if uCnt != 0x00, goto +1
+    uR0 <- Regs[0], goto RegValRet
+    if uCnt != 0x01, goto +1
+    uR0 <- Regs[1], goto RegValRet
+    if uCnt != 0x02, goto +1
+    uR0 <- Regs[2], goto RegValRet
+    if uCnt != 0x03, goto +1
+    uR0 <- Regs[3], goto RegValRet
+
+    if uCnt != 0x04, goto +1
+    uR0 <- Regs[4], goto RegValRet
+    if uCnt != 0x05, goto +1
+    uR0 <- Regs[5], goto RegValRet
+    if uCnt != 0x06, goto +1
+    uR0 <- Regs[6], goto RegValRet
+    if uCnt != 0x07, goto +1
+    uR0 <- Regs[7], goto RegValRet
+    
+    if uCnt != 0x08, goto +1
+    uR0 <- Regs[8], goto RegValRet
+    if uCnt != 0x09, goto +1
+    uR0 <- Regs[9], goto RegValRet
+    if uCnt != 0x0A, goto +1
+    uR0 <- Regs[10], goto RegValRet
+    if uCnt != 0x0B, goto +1
+    uR0 <- Regs[11], goto RegValRet
+    
+    if uCnt != 0x0C, goto +1
+    uR0 <- Regs[12], goto RegValRet
+    if uCnt != 0x0D, goto +1
+    uR0 <- Regs[13], goto RegValRet
+    if uCnt != 0x0E, goto +1
+    uR0 <- Regs[14], goto RegValRet
+    if uCnt != 0x0F, goto +1
+    uR0 <- Regs[15], goto RegValRet
+
+RegValRet:
+    uPC <- uRet, uRet <- uR2
+
+
+
+# ScaleOp:
+#   This microfunction will grab the full value of a given operand (memory 
+#   access and prefix bytes)
+# Args:
+#   uCnt: The operand's OpScale
+#   uR1: The operand's OpVal
+# Uses:
+#   uTmp, uR2
+# Returns:
+#   uR0: The value from OpVal with scaling applied (run EvalOp first for base)
+#
+ScaleOp:
+    if uCnt == 0, goto uRet                 # Skip everything if non-scaled
+
+    uR2 <- uCnt >> 8, <No Op>
+
+    uTmp <- uR2 & 0x0C, <No Op>             # Grab the rs value
+    
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    uR0 <- Regs[0], goto ScaleOp1           # Grab reg 0 and goto truncation
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    uR0 <- Regs[1], goto ScaleOp1           # Grab reg 1 and goto truncation
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    uR0 <- Regs[12], goto ScaleOp1          # Grab reg 1 and goto truncation
+
+    uTmp <- uCnt, uCnt <- uCnt & 0xFF       # Set uCnt for regVal
+    uR2 <- uRet, <No Op>                    # Save uRet for restore
+    uRet <- uPC, goto RegVal                # Grab the value of the register
+    uCnt <- uTmp, <No Op>                   # Restore uCnt
+
+ScaleOp1:
+    uCnt <- uCnt >> 8, <No Op>              # Can discard the reg byte now
+    uCnt <- uCnt & 0x03, <No Op>            # Extract val field
+    
+    if uCnt != 0x00, goto +1                # if idx not scaled by 1, skip next
+    uR0 <- uR1 + uR0, uPC <- uRet           # Add reg value to base and return
+
+    uTmp <- uR0 << 1, uR2 <- uR0            # Store base and double of indexes
+    uR0 <- uR1 + uTmp, <No Op>              # Set base return to base + 2*idx
+
+    if uCnt == 0x01, goto uRet              # If scaled by 2, return now
+    
+    if uCnt != 0x02, goto +1                # Skip next if scaled by 4
+    uR0 <- uR0 + uCnt, uPC <- uRet          # Add idx to return scale by 3
+
+    uR0 <- uR0 + uTmp, uPC <- uRet          # Add 2*idx to return scale by 4
+
+
+# WriteRet:
+#   This microfunction will write out the provided value to the provided operand
+# Args:
+#   uCnt: The OPVal to target from
+#   uR0: The OPType to target
+#   uR1: A pre-calculated EA (because EvalOp is a nightmare)
+#   uR2: The value to store (run through PrefixRet)
+# Uses:
+#   uTmp
+# Returns:
+#
+WriteRet:
+    # Can safely return on immediates (accounted for in decode)
+    if uR0 & 0xF0 == 0x10, goto uRet
+    if uR0 & 0xF0 == 0x20, goto uRet
+
+    # EA was precalculated, so we can just use that
+    if uR0 & 0xF0 == 0x40, goto WriteRetMem
+    if uR0 & 0xF0 == 0x50, goto WriteRetMem
+    if uR0 & 0xF0 == 0x60, goto WriteRetMem
+    if uR0 & 0xF0 == 0x70, goto WriteRetMem
+    if uR0 & 0xF0 == 0x80, goto WriteRetMem
+
+    # Write to all of the different register types (pre and post inc unified)
+    if uR0 & 0xF0 == 0x30, goto WriteRetReg
+
+    # Prep values for all increments/decrements
+    uTmp <- uR0 & 0x03, <No Op>
+    uTmp <- uTmp + 1, <No Op> 
+
+    # Perform increments and decrements during write
+    if uR0 & 0xF0 == 0x90, goto WriteRetInc
+    if uR0 & 0xF0 == 0xA0, goto WriteRetDec
+    if uR0 & 0xF0 == 0xC0, goto WriteRetInc
+    if uR0 & 0xF0 == 0xD0, goto WriteRetDec
+
+    <No Op>, goto halt                      # Invalid operand type
+
+WriteRetMem:
+    uCnt <- 0x03, <No Op>
+
+WriteRetMem1:
+    MAR <- uR1, MDR <- uR2
+    Mem[MAR] <- MDR, uR2 <- uR2 >> 8
+    
+    if uCnt == 0x00, goto uRet
+    uR1 <- uR1 + 1, <No Op>
+    uCnt <- uCnt - 1, goto WriteRetMem1
+
+WriteRetReg:
+    uTmp <- uR0 & 0x0C, <No Op>
+
+    if uTmp != 0x00, goto +1
+    Regs[0] <- uR2, uPC <- uRet
+    if uTmp != 0x01, goto +1
+    Regs[1] <- uR2, uPC <- uRet
+    if uTmp != 0x02, goto +1
+    Regs[12] <- uR2, uPC <- uRet
+
+    uTmp <- uCnt & 0xFF
+    
+    if uTmp != 0x00, goto +1
+    Regs[0x0] <- uR2, uPC <- uRet
+    if uTmp != 0x01, goto +1
+    Regs[0x1] <- uR2, uPC <- uRet
+    if uTmp != 0x02, goto +1
+    Regs[0x2] <- uR2, uPC <- uRet
+    if uTmp != 0x03, goto +1
+    Regs[0x3] <- uR2, uPC <- uRet
+    
+    if uTmp != 0x04, goto +1
+    Regs[0x4] <- uR2, uPC <- uRet
+    if uTmp != 0x05, goto +1
+    Regs[0x5] <- uR2, uPC <- uRet
+    if uTmp != 0x06, goto +1
+    Regs[0x6] <- uR2, uPC <- uRet
+    if uTmp != 0x07, goto +1
+    Regs[0x7] <- uR2, uPC <- uRet
+    
+    if uTmp != 0x08, goto +1
+    Regs[0x8] <- uR2, uPC <- uRet
+    if uTmp != 0x09, goto +1
+    Regs[0x9] <- uR2, uPC <- uRet
+    if uTmp != 0x0A, goto +1
+    Regs[0xA] <- uR2, uPC <- uRet
+    if uTmp != 0x0B, goto +1
+    Regs[0xB] <- uR2, uPC <- uRet
+    
+    if uTmp != 0x0C, goto +1
+    Regs[0xC] <- uR2, uPC <- uRet
+    if uTmp != 0x0D, goto +1
+    Regs[0xD] <- uR2, uPC <- uRet
+    if uTmp != 0x0E, goto +1
+    Regs[0xE] <- uR2, uPC <- uRet
+    if uTmp != 0x0F, goto +1
+    Regs[0xF] <- uR2, uPC <- uRet
+    
+    <No Op>, goto halt                      # Invalid register
+
+WriteRetInc:
+    uR2 <- uR2 + uTmp, goto WriteRetReg
+
+WriteRetDec:
+    uR2 <- uR2 - uTmp, goto WriteRetReg

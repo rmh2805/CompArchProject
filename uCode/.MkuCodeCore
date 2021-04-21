@@ -1,0 +1,55 @@
+#! /bin/bash
+
+echo "          ############################################################" > uCodeCore.txt
+echo "          ###                                                      ###" >> uCodeCore.txt
+echo "          ###                    Fetch Microcode                   ###" >> uCodeCore.txt
+echo "          ###                                                      ###" >> uCodeCore.txt
+echo "          ############################################################" >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeFetch.txt >> uCodeCore.txt
+
+echo "" >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+echo "          ############################################################" >> uCodeCore.txt
+echo "          ###                                                      ###" >> uCodeCore.txt
+echo "          ###                   Decode Microcode                   ###" >> uCodeCore.txt
+echo "          ###                                                      ###" >> uCodeCore.txt
+echo "          ############################################################" >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeDecode.txt >> uCodeCore.txt
+
+echo "" >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+echo "          ############################################################" >> uCodeCore.txt
+echo "          ###                                                      ###" >> uCodeCore.txt
+echo "          ###                  Writeback Microcode                 ###" >> uCodeCore.txt
+echo "          ###                                                      ###" >> uCodeCore.txt
+echo "          ############################################################" >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeWriteback.txt >> uCodeCore.txt
+
+echo "" >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+echo "          ############################################################" >> uCodeCore.txt
+echo "          ###                                                      ###" >> uCodeCore.txt
+echo "          ###                    Helper Microcode                  ###" >> uCodeCore.txt
+echo "          ###                                                      ###" >> uCodeCore.txt
+echo "          ############################################################" >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeEvalOp.txt >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeGetOp.txt >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeMemOp.txt >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeMemRet.txt >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodePrefixOp.txt >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodePrefixRet.txt >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeRegVal.txt >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeScaleOp.txt >> uCodeCore.txt
+echo "" >> uCodeCore.txt
+cat uCodeWriteRet.txt >> uCodeCore.txt
