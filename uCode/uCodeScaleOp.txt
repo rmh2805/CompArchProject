@@ -9,6 +9,8 @@
 #   uR0: The value from OpVal with scaling applied (run EvalOp first for base)
 #
 ScaleOp:
+    if uCnt == 0, goto uRet                 # Skip everything if non-scaled
+
     uR2 <- uCnt >> 8, <No Op>
 
     uTmp <- uR2 & 0x0C, <No Op>             # Grab the rs value
