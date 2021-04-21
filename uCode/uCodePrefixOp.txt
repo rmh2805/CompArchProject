@@ -1,13 +1,27 @@
 # Prefix Op:
 #   This microfunction will apply prefix bytes to a value
 # Args:
-#   uCnt: The value to handle
+#   uR0: The value to handle
 #   uR1: The related OpType
 # Uses:
-#   uTmp, uCnt
+#   uTmp
 # Returns:
 #   uR0: The value from OpVal with prefixes applied (and memory accessed) (run 
 #        EvalOp and ScaleOp first to get value/EA)
 #
 PrefixOp:
-    <No Op>, uPC <- uRet
+    if uR1 & 0xF0 != 0x70, goto PrefixOp2   # Start loop if not displacement
+    uR1 <- uR1 & 0x00FFFFFF, goto PrefixOp2 # Yeet reg byte, start loop
+
+PrefixOp1:
+    uTmp <- uR1 & 0xFF, <No Op>             # Grab the next prefix byte
+    
+    if uTmp == 0x00, goto uRet              # Break on null byte
+    
+    if uTmp != 0x01, goto +1                # if sign extension, extend sign
+    uR0 <- signExtend(uR0), goto PrefixOp2
+
+    <No Op>, goto halt                      # halt on unrecognized prefix
+    
+PrefixOp2:
+    uR1 <- uR1 >> 8, goto PrefixOp1
