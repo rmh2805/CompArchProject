@@ -24,10 +24,10 @@ EvalOp:
     if uR1 & 0xF0 == 0x80, goto EvalImm     # EA grabbed as immediate
     if uR1 & 0xF0 == 0x90, goto EvalReg     # Evaluate (post) increment arg
     if uR1 & 0xF0 == 0xA0, goto EvalDec     # Evaluate (pre) decrement arg
-    if uR1 & 0xF0 == 0xB0, goto halt        # Somehow got a scale byte here
+    if uR1 & 0xF0 == 0xB0, goto EvalPDc     # Somehow got a scale byte here
 
     if uR1 & 0xF0 == 0xC0, goto EvalInc     # Evaluate (pre)  increment arg
-    if uR1 & 0xF0 == 0xD0, goto EvalReg     # Evaluage (post) increment arg
+    if uR1 & 0xF0 == 0xD0, goto EvalPIc     # Evaluage (post) increment arg
 
 EvalNyb:
     uR0 <- uR1 & 0x0F, uPC <- uRet          # Grab nybble immediate and return
@@ -190,3 +190,68 @@ EvalDec1:
 
 
     <No Op>, goto halt                      # Halt on bad register
+
+EvalPDc:
+    uCnt <- uRet, <No Op>
+    uRet <- uPC, goto EvalReg
+    uRet <- uCnt, uR2 <- 0
+    uR2 <- uR2 - 1, goto EvalPIc1
+
+EvalPIc:
+    uCnt <- uRet, <No Op>
+    uRet <- uPC, goto EvalReg
+    uRet <- uCnt, uR2 <- 1
+
+EvalPIc1:
+    uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+
+    if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
+    Regs[0] <- Regs[0] + uR2, goto uRet     # Modify reg 0 and return
+
+    if uTmp != 0x04, goto +1                # Skip unless targeting reg 1
+    Regs[1] <- Regs[1] + uR2, goto uRet     # Modify reg 1 and return
+
+    if uTmp != 0x08, goto +1                # Skip unless targeting base pointer
+    Regs[12] <- Regs[12] + uR2, goto uRet   # Modify base ptr and return
+
+
+    # Increment registers based on the follow-on byte
+    if uCnt != 0x00, goto +1
+    Regs[0] <- Regs[0] + uR2, goto uRet
+    if uCnt != 0x01, goto +1
+    Regs[1] <- Regs[1] + uR2, goto uRet
+    if uCnt != 0x02, goto +1
+    Regs[2] <- Regs[2] + uR2, goto uRet
+    if uCnt != 0x03, goto +1
+    Regs[3] <- Regs[3] + uR2, goto uRet
+
+    if uCnt != 0x04, goto +1
+    Regs[4] <- Regs[4] + uR2, goto uRet
+    if uCnt != 0x05, goto +1
+    Regs[5] <- Regs[5] + uR2, goto uRet
+    if uCnt != 0x06, goto +1
+    Regs[6] <- Regs[6] + uR2, goto uRet
+    if uCnt != 0x07, goto +1
+    Regs[7] <- Regs[7] + uR2, goto uRet
+
+    if uCnt != 0x08, goto +1
+    Regs[8] <- Regs[8] + uR2, goto uRet
+    if uCnt != 0x09, goto +1
+    Regs[9] <- Regs[9] + uR2, goto uRet
+    if uCnt != 0x0A, goto +1
+    Regs[10] <- Regs[10] + uR2, goto uRet
+    if uCnt != 0x0B, goto +1
+    Regs[11] <- Regs[11] + uR2, goto uRet
+
+    if uCnt != 0x0C, goto +1
+    Regs[12] <- Regs[12] + uR2, goto uRet
+    if uCnt != 0x0D, goto +1
+    Regs[13] <- Regs[13] + uR2, goto uRet
+    if uCnt != 0x0E, goto +1
+    Regs[14] <- Regs[14] + uR2, goto uRet
+    if uCnt != 0x0F, goto +1
+    Regs[15] <- Regs[15] + uR2, goto uRet
+
+
+    <No Op>, goto halt                      # Halt on bad register
+
