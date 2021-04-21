@@ -9,7 +9,7 @@ Decode:
     if IR == 0x11, goto DecodeAdd           # Decode for SUB
     if IR == 0x12, goto DecodeMul           # Decode for MUL
     if IR == 0x13, goto DecodeDiv           # Decode for DIV
-    if IR == 0x14, goto DecodeMod           # Decode for MOD
+    if IR == 0x14, goto DecodeADD           # Decode for MOD
     if IR == 0x15, goto DecodeAdd           # Decode for AND
     if IR == 0x16, goto DecodeAdd           # Decode for OR
     if IR == 0x17, goto DecodeAdd           # Decode for XOR
@@ -85,7 +85,6 @@ DecodeMul:
     # Halt on immediate dst
     if OP1Type & 0xF0 == 0x10, goto Halt
     if OP1Type & 0xF0 == 0x20, goto Halt
-    <No Op>, goto DecodeMul1
 
 DecodeMul1:
     uCnt <- OP4Val, uR1 <- OP4Type  # Get the Val/EA for Op 4
@@ -117,9 +116,6 @@ DecodeDiv1:
     if OP2Type & 0xF0 == 0x10, goto halt 
     if OP2Type & 0xF0 == 0x20, goto halt
     <No Op>, goto DecodeMul1
-
-
-DecodeMod:
 
 DecodeCmp:
 
