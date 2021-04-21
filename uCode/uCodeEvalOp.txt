@@ -132,11 +132,13 @@ EvalDsp1:
     uR0 <- uR0 + uCnt, uPc <- uRet          # Calculate EA and return
 
 EvalInc:
-    uR2 <- 1, goto EvalDec1
+    uR2 <- uR1 & 0x03, <No Ops>
+    uR2 <- uR2 + 1, goto EvalDec1
 
 EvalDec:
-    uR2 <- 0, <No Op>
-    uR2 <- uTmp - 1, <No Op>
+    uR2 <- 0, uTmp <- uR1 & 0x03
+    uTmp <- uTmp + 1, <No Op>
+    uR2 <- uR2 - uTmp, <No Op>
 
 EvalDec1:
     uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
@@ -194,13 +196,15 @@ EvalDec1:
 EvalPDc:
     uRet2 <- uRet, <No Op>
     uRet <- uPC, goto EvalReg
-    uRet <- uRet2, uR2 <- 0
-    uR2 <- uR2 - 1, goto EvalPIc1
+    uRet <- uRet2, uTmp <- uR1 & 0x03
+    uR2 <- 0, uTmp <- uTmp + 1
+    uR2 <- uR2 - uTmp, goto EvalPIc1
 
 EvalPIc:
     uRet2 <- uRet, <No Op>
     uRet <- uPC, goto EvalReg
-    uRet <- uRet2, uR2 <- 1
+    uRet <- uRet2, uR2 <- uR1 & 0x03
+    uR2 <- uR2 + 1, <No Op>
 
 EvalPIc1:
     uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
