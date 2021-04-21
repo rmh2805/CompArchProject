@@ -23,10 +23,18 @@ WriteRet:
 
     # Write to all of the different register types (pre and post inc unified)
     if uR0 & 0xF0 == 0x30, goto WriteRetReg
+
+    # Prep values for all increments/decrements
+    uTmp <- uR0 & 0x03, <No Op>
+    uTmp <- uTmp + 1, <No Op> 
+
+    # Perform increments and decrements during write
     if uR0 & 0xF0 == 0x90, goto WriteRetInc
     if uR0 & 0xF0 == 0xA0, goto WriteRetDec
     if uR0 & 0xF0 == 0xC0, goto WriteRetInc
     if uR0 & 0xF0 == 0xD0, goto WriteRetDec
+
+    <No Op>, goto halt                      # Invalid operand type
 
 WriteRetMem:
     uCnt <- 0x03, <No Op>
@@ -40,8 +48,57 @@ WriteRetMem1:
     uCnt <- uCnt - 1, goto WriteRetMem1
 
 WriteRetReg:
+    uTmp <- uR0 & 0x0C, <No Op>
+
+    if uTmp != 0x00, goto +1
+    Regs[0] <- uR2, uPC <- uRet
+    if uTmp != 0x01, goto +1
+    Regs[1] <- uR2, uPC <- uRet
+    if uTmp != 0x02, goto +1
+    Regs[12] <- uR2, uPC <- uRet
+
+    uTmp <- uCnt & 0xFF
+    
+    if uTmp != 0x00, goto +1
+    Regs[0x0] <- uR2, uPC <- uRet
+    if uTmp != 0x01, goto +1
+    Regs[0x1] <- uR2, uPC <- uRet
+    if uTmp != 0x02, goto +1
+    Regs[0x2] <- uR2, uPC <- uRet
+    if uTmp != 0x03, goto +1
+    Regs[0x3] <- uR2, uPC <- uRet
+    
+    if uTmp != 0x04, goto +1
+    Regs[0x4] <- uR2, uPC <- uRet
+    if uTmp != 0x05, goto +1
+    Regs[0x5] <- uR2, uPC <- uRet
+    if uTmp != 0x06, goto +1
+    Regs[0x6] <- uR2, uPC <- uRet
+    if uTmp != 0x07, goto +1
+    Regs[0x7] <- uR2, uPC <- uRet
+    
+    if uTmp != 0x08, goto +1
+    Regs[0x8] <- uR2, uPC <- uRet
+    if uTmp != 0x09, goto +1
+    Regs[0x9] <- uR2, uPC <- uRet
+    if uTmp != 0x0A, goto +1
+    Regs[0xA] <- uR2, uPC <- uRet
+    if uTmp != 0x0B, goto +1
+    Regs[0xB] <- uR2, uPC <- uRet
+    
+    if uTmp != 0x0C, goto +1
+    Regs[0xC] <- uR2, uPC <- uRet
+    if uTmp != 0x0D, goto +1
+    Regs[0xD] <- uR2, uPC <- uRet
+    if uTmp != 0x0E, goto +1
+    Regs[0xE] <- uR2, uPC <- uRet
+    if uTmp != 0x0F, goto +1
+    Regs[0xF] <- uR2, uPC <- uRet
+    
+    <No Op>, goto halt                      # Invalid register
 
 WriteRetInc:
+    uR2 <- uR2 + uTmp, goto WriteRetReg
 
 WriteRetDec:
-    uPC <- uRet, <No Op>
+    uR2 <- uR2 - uTmp, goto WriteRetReg
