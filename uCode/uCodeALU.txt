@@ -27,25 +27,25 @@ CMP:
 
 MOD:
     uR0 <- 0, uR2 <- 0 // Set div to 0
-    uTmp <- OP3Val >> 0x18, <No Op>
+    uTmp <- OP2Val >> 0x18, <No Op>
     if uTmp & 0x80 != 0x80, goto +2
+    OP2Val <- ~OP2Val, <No Op>
+    OP2Val <- OP2Val + 1, <No Op>
+
+    uTmp <- OP3Val >> 0x18, <No Op>
+    if uTmp & 0x80 != 0x80 , goto + 2
     OP3Val <- ~OP3Val, <No Op>
     OP3Val <- OP3Val + 1, <No Op>
 
-    uTmp <- OP4Val >> 0x18, <No Op>
-    if uTmp & 0x80 != 0x80 , goto + 2
-    OP4Val <- ~OP4Val, <No Op>
-    OP4Val <- OP4Val + 1, <No Op>
-
 MOD1:
-    OP3Val <- OP3Val - OP4Val, <No OP>
-    uTmp <- OP3Val >> 0x18, <No Op>
+    OP2Val <- OP2Val - OP3Val, <No OP>
+    uTmp <- OP2Val >> 0x18, <No Op>
 
     if uTmp & 0x80 == 0x80, goto MOD2
     <No Op>, goto MOD1
 
 MOD2:
-    uR0 <- OP3Val + OP4Val, goto Writeback
+    uR0 <- OP2Val + OP3Val, goto Writeback
 
 // This works for only positive
 DIV:
