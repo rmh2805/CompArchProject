@@ -1,45 +1,46 @@
 Fetch:
-    <No OP>, <No OP>                        # Space to ensure that uPC can start before first instruction
-    IncPC, IncPC                            # Halt on PC overflow, else increment
+    <No OP>, <No OP>                        # Space to ensure that uPC can start
+                                            # before first instruction
+    IncPC, IncPC                            # Halt on PC overflow, else incr
     
-    MAR <- PC, <No OP>                      # Prepare to pull in the next instr byte
+    MAR <- PC, <No OP>                      # Prepare to pull in the next byte
     MDR <- Mem[MAR], <No OP>                # Grab the next opcode
-    IR <- MDR, goto FetchOperands           # Fetch the operands for this instruction
+    IR <- MDR, goto FetchOperands           # Fetch the operands for instruction
 
 FetchOperands:
-    if IR in noOps, goto Decode             # Decode the instruction if it takes no operations
+    if IR in noOps, goto Decode             # Decode instr w/ no ops
     
     # Grab the first operand
     uRet <- uPC, goto GetOperand            # Micro function call
-    OP1Type <- uR0, OP1Val <- uR1           # Store the type bytes & value bytes for the first operand
-    OP1Scale <- uR2, <No OP>                # Store the scale bytes for the first operand
+    OP1Type <- uR0, OP1Val <- uR1           # Store first operand info
+    OP1Scale <- uR2, <No OP>
     
-    if OP1Type == 0, goto InterpOperand     # If explicit end of operands, set others by default
-    if IR in oneOp, goto Decode             # Break loop if this is the last operand
+    if OP1Type == 0, goto InterpOperand     # Fill in on explicit end of ops
+    if IR in oneOp, goto Decode             # Break if one op instruction
     
     # Grab the second operand
     uRet <- uPC, goto GetOperand            # Micro function call
-    OP2Type <- uR0, OP2Val <- uR1           # Store the type bytes & value bytes for the second operand
-    OP2Scale <- uR2, <No OP>                # Store the scale bytes for the second operand
-    
-    if OP2Type == 0, goto InterpOperand     # If explicit end of operands, set others by default
-    if IR in twoOps, goto Decode            # Break loop if this is the last operand
+    OP2Type <- uR0, OP2Val <- uR1           # Store second operand info
+    OP2Scale <- uR2, <No OP>
+
+    if OP2Type == 0, goto InterpOperand     # Fill in on explicit end of ops
+    if IR in twoOps, goto Decode            # Break if two op instruction
     
     # Grab the third operand
     uRet <- uPC, goto GetOperand            # Micro function call
-    OP3Type <- uR0, OP3Val <- uR1           # Store the type bytes & value bytes for the third operand
-    OP3Scale <- uR2, <No OP>                # Store the scale bytes for the third operand
+    OP3Type <- uR0, OP3Val <- uR1           # Store third operand info
+    OP3Scale <- uR2, <No OP>
     
-    if OP3Type == 0, goto InterpOperand     # If explicit end of operands, set others by default
-    if IR in threeOps, goto Decode          # Break loop if this is the last operand
+    if OP3Type == 0, goto InterpOperand     # Fill in on explicit end of ops
+    if IR in threeOps, goto Decode          # Break if three op instruction
     
     # Grab the fourth operand
     uRet <- uPC, goto GetOperand            # Micro function call
-    OP4Type <- uR0, OP4Val <- uR1           # Store the type bytes & value bytes for the fourth operand
-    OP4Scale <- uR2, <No OP>                # Store the scale bytes for the fourth operand
+    OP4Type <- uR0, OP4Val <- uR1           # Store fourth operand info
+    OP4Scale <- uR2, <No OP>
     
-    if OP4Type == 0, goto InterpOperand     # If explicit end of operands, set others by default
-    <No OP>, goto Decode                    # Max Nr of operands grabbed, decode
+    if OP4Type == 0, goto InterpOperand     # Fill in on explicit end of ops
+    <No OP>, goto Decode                    # Break on max nr of ops
 
 InterpOperand:
     # Control instructions
