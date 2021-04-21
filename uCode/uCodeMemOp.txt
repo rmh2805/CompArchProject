@@ -1,13 +1,12 @@
 # MemOp:
 #   This microfunction will grab an operand from memory from its EA
 # Args:
-#   uCnt: The (pre-scaled) EA of the 
+#   uCnt: The (pre-scaled) EA to grab
 #   uR1: The related OpType
 # Uses:
 #   uTmp, uCnt
 # Returns:
-#   uR0: The value from OpVal with prefixes applied (and memory accessed) (run 
-#        EvalOp and ScaleOp first to get EA)
+#   uR0: The value referenced by the operand, grabbed from mem if necessary
 #
 MemOp:
     # If this is an EA, we must grab it from memory
