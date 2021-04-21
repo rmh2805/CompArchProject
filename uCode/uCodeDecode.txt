@@ -9,7 +9,7 @@ Decode:
     if IR == 0x11, goto DecodeAdd           # Decode for SUB
     if IR == 0x12, goto DecodeMul           # Decode for MUL
     if IR == 0x13, goto DecodeDiv           # Decode for DIV
-    if IR == 0x14, goto DecodeADD           # Decode for MOD
+    if IR == 0x14, goto DecodeAdd           # Decode for MOD
     if IR == 0x15, goto DecodeAdd           # Decode for AND
     if IR == 0x16, goto DecodeAdd           # Decode for OR
     if IR == 0x17, goto DecodeAdd           # Decode for XOR
