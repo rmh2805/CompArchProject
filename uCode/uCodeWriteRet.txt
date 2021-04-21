@@ -1,4 +1,4 @@
-# MemRet:
+# WriteRet:
 #   This microfunction will write out the provided value to the provided operand
 # Args:
 #   uCnt: The OPVal to target from
@@ -9,5 +9,39 @@
 #   uTmp
 # Returns:
 #
-MemRet:
+WriteRet:
+    # Can safely return on immediates (accounted for in decode)
+    if uR0 & 0xF0 == 0x10, goto uRet
+    if uR0 & 0xF0 == 0x20, goto uRet
+
+    # EA was precalculated, so we can just use that
+    if uR0 & 0xF0 == 0x40, goto WriteRetMem
+    if uR0 & 0xF0 == 0x50, goto WriteRetMem
+    if uR0 & 0xF0 == 0x60, goto WriteRetMem
+    if uR0 & 0xF0 == 0x70, goto WriteRetMem
+    if uR0 & 0xF0 == 0x80, goto WriteRetMem
+
+    # Write to all of the different register types (pre and post inc unified)
+    if uR0 & 0xF0 == 0x30, goto WriteRetReg
+    if uR0 & 0xF0 == 0x90, goto WriteRetInc
+    if uR0 & 0xF0 == 0xA0, goto WriteRetDec
+    if uR0 & 0xF0 == 0xC0, goto WriteRetInc
+    if uR0 & 0xF0 == 0xD0, goto WriteRetDec
+
+WriteRetMem:
+    uCnt <- 0x03, <No Op>
+
+WriteRetMem1:
+    MAR <- uR1, MDR <- uR2
+    Mem[MAR] <- MDR, uR2 <- uR2 >> 8
+    
+    if uCnt == 0x00, goto uRet
+    uR1 <- uR1 + 1, <No Op>
+    uCnt <- uCnt - 1, goto WriteRetMem1
+
+WriteRetReg:
+
+WriteRetInc:
+
+WriteRetDec:
     uPC <- uRet, <No Op>
