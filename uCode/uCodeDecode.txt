@@ -1,7 +1,7 @@
 Decode:
     if IR in noOps, goto DecodeBranch
 
-    if IR == 0x02, goto DecodeBranch        # Decode for CLR (handled in Writeback)
+    if IR == 0x02, goto DecodeBranch        # Decode for CLR (writeback only)
     if IR == 0x03, goto DecodeDmp           # Decode for DMP
     if IR == 0x04, goto DecodeOut           # Decode for OUT
 
