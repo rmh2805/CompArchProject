@@ -8,16 +8,16 @@ Writeback:
     if IR == 0x10, goto WritebackAdd        # Writeback for ADD
     if IR == 0x11, goto WritebackAdd        # Writeback for SUB
     if IR == 0x12, goto WritebackMul        # Writeback for MUL
-    if IR == 0x13, goto WritebackDiv        # Writeback for DIV
+    if IR == 0x13, goto WritebackMul        # Writeback for DIV
     if IR == 0x14, goto WritebackAdd        # Writeback for MOD
     if IR == 0x15, goto WritebackAdd        # Writeback for AND
     if IR == 0x16, goto WritebackAdd        # Writeback for OR
     if IR == 0x17, goto WritebackAdd        # Writeback for XOR
-    if IR == 0x18, goto WritebackCmp        # Writeback for CMP
+    if IR == 0x18, goto WritebackAdd        # Writeback for CMP
     if IR == 0x19, goto WritebackInc        # Writeback for INC
     if IR == 0x1A, goto WritebackInc        # Writeback for DEC
 
-    if IR == 0x20, goto WritebackCmp        # Writeback for MOV
+    if IR == 0x20, goto WritebackAdd        # Writeback for MOV
     if IR == 0x21, goto WritebackSwp        # Writeback for SWP
     if IR == 0x22, goto Fetch               # Writeback for CPY (none)
 
@@ -36,21 +36,43 @@ WritebackAdd:
     # Apply prefixes (and truncation) to this value
     uR1 <- OP1Type, <No Op>
     uRet <- uPC, goto PrefixRet
-    OP2Val <- uR0, <No Op>                  # Stash the value for later
+    OP4Val <- uR0, <No Op>                  # Stash the value for later
 
-    # If Mem, calculate EA and scale
+    # Calculate Scaled EA in case of memory OP 1
     uCnt <- OP1Val, uR1 <- OP1Type
     uRet <- uPC, goto MemRet
     uCnt <- OP1Scale, uR1 <- uR0
     uRet <- uPC, goto ScaleOp
 
+    # Write out with known values
+    uR1 <- uR0, uR0 <- OP1Type
+    uCnt <- OP1Val, uR2 <- OP4Val
+    uRet <- uPC, goto WriteRet
+    <No Op>, goto Fetch
+
 WritebackMul:
+    OP3Val <- uR0, uR0 <- uR1               # Store uR0 for later, work on uR1
 
-WritebackDiv:
+    # Apply prefixes (and truncation) to second return
+    uR1 <- OP2Type, <No Op>
+    uRet <- uPC, goto PrefixRet
+    OP4Val <- uR0, <No Op>                  # Stash the value for later
 
-WritebackCmp:
+    # Calculate Scaled EA in case of memory OP 2
+    uCnt <- OP2Val, uR1 <- OP2Type
+    uRet <- uPC, goto MemRet
+    uCnt <- OP2Scale, uR1 <- uR0
+    uRet <- uPC, goto ScaleOp
+
+    # Write out with known values
+    uR1 <- uR0, uR0 <- OP1Type
+    uCnt <- OP2Val, uR2 <- OP4Val
+    uRet <- uPC, goto WriteRet
+    uR0 <- OP3Val, goto WritebackAdd        # And write out for first operand
 
 WritebackInc:
+    OP1Val <- OP2Val, OP1Type <- OP2Type    # Restore original operand values
+    OP1Scale <- OP2Scale, goto WritebackAdd # And then writeback as in ADD
 
 WritebackCmp:
 
