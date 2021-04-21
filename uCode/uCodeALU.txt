@@ -25,12 +25,39 @@ DEC:
 CMP:
    uR0 <- ~OP2Val, goto Writeback
 
-MOD:
-   //todo 
-   <No Op>, goto Writeback
-
 DIV:
-    
+    uRet <- uPC, goto DoDiv
+    <No Op>, goto Writeback
+
+MOD:
+    OP4Val <- OP3Val, OP3Val <- OP2Val
+    uRet <- uPC, goto DoDiv
+    uR0 <- uR1, goto Writeback
+
+DoDiv:
+    uR0 <- 0, uR2 <- 0 // Set div to 0
+    uTmp <- OP3Val >> 0x18, <No Op>
+    if uTmp & 0x80 != 0x80, goto +2
+    OP3Val <- ~OP3Val, uR2 <- uR2 + 1
+    OP3Val <- OP3Val + 1, <No Op>
+
+    uTmp <- OP4Val >> 0x18, <No Op>
+    if uTmp & 0x80 != 0x80 , goto + 2
+    OP4Val <- ~OP4Val, uR2 <- uR2 + 1
+    OP4Val <- OP4Val + 1, <No Op>
+
+DoDiv1:
+    OP3Val <- OP3Val - OP4Val, <No OP>
+    uTmp <- OP3Val >> 0x18, <No Op>
+
+    if uTmp & 0x80 == 0x80, goto DIV2
+    uR0 <- uR0 + 1, goto DIV1
+
+DoDiv2:
+    uR1 <- OP3Val + OP4Val, <No Op>
+    if uR2 != 0x01, goto uRet
+    uR0 <- ~uR0, <No Op>
+    uR0 <- uR0 + 1, uPC <- uRet
 
 MUL:
    uCnt <- 0x1F, uR0 <- 0
