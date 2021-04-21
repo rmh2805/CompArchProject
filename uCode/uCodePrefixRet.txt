@@ -1,0 +1,23 @@
+# PrefixRet:
+#   This microfunction will apply prefix bytes to a return value
+# Args:
+#   uR0: The value to handle
+#   uR1: The related OpType
+# Uses:
+#   uTmp
+# Returns:
+#   uR0: The return with prefixes applied (and any truncation)
+#
+PrefixRet:
+    # This is the same as PrefixOp *unless* this is a truncated Register
+    if uR1 & 0xF0 != 0x30, goto PrefixOp 
+
+    uTmp <- uR1 & 0x03, <No Op>
+
+    if uTmp != 0x00, goto +1
+    uR0 <- uR0 & 0xFF, goto PrefixOp
+    if uTmp != 0x01, goto +1
+    uR0 <- uR0 & 0x0000FFFF, goto PrefixOp
+    if uTmp != 0x02, goto +1
+    uR0 <- uR0 & 0x00FFFFFF, goto PrefixOp
+    <No Op>, goto PrefixOp
