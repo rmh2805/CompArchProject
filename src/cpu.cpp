@@ -1,11 +1,8 @@
 #include "cpu.h"
 
 //=========================================<CPU Objects>==========================================//
-Bus ALU1Out("ALU1Out", kAddrBusSize);
-Bus ALU2Out("ALU2Out", kAddrBusSize);
-
-BusALU alu1("ALU1", kAddrBusSize);
-BusALU alu2("ALU2", kAddrBusSize);
+BusALU ALU1("ALU1", kAddrBusSize);
+BusALU ALU2("ALU2", kAddrBusSize);
 
 // General Purpose Register File
 StorageObject * GPR[16] = {
@@ -82,51 +79,53 @@ StorageObject * SYS[23] = {
 void connect() {
 
     // Memory Setup
-    m.MAR().connectsTo(ALU1Out.OUT());
-    m.MAR().connectsTo(ALU2Out.OUT());	
-    control_storage.MAR().connectsTo(ALU1Out.OUT());
-    control_storage.MAR().connectsTo(ALU2Out.OUT());
+    m.MAR().connectsTo(ALU1.OUT());
+    m.MAR().connectsTo(ALU2.OUT());	
+    control_storage.MAR().connectsTo(ALU1.OUT());
+
+    // Connect PC to main memory
+    GPR[15]->connectsTo(m.READ());
 
     // MDR setup
-    SYS[MDR]->connectsTo(ALU1Out.OUT());
-    SYS[MDR]->connectsTo(ALU2Out.OUT());
+    SYS[MDR]->connectsTo(ALU1.OUT());
+    SYS[MDR]->connectsTo(ALU2.OUT());
     SYS[MDR]->connectsTo(m.WRITE());
     SYS[MDR]->connectsTo(m.READ());
-    SYS[MDR]->connectsTo(alu1.OP1());
-    SYS[MDR]->connectsTo(alu1.OP2());
-    SYS[MDR]->connectsTo(alu2.OP1());
-    SYS[MDR]->connectsTo(alu2.OP2());
+    SYS[MDR]->connectsTo(ALU1.OP1());
+    SYS[MDR]->connectsTo(ALU1.OP2());
+    SYS[MDR]->connectsTo(ALU2.OP1());
+    SYS[MDR]->connectsTo(ALU2.OP2());
 
     //uPC setup
-    SYS[uPC]->connectsTo(ALU1Out.OUT());
-    SYS[uPC]->connectsTo(ALU2Out.OUT());
-    SYS[uPC]->connectsTo(alu1.OP1());
+    SYS[uPC]->connectsTo(ALU1.OUT());
+    SYS[uPC]->connectsTo(ALU2.OUT());
+    SYS[uPC]->connectsTo(ALU1.OP1());
     SYS[uPC]->connectsTo(control_storage.READ());
 
     // IR setup
-    SYS[IR]->connectsTo(ALU1Out.OUT());
-    SYS[IR]->connectsTo(ALU2Out.OUT());
+    SYS[IR]->connectsTo(ALU1.OUT());
+    SYS[IR]->connectsTo(ALU2.OUT());
 
     //uIR setup
     SYS[uIR]->connectsTo(control_storage.READ());
-    SYS[uIR]->connectsTo(alu1.OP1());
+    SYS[uIR]->connectsTo(ALU1.OP1());
 
     // Connect GPRs 
     for(int i = 0; i < 16; i++) {
-	GPR[i]->connectsTo(ALU1Out.OUT());
-	GPR[i]->connectsTo(ALU2Out.OUT());
-	GPR[i]->connectsTo(alu1.OP1());
-	GPR[i]->connectsTo(alu1.OP2());
-	GPR[i]->connectsTo(alu2.OP1());
-	GPR[i]->connectsTo(alu2.OP2());
+	GPR[i]->connectsTo(ALU1.OUT());
+	GPR[i]->connectsTo(ALU2.OUT());
+	GPR[i]->connectsTo(ALU1.OP1());
+	GPR[i]->connectsTo(ALU1.OP2());
+	GPR[i]->connectsTo(ALU2.OP1());
+	GPR[i]->connectsTo(ALU2.OP2());
     }
 
     // Connect Immediate registers
     for(int i = 0; i < 16; i++) {
-	IMM[i]->connectsTo(alu1.OP1());
-	IMM[i]->connectsTo(alu1.OP2());
-	IMM[i]->connectsTo(alu2.OP1());
-	IMM[i]->connectsTo(alu2.OP2());
+	IMM[i]->connectsTo(ALU1.OP1());
+	IMM[i]->connectsTo(ALU1.OP2());
+	IMM[i]->connectsTo(ALU2.OP1());
+	IMM[i]->connectsTo(ALU2.OP2());
     }
 
     // Basic connect for Systems Registers to ALU
@@ -134,16 +133,42 @@ void connect() {
 	if (i == MDR || i == IR || i == uIR || i == uPC ) {
 		continue;
 	}
-	SYS[i]->connectsTo(ALU1Out.OUT());
-	SYS[i]->connectsTo(ALU2Out.OUT());
-	SYS[i]->connectsTo(alu1.OP1());
-	SYS[i]->connectsTo(alu1.OP2());
-	SYS[i]->connectsTo(alu2.OP1());
-	SYS[i]->connectsTo(alu2.OP2());
+	SYS[i]->connectsTo(ALU1.OUT());
+	SYS[i]->connectsTo(ALU2.OUT());
+	SYS[i]->connectsTo(ALU1.OP1());
+	SYS[i]->connectsTo(ALU1.OP2());
+	SYS[i]->connectsTo(ALU2.OP1());
+	SYS[i]->connectsTo(ALU2.OP2());
     }
 
 }
 
 void execute(const char * codeFile, const char * uCodeFile) {
+    // Load the object files
+    m.load(codeFile);
+    control_storage.load(uCodeFile);
+
+    // Set starting PC Values
+    GPR[15]->latchFrom(m.READ());
+    SYS[uPC]->latchFrom(control_storage.READ());
+    Clock::tick();
     
+    while(true) { 
+
+	    // Increment Program Counter and store in uPC and MAR
+	    ALU1.OP1().pullFrom(*SYS[uPC]);
+	    ALU1.OP2().pullFrom(*IMM[1]);
+	    ALU1.perform(BusALU::op_add); // Add uPC + 1
+	    control_storage.MAR().latchFrom(ALU1.OUT());
+	    SYS[uPC]->latchFrom(ALU1.OUT());
+	    Clock::tick();
+
+	    // Read Value from 
+	    control_storage.read();
+	    SYS[uIR]->latchFrom(control_storage.READ()); 
+
+	    // Execute
+	    
+    }
+
 }

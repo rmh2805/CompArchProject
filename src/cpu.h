@@ -37,17 +37,13 @@ const size_t kRegSize = 32;
 
 const size_t kMaxAddr = int(pow(2, kAddrBusSize)) - 1;
 
-// Buses
-extern Bus ALU1Out;
-extern Bus ALU2Out;
-
 // Memory
 extern Memory m;
 extern Memory control_storage;
 
 // ALUs
-extern BusALU alu1;
-extern BusALU alu2;
+extern BusALU ALU1;
+extern BusALU ALU2;
 
 void connect();
 
