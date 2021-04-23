@@ -6,7 +6,7 @@
 #include "includes.h"
 
 enum sys_names {
-    uPC,
+    uPC = 0,
     uRET,
     uR0,
     uR1,

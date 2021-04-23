@@ -232,6 +232,83 @@ void setAfield(long Afield, BusALU * alu) {
 
 void setBfield(long Bfield, BusALU * alu) {
 
+    long opc = (*SYS[uIR])(CU_DATA_SIZE-Bfield, CU_DATA_SIZE-Bfield-2);
+    long rdB = (*SYS[uIR])(CU_DATA_SIZE-Bfield-3, CU_DATA_SIZE-Bfield-8);
+    long rsB = (*SYS[uIR])(CU_DATA_SIZE-Bfield-9, CU_DATA_SIZE-Bfield-14);
+    long rtB = (*SYS[uIR])(CU_DATA_SIZE-Bfield-15 , CU_DATA_SIZE-Bfield-20);
+
+    StorageObject * dB;
+    StorageObject * sB;
+    StorageObject * tB;
+
+    // Setup rdB pointer
+    if(rdB <= 0x0f) {
+        dB = IMM[rdB];
+    } else if (rdB <= 0x2f) {
+        dB = SYS[rdB];
+    } else {
+        dB = GPR[rdB];
+    }
+
+    // Setup rsB pointer
+    if(rsB <= 0x0f) {
+        sB = IMM[rsB];
+    } else if (rsB <= 0x2f) {
+        sB = SYS[rsB];
+    } else {
+        sB = GPR[rsB];
+    }
+
+    // Setup rsB pointer
+    if(rtB <= 0x0f) {
+        tB = IMM[rtB];
+    } else if (rtB <= 0x2f) {
+        tB = SYS[rtB];
+    } else {
+        tB = GPR[rtB];
+    }
+
+    switch(opc) {
+        case 0: // No Op
+		break;
+	case 1: // MOV
+		alu->OP1().pullFrom(*sB);
+		alu->OP2().pullFrom(*tB);
+		dB->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_rop1);
+		break;
+	case 2: // CMP
+		alu->OP1().pullFrom(*sB);
+		alu->OP2().pullFrom(*tB);
+		dB->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_not);
+		break;
+	case 3: // Mem Read
+		m.read();
+		SYS[MDR]->latchFrom(m.READ());
+		break;
+	case 4: // Mem Write
+		m.WRITE().pullFrom(*SYS[MDR]);
+		m.write();
+		break;
+	case 5: // SUB
+		alu->OP1().pullFrom(*sB);
+		alu->OP2().pullFrom(*tB);
+		dB->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_sub);
+		break;
+	case 6: // ADD
+		alu->OP1().pullFrom(*sB);
+		alu->OP2().pullFrom(*tB);
+		dB->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_add);
+		break;
+	case 7: // No Op
+		break;
+	default:
+		break;
+    }
+
 }
 
 void execute(const char * codeFile, const char * uCodeFile) {
