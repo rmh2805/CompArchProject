@@ -1,0 +1,4 @@
+halt 0
+fetch 0
+decode 1000
+fetchoperands 1000
