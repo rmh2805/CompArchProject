@@ -1,8 +1,9 @@
 Fetch:
     <No OP>, <No OP>                        # Space to ensure that uPC can start
                                             # before first instruction
-    IncPC, IncPC                            # Halt on PC overflow, else incr
-    
+    if PC == PC_MAX, goto halt              # Halt on PC overflow, else incr
+    PC <- PC + 1, <None>
+
     MAR <- PC, <No OP>                      # Prepare to pull in the next byte
     MDR <- Mem[MAR], <No OP>                # Grab the next opcode
     IR <- MDR, goto FetchOperands           # Fetch the operands for instruction
