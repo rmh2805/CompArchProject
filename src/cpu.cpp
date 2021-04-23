@@ -156,27 +156,27 @@ void setAfield(long Afield, BusALU * alu) {
     if(rdA <= 0x0f) {
         dA = IMM[rdA];
     } else if (rdA <= 0x2f) {
-        dA = SYS[rdA];
+        dA = SYS[rdA - 16];
     } else {
-        dA = GPR[rdA];
+        dA = GPR[rdA - 48];
     }
 
     // Setup rsA pointer
     if(rsA <= 0x0f) {
         sA = IMM[rsA];
     } else if (rsA <= 0x2f) {
-        sA = SYS[rsA];
+        sA = SYS[rsA - 16];
     } else {
-        sA = GPR[rsA];
+        sA = GPR[rsA - 48];
     }
 
     // Setup rsA pointer
     if(rtA <= 0x0f) {
         tA = IMM[rtA];
     } else if (rtA <= 0x2f) {
-        tA = SYS[rtA];
+        tA = SYS[rtA - 16];
     } else {
-        tA = GPR[rtA];
+        tA = GPR[rtA - 48];
     }
 
     switch(opc) {
@@ -244,27 +244,27 @@ void setBfield(long Bfield, BusALU * alu) {
     if(rdB <= 0x0f) {
         dB = IMM[rdB];
     } else if (rdB <= 0x2f) {
-        dB = SYS[rdB];
+        dB = SYS[rdB - 16];
     } else {
-        dB = GPR[rdB];
+        dB = GPR[rdB - 48];
     }
 
     // Setup rsB pointer
     if(rsB <= 0x0f) {
         sB = IMM[rsB];
     } else if (rsB <= 0x2f) {
-        sB = SYS[rsB];
+        sB = SYS[rsB - 16];
     } else {
-        sB = GPR[rsB];
+        sB = GPR[rsB - 48];
     }
 
     // Setup rsB pointer
     if(rtB <= 0x0f) {
         tB = IMM[rtB];
     } else if (rtB <= 0x2f) {
-        tB = SYS[rtB];
+        tB = SYS[rtB - 16];
     } else {
-        tB = GPR[rtB];
+        tB = GPR[rtB - 48];
     }
 
     switch(opc) {
@@ -303,6 +303,64 @@ void setBfield(long Bfield, BusALU * alu) {
 		alu->perform(BusALU::op_add);
 		break;
 	case 7: // No Op
+		break;
+	default:
+		break;
+    }
+}
+
+void conditional(long cBits) {
+    long rT = (*SYS[uIR])(CU_DATA_SIZE-cBits-1, CU_DATA_SIZE-cBits-8); // 8 bits
+    long rS = (*SYS[uIR])(CU_DATA_SIZE-cBits-9, CU_DATA_SIZE-cBits-14);
+    long type = (*SYS[uIR])(CU_DATA_SIZE-cBits-17, CU_DATA_SIZE-cBits-20);
+
+    StorageObject * rs;
+    StorageObject * rt;
+
+    // Setup rT pointer
+    if(rT <= 0x0f) {
+        rt = IMM[rT];
+    } else if (rT <= 0x2f) {
+        rt = SYS[rT - 16];
+    } else {
+        rt = GPR[rT - 48];
+    }
+
+    // Setup rS pointer
+    if(rS <= 0x0f) {
+        rs = IMM[rS];
+    } else if (rS <= 0x2f) {
+        rs = SYS[rS - 16];
+    } else {
+        rs = GPR[rS - 48];
+    }
+
+    switch(type) {
+        case 0:
+		break;
+	case 1:
+		break;
+	case 2:
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	case 5:
+		break;
+	case 6:
+		break;
+	case 7:
+		break;
+	case 8:
+		break;
+	case 9:
+		break;
+	case 10:
+		break;
+	case 11:
+		break;
+	case 12:
 		break;
 	default:
 		break;
@@ -359,6 +417,9 @@ void execute(const char * codeFile, const char * uCodeFile) {
 		SYS[uPC]->latchFrom(ALU1.OUT());
 		break;
 	     case 3: // Conditional 
+		cBits = CU_DATA_SIZE-3;
+	        conditional(cBits);
+		break;
 	     default:
 		break;
 	}
