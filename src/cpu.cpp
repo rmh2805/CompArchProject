@@ -143,6 +143,14 @@ void connect() {
 
 }
 
+void setAfield(long Afield, BusALU * alu) {
+
+}
+
+void setBfield(long Bfield, BusALU * alu) {
+
+}
+
 void execute(const char * codeFile, const char * uCodeFile) {
     // Load the object files
     m.load(codeFile);
@@ -168,7 +176,31 @@ void execute(const char * codeFile, const char * uCodeFile) {
 	    SYS[uIR]->latchFrom(control_storage.READ()); 
 
 	    // Execute
-	    
+	    long prefix = *SYS[uIR](DATA_BITS-1, DATA_BITS-2);
+	    // Get prefix (first 2 bits of uIR)
+	    switch(prefix) {
+	        case 0: // Parallel Operations
+			long aBits = *SYS[uIR](DATA_BITS-3, DATA_BITS-23);
+			long bBits = *SYS[uIR](DATA_BITS-24, DATA_BITS-44);
+		        setAfield(aBits, &ALU1);
+			setBfield(bBits, &ALU2);
+			break;
+		case 1: // A Field jump
+			long aBits = *SYS[uIR](DATA_BITS-3, DATA_BITS-23);
+		        setAfield(aBits, &ALU2);
+			ALU1.IN().pullFrom(uIR);
+			SYS[uPC]->latchFrom(ALU1.OUT());
+			break;
+		case 2: // B Field jump
+			long bBits = *SYS[uIR](DATE_BITS-3, DATA_BITS-23);
+		        setBfield(bBits, &ALU2);
+			ALU1.IN().pullFrom(uIR);
+			SYS[uPC]->latchFrom(ALU1.OUT());
+			break;
+		case 3: // Conditional 
+		default:
+			break;
+	    }
+	    Clock::tick(); // Tick our clock
     }
-
 }
