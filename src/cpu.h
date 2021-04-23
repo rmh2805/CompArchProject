@@ -35,6 +35,8 @@ const size_t kAddrBusSize = 32;
 const size_t kDataBusSize = 8;
 const size_t kRegSize = 32;
 
+const size_t CU_DATA_SIZE = 55;
+
 const size_t kMaxAddr = int(pow(2, kAddrBusSize)) - 1;
 
 // Memory

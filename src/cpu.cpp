@@ -45,9 +45,7 @@ StorageObject * IMM[16] = {
 };
 
 Memory m("Main Memory", kAddrBusSize, kDataBusSize);
-
-//=========================================<uPU Objects>==========================================//
-Memory control_storage("Control Storage", kAddrBusSize, kDataBusSize);
+Memory control_storage("Control Storage", CU_DATA_SIZE, CU_DATA_SIZE);
 
 // System Registers
 StorageObject * SYS[23] = {
@@ -71,7 +69,7 @@ StorageObject * SYS[23] = {
     new StorageObject("OP3Scale", kRegSize),
     new StorageObject("OP4Scale", kRegSize),
     new StorageObject("IR", kRegSize),
-    new StorageObject("uIR", kRegSize),
+    new StorageObject("uIR", CU_DATA_SIZE),
     new StorageObject("uTmp", kRegSize),
     new StorageObject("uRet2", kRegSize),
 };
@@ -145,6 +143,91 @@ void connect() {
 
 void setAfield(long Afield, BusALU * alu) {
 
+    long opc = (*SYS[uIR])(CU_DATA_SIZE-Afield, CU_DATA_SIZE-Afield-2);
+    long rdA = (*SYS[uIR])(CU_DATA_SIZE-Afield-3, CU_DATA_SIZE-Afield-8);
+    long rsA = (*SYS[uIR])(CU_DATA_SIZE-Afield-9, CU_DATA_SIZE-Afield-14);
+    long rtA = (*SYS[uIR])(CU_DATA_SIZE-Afield-15 , CU_DATA_SIZE-Afield-20);
+
+    StorageObject * dA;
+    StorageObject * sA;
+    StorageObject * tA;
+
+    // Setup rdA pointer
+    if(rdA <= 0x0f) {
+        dA = IMM[rdA];
+    } else if (rdA <= 0x2f) {
+        dA = SYS[rdA];
+    } else {
+        dA = GPR[rdA];
+    }
+
+    // Setup rsA pointer
+    if(rsA <= 0x0f) {
+        sA = IMM[rsA];
+    } else if (rsA <= 0x2f) {
+        sA = SYS[rsA];
+    } else {
+        sA = GPR[rsA];
+    }
+
+    // Setup rsA pointer
+    if(rtA <= 0x0f) {
+        tA = IMM[rtA];
+    } else if (rtA <= 0x2f) {
+        tA = SYS[rtA];
+    } else {
+        tA = GPR[rtA];
+    }
+
+    switch(opc) {
+        case 0: // No Op
+		break;
+	case 1: // MOV
+		alu->OP1().pullFrom(*sA);
+		alu->OP2().pullFrom(*tA);
+		dA->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_rop1);
+		break;
+	case 2: // SLL
+		alu->OP1().pullFrom(*sA);
+		alu->OP2().pullFrom(*tA);
+		dA->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_lshift);
+		break;
+	case 3: // SRL
+		alu->OP1().pullFrom(*sA);
+		alu->OP2().pullFrom(*tA);
+		dA->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_rshift);
+		break;
+	case 4: // OR
+		alu->OP1().pullFrom(*sA);
+		alu->OP2().pullFrom(*tA);
+		dA->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_or);
+		break;
+	case 5: // SIGN EXTEND
+		alu->OP1().pullFrom(*sA);
+		alu->OP2().pullFrom(*tA);
+		dA->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_extendSign);
+		break;
+	case 6: // XOR
+		alu->OP1().pullFrom(*sA);
+		alu->OP2().pullFrom(*tA);
+		dA->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_xor);
+		break;
+	case 7: // AND
+		alu->OP1().pullFrom(*sA);
+		alu->OP2().pullFrom(*tA);
+		dA->latchFrom(alu->OUT());
+		alu->perform(BusALU::op_and);
+		break;
+	default:
+		break;
+    }
+
 }
 
 void setBfield(long Bfield, BusALU * alu) {
@@ -171,30 +254,33 @@ void execute(const char * codeFile, const char * uCodeFile) {
 	    SYS[uPC]->latchFrom(ALU1.OUT());
 	    Clock::tick();
 
-	    // Read Value from 
+	    // Read Value from CS into uIR
 	    control_storage.read();
 	    SYS[uIR]->latchFrom(control_storage.READ()); 
 
 	    // Execute
-	    long prefix = *SYS[uIR](DATA_BITS-1, DATA_BITS-2);
+	    long prefix = (*SYS[uIR])(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
+	    long aBits;
+	    long bBits;
+
 	    // Get prefix (first 2 bits of uIR)
 	    switch(prefix) {
 	        case 0: // Parallel Operations
-			long aBits = *SYS[uIR](DATA_BITS-3, DATA_BITS-23);
-			long bBits = *SYS[uIR](DATA_BITS-24, DATA_BITS-44);
+			aBits = CU_DATA_SIZE-3;
+			bBits = CU_DATA_SIZE-24;
 		        setAfield(aBits, &ALU1);
 			setBfield(bBits, &ALU2);
 			break;
 		case 1: // A Field jump
-			long aBits = *SYS[uIR](DATA_BITS-3, DATA_BITS-23);
+			aBits = CU_DATA_SIZE-3;
 		        setAfield(aBits, &ALU2);
-			ALU1.IN().pullFrom(uIR);
+			ALU1.IN1().pullFrom(*SYS[uIR]);
 			SYS[uPC]->latchFrom(ALU1.OUT());
 			break;
 		case 2: // B Field jump
-			long bBits = *SYS[uIR](DATE_BITS-3, DATA_BITS-23);
+			bBits = CU_DATA_SIZE-3;
 		        setBfield(bBits, &ALU2);
-			ALU1.IN().pullFrom(uIR);
+			ALU1.IN1().pullFrom(*SYS[uIR]);
 			SYS[uPC]->latchFrom(ALU1.OUT());
 			break;
 		case 3: // Conditional 
