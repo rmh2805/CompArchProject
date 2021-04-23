@@ -2,8 +2,6 @@
 %%
 
     /* Key Characters */
-","                         {printf("COMMA\n");}
-";"                         {printf("Semicolon\n");}
 
     /* Numeric Literals */
 "0x"[0-9a-fA-F]+            {printf("INT %ld\n", strtol(yytext, NULL, 16));}
@@ -15,6 +13,8 @@
 
     /* Whitespace Handling */
 [ \t]                       {}
+","                         {}
+";"                         {}
 \n                          {printf("EOL\n");}
 
     /* Misc */

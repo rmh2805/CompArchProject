@@ -1,0 +1,2 @@
+fetch 0
+decode 1000
