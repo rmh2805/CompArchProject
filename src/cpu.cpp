@@ -227,7 +227,6 @@ void setAfield(long Afield, BusALU * alu) {
 	default:
 		break;
     }
-
 }
 
 void setBfield(long Bfield, BusALU * alu) {
@@ -308,7 +307,6 @@ void setBfield(long Bfield, BusALU * alu) {
 	default:
 		break;
     }
-
 }
 
 void execute(const char * codeFile, const char * uCodeFile) {
@@ -323,47 +321,47 @@ void execute(const char * codeFile, const char * uCodeFile) {
     
     while(true) { 
 
-	    // Increment Program Counter and store in uPC and MAR
-	    ALU1.OP1().pullFrom(*SYS[uPC]);
-	    ALU1.OP2().pullFrom(*IMM[1]);
-	    ALU1.perform(BusALU::op_add); // Add uPC + 1
-	    control_storage.MAR().latchFrom(ALU1.OUT());
-	    SYS[uPC]->latchFrom(ALU1.OUT());
-	    Clock::tick();
-
-	    // Read Value from CS into uIR
-	    control_storage.read();
-	    SYS[uIR]->latchFrom(control_storage.READ()); 
-
-	    // Execute
-	    long prefix = (*SYS[uIR])(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
-	    long aBits;
-	    long bBits;
-
-	    // Get prefix (first 2 bits of uIR)
-	    switch(prefix) {
-	        case 0: // Parallel Operations
-			aBits = CU_DATA_SIZE-3;
-			bBits = CU_DATA_SIZE-24;
-		        setAfield(aBits, &ALU1);
-			setBfield(bBits, &ALU2);
-			break;
-		case 1: // A Field jump
-			aBits = CU_DATA_SIZE-3;
-		        setAfield(aBits, &ALU2);
-			ALU1.IN1().pullFrom(*SYS[uIR]);
-			SYS[uPC]->latchFrom(ALU1.OUT());
-			break;
-		case 2: // B Field jump
-			bBits = CU_DATA_SIZE-3;
-		        setBfield(bBits, &ALU2);
-			ALU1.IN1().pullFrom(*SYS[uIR]);
-			SYS[uPC]->latchFrom(ALU1.OUT());
-			break;
-		case 3: // Conditional 
-		default:
-			break;
-	    }
-	    Clock::tick(); // Tick our clock
+	// Increment Program Counter and store in uPC and MAR
+	ALU1.OP1().pullFrom(*SYS[uPC]);
+	ALU1.OP2().pullFrom(*IMM[1]);
+	ALU1.perform(BusALU::op_add); // Add uPC + 1
+	control_storage.MAR().latchFrom(ALU1.OUT());
+	SYS[uPC]->latchFrom(ALU1.OUT());
+	Clock::tick();
+	
+	// Read Value from CS into uIR
+	control_storage.read();
+	SYS[uIR]->latchFrom(control_storage.READ()); 
+	
+	// Execute
+	long prefix = (*SYS[uIR])(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
+	long aBits;
+	long bBits;
+	
+	// Get prefix (first 2 bits of uIR)
+	switch(prefix) {
+	    case 0: // Parallel Operations
+		aBits = CU_DATA_SIZE-3;
+		bBits = CU_DATA_SIZE-24;
+		setAfield(aBits, &ALU1);
+		setBfield(bBits, &ALU2);
+		break;
+	    case 1: // A Field jump
+		aBits = CU_DATA_SIZE-3;
+		setAfield(aBits, &ALU2);
+		ALU1.IN1().pullFrom(*SYS[uIR]);
+		SYS[uPC]->latchFrom(ALU1.OUT());
+		break;
+	    case 2: // B Field jump
+		bBits = CU_DATA_SIZE-3;
+		setBfield(bBits, &ALU2);
+		ALU1.IN1().pullFrom(*SYS[uIR]);
+		SYS[uPC]->latchFrom(ALU1.OUT());
+		break;
+	     case 3: // Conditional 
+	     default:
+		break;
+	}
+	Clock::tick(); // Tick our clock
     }
 }
