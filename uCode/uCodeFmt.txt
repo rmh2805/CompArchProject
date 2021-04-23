@@ -28,6 +28,7 @@ Conditional Types:
         9: IR 1 Op      (IR contains an opcode w/ 1 op max)
         A: IR 2 Ops     (IR contains an opcode w/ 2 ops max)
         B: IR 3 Ops     (IR contains an opcode w/ 3 ops max)
+        C: PC Max       (PC == PC_MAX)
 
 Micro opcodes:
     - A: 
