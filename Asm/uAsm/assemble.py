@@ -152,7 +152,8 @@ condMap = {'eq'   :(0x0, 1),
            'noops':(0x8, 0),
            'oneop':(0x9, 0),
            'twoops':(0xA, 0),
-           'threeops':(0xB, 0)}
+           'threeops':(0xB, 0),
+           'pcmax':(0xC, 0)}
 
 loadPoints = dict()
 

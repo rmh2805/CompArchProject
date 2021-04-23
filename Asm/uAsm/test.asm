@@ -22,3 +22,4 @@
 19 if oneOp 0x0
 20 if twoOps 0x0
 21 if threeOps 0x0
+22 if pcmax decode
