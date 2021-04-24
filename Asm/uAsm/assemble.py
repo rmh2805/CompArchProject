@@ -155,7 +155,7 @@ condMap = {'eq'   :(0x0, 1),
            'threeops':(0xB, 0),
            'pcmax':(0xC, 0)}
 
-loadPoints = dict()
+loadPoints = {'.':None}
 
 def doCond(inst, line):
     line = line[1:]
@@ -168,13 +168,7 @@ def doCond(inst, line):
     condType, operandType = condMap[line[0].val]
     inst.condition = condType
     
-    if line[-1].tokType != 'INT':
-        if line[-1].val not in loadPoints:
-            printErr('Non-integer conditional destination', line[-1].lineNr)
-            exit(1)
-        inst.address = loadPoints[line[-1].val]
-    else:
-        inst.address = int(line[-1].val)
+    setAddr(inst, line)
     
     if operandType == 0:    # These are the no operand conditionals
         return
@@ -274,9 +268,28 @@ def doOpRegs(line, nRegs, regs):
         line = line[1:]
     return line
 
+def setAddr(inst, line):
+    if line[-1].tokType == 'OFF':
+        if loadPoints['.'] is None:
+            printErr("Must specify load point to generate offsets", line[-1].lineNr)
+            exit(1)
+
+        inst.address = loadPoints['.'] + int(OFF.val)
+    elif line[-1].tokType != 'INT':
+        if line[-1].val not in loadPoints:
+            printErr('Non-integer conditional destination', line[-1].lineNr)
+            exit(1)
+        
+        inst.address = loadPoints[line[-1].val]
+    else:
+        inst.address = int(line[-1].val)
+
 def main():
-    if len(argv) > 1:
+    if len(argv) >= 2:
         getLoadPoints(argv[1])
+    
+    if len(argv) >= 3:
+        loadPoints['.'] = int(argv[2], 16)
     
     insts = list()
     
@@ -290,6 +303,7 @@ def main():
             exit(1)
         
         inst.offset = int(line[0].val)
+        lineNr = line[0].lineNr
         line = line[1:]
         
         # Catch conditionals here
@@ -309,15 +323,13 @@ def main():
                 printErr('Unrecongized mnemonic \'' + str(line[0].val) + '\'', line[0].lineNr)
                 exit(1)
             
+            if len(line) == 0:
+                printErr("Must specify both instruction operands", lineNr)
+                exit(1)
+
             # Handle the second field
             if line[0].val == 'goto':
-                if line[-1].tokType != 'INT':
-                    if line[-1].val not in loadPoints:
-                        printErr('Non-integer conditional destination', line[-1].lineNr)
-                        exit(1)
-                    inst.address = loadPoints[line[-1].val]
-                else:
-                    inst.address = int(line[-1].val)
+                setAddr(inst, line)
             elif line[0].val in opAMap:
                 line = doOpA(inst, line)
             elif line[0].val in opBMap:
