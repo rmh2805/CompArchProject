@@ -19,12 +19,70 @@ GetOperand      0FF
     FetchOpVal      10C
     FetchOpImm      118
     FetchOpImmLoop  119
-    FetchOpReg      11E
-    FetchOpReg2     120
-    FetchOpIdx      126
+    FetchOpReg      120
+    FetchOpReg2     122
+    FetchOpIdx      128
     FetchOpIdx2     12F
     FetchOpDsp      137
     FetchOpScl      141
-    FetchOpScl1     146
-Decode          FFFFFFFF
+    FetchOpScl1     149
+Decode          1FF
+    DecodeDmp       21B
+    DecodeOut       223
+    DecodeAdd       22B
+    DecodeAdd1      235
+    DecodeMul       23D
+    DecodeMul1      23F
+    DecodeDiv       247
+    DecodeDiv1      24A
+    DecodeCmp       24D
+    DecodeInc       257
+    DecodeSwp       259
+    DecodeCpy       266
+    DecodeCpy1      26C
+    DecodeCpy2      272
+    DecodeJmp       27C
+    DecodeJmp1      282
+    DecodeBeq       288
+    DecodeBeq1      28D
+    DecodeBie       292
+    DecodeBranch    295
+EvalOp          FFFFFFFF
+ScaleOp         FFFFFFFF
+MemOp           FFFFFFFF
+PrefixOp        FFFFFFFF
+Control         FFFFFFFF
+    HLT             FFFFFFFF
+    CLR             FFFFFFFF
+    DMP             FFFFFFFF
+    OUT             FFFFFFFF
+    NOP             FFFFFFFF
+ALU             FFFFFFFF
+    ADD             FFFFFFFF
+    SUB             FFFFFFFF
+    MUL             FFFFFFFF
+    DIV             FFFFFFFF
+    MOD             FFFFFFFF
+    AND             FFFFFFFF
+    OR              FFFFFFFF
+    XOR             FFFFFFFF
+    CMP             FFFFFFFF
+    INC             FFFFFFFF
+    DEC             FFFFFFFF
+MEM             FFFFFFFF
+    MOV             FFFFFFFF
+    SWP             FFFFFFFF
+    CPY             FFFFFFFF
+COL             FFFFFFFF
+    JMP             FFFFFFFF
+    JAL             FFFFFFFF
+    RET             FFFFFFFF
+    BEQ             FFFFFFFF
+    BNE             FFFFFFFF
+    BGT             FFFFFFFF
+    BGE             FFFFFFFF
+    BIE             FFFFFFFF
+    BDE             FFFFFFFF
+    BAO             FFFFFFFF
+    BAC             FFFFFFFF
 halt            FFFFFFFF

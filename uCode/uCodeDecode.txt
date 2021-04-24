@@ -72,6 +72,7 @@ DecodeAdd:
     uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 2
     OP2Val <- uR0, <No Op>
 
+DecodeAdd1:
     uCnt <- OP3Val, uR1 <- OP3Type  # Get the Val/EA for Op 3
     uRet <- uPC, goto EvalOp
     uCnt <- OP3Scale, uR1 <- uR0    # Scale Op 3
@@ -94,16 +95,7 @@ DecodeMul1:
     uCnt <- uR0, uR1 <- OP4Type     # Get memory value of Op 4
     uRet <- uPC, goto MemOp
     uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 4
-    OP4Val <- uR0, <No Op>
-
-    uCnt <- OP3Val, uR1 <- OP3Type  # Get the Val/EA for Op 3
-    uRet <- uPC, goto EvalOp
-    uCnt <- OP3Scale, uR1 <- uR0    # Scale Op 3
-    uRet <- uPC, goto ScaleOp
-    uCnt <- uR0, uR1 <- OP3Type     # Get memory value of Op 3
-    uRet <- uPC, goto MemOp
-    uRet <- uPC, goto PrefixOp      # Apply prefixes to Op 3 and execute
-    OP3val <- uR0, goto DecodeBranch
+    OP4Val <- uR0, goto DecodeAdd1
 
 DecodeDiv:
     # If dst is immediate, check if mod is
