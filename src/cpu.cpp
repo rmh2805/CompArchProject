@@ -111,33 +111,33 @@ void connect() {
 
     // Connect GPRs 
     for(int i = 0; i < 16; i++) {
-	GPR[i]->connectsTo(ALU1.OUT());
-	GPR[i]->connectsTo(ALU2.OUT());
-	GPR[i]->connectsTo(ALU1.OP1());
-	GPR[i]->connectsTo(ALU1.OP2());
-	GPR[i]->connectsTo(ALU2.OP1());
-	GPR[i]->connectsTo(ALU2.OP2());
+        GPR[i]->connectsTo(ALU1.OUT());
+        GPR[i]->connectsTo(ALU2.OUT());
+        GPR[i]->connectsTo(ALU1.OP1());
+        GPR[i]->connectsTo(ALU1.OP2());
+        GPR[i]->connectsTo(ALU2.OP1());
+        GPR[i]->connectsTo(ALU2.OP2());
     }
 
     // Connect Immediate registers
     for(int i = 0; i < 16; i++) {
-	IMM[i]->connectsTo(ALU1.OP1());
-	IMM[i]->connectsTo(ALU1.OP2());
-	IMM[i]->connectsTo(ALU2.OP1());
-	IMM[i]->connectsTo(ALU2.OP2());
+        IMM[i]->connectsTo(ALU1.OP1());
+        IMM[i]->connectsTo(ALU1.OP2());
+        IMM[i]->connectsTo(ALU2.OP1());
+        IMM[i]->connectsTo(ALU2.OP2());
     }
 
     // Basic connect for Systems Registers to ALU
     for(int i = 0; i < 23; i++) {
-	if (i == MDR || i == IR || i == uIR || i == uPC ) {
-		continue;
-	}
-	SYS[i]->connectsTo(ALU1.OUT());
-	SYS[i]->connectsTo(ALU2.OUT());
-	SYS[i]->connectsTo(ALU1.OP1());
-	SYS[i]->connectsTo(ALU1.OP2());
-	SYS[i]->connectsTo(ALU2.OP1());
-	SYS[i]->connectsTo(ALU2.OP2());
+        if (i == MDR || i == IR || i == uIR || i == uPC ) {
+            continue;
+        }
+        SYS[i]->connectsTo(ALU1.OUT());
+        SYS[i]->connectsTo(ALU2.OUT());
+        SYS[i]->connectsTo(ALU1.OP1());
+        SYS[i]->connectsTo(ALU1.OP2());
+        SYS[i]->connectsTo(ALU2.OP1());
+        SYS[i]->connectsTo(ALU2.OP2());
     }
 
 }
@@ -160,100 +160,100 @@ int getMaxOperands(long opc) {
 
     int maxOps;
     switch(opc) {
-	case 0x0: // HLT
-	    maxOps = 0;
-	    break;
-	case 0x1: // NOP
-	    maxOps = 0;
-	    break;
-	case 0x2: // CLR
-	    maxOps = 1;
-	    break;
-	case 0x3: // DMP
-	    maxOps = 1;
-	    break;
-	case 0x4: // OUT
-	    maxOps = 2;
-	    break;
-	case 0x10: // ADD
-	    maxOps = 3;
-	    break;
-	case 0x11: // SUB
-	    maxOps = 3;
-	    break;
-	case 0x12: // MUL
-	    maxOps = 4;
-	    break;
-	case 0x13: // DIV
-	    maxOps = 4;
-	    break;
-	case 0x14: // MOD
-	    maxOps = 3;
-	    break;
-	case 0x15: // AND
-	    maxOps = 3;
-	    break;
-	case 0x16: // OR
-	    maxOps = 3;
-	    break;
-	case 0x17: // XOR
-	    maxOps = 3;
-	    break;
-	case 0x18: // CMP
-	    maxOps = 2;
-	    break;
-	case 0x19: // INC
-	    maxOps = 1;
-	    break;
-	case 0x1A: // DEC
-	    maxOps = 1;
-	    break;
+        case 0x0: // HLT
+            maxOps = 0;
+            break;
+        case 0x1: // NOP
+            maxOps = 0;
+            break;
+        case 0x2: // CLR
+            maxOps = 1;
+            break;
+        case 0x3: // DMP
+            maxOps = 1;
+            break;
+        case 0x4: // OUT
+            maxOps = 2;
+            break;
+        case 0x10: // ADD
+            maxOps = 3;
+            break;
+        case 0x11: // SUB
+            maxOps = 3;
+            break;
+        case 0x12: // MUL
+            maxOps = 4;
+            break;
+        case 0x13: // DIV
+            maxOps = 4;
+            break;
+        case 0x14: // MOD
+            maxOps = 3;
+            break;
+        case 0x15: // AND
+            maxOps = 3;
+            break;
+        case 0x16: // OR
+            maxOps = 3;
+            break;
+        case 0x17: // XOR
+            maxOps = 3;
+            break;
+        case 0x18: // CMP
+            maxOps = 2;
+            break;
+        case 0x19: // INC
+            maxOps = 1;
+            break;
+        case 0x1A: // DEC
+            maxOps = 1;
+            break;
         case 0x20: // MOV
     	    maxOps = 2;
-	    break;
+            break;
         case 0x21: // SWP
             maxOps = 2;	    
-	    break;
+            break;
         case 0x22: // CPY
             maxOps = 4;    
-	    break;
-	case 0x31: // JMP
-	    maxOps = 1;
-	    break;
-	case 0x32: // JAL
-	    maxOps = 1;
-	    break;
-	case 0x33: // RET
-	    maxOps = 0;
-	    break;
-	case 0x34: // BEQ
-	    maxOps = 3;
-	    break;
-	case 0x35: // BNE
-	    maxOps = 3;
-	    break;
-	case 0x36: // BGT
-	    maxOps = 3;
-	    break;
-	case 0x37: // BGE
-	    maxOps = 3;
-	    break;
-	case 0x38: // BIE
-	    maxOps = 3;
-	    break;
-	case 0x39: // BDE
-	    maxOps = 3;
-	    break;
-	case 0x3a: // BAO
-	    maxOps = 1;
-	    break;
-	case 0x3b: // BAC
-	    maxOps = 1;
-	    break;
-	default: 
-	    cout << "Unspecified Instruction...returning 0 for max OPs\n";
-	    maxOps = 0;
-	    break;
+            break;
+        case 0x31: // JMP
+            maxOps = 1;
+            break;
+        case 0x32: // JAL
+            maxOps = 1;
+            break;
+        case 0x33: // RET
+            maxOps = 0;
+            break;
+        case 0x34: // BEQ
+            maxOps = 3;
+            break;
+        case 0x35: // BNE
+            maxOps = 3;
+            break;
+        case 0x36: // BGT
+            maxOps = 3;
+            break;
+        case 0x37: // BGE
+            maxOps = 3;
+            break;
+        case 0x38: // BIE
+            maxOps = 3;
+            break;
+        case 0x39: // BDE
+            maxOps = 3;
+            break;
+        case 0x3a: // BAO
+            maxOps = 1;
+            break;
+        case 0x3b: // BAC
+            maxOps = 1;
+            break;
+        default: 
+            cout << "Unspecified Instruction...returning 0 for max OPs\n";
+            maxOps = 0;
+            break;
     }
     return maxOps;
 }
@@ -280,52 +280,52 @@ void setAfield(long Afield, BusALU * alu) {
 
     switch(opc) {
         case 0: // No Op
-		break;
-	case 1: // MOV
-		alu->OP1().pullFrom(*sA);
-		alu->OP2().pullFrom(*tA);
-		dA->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_rop1);
-		break;
-	case 2: // SLL
-		alu->OP1().pullFrom(*sA);
-		alu->OP2().pullFrom(*tA);
-		dA->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_lshift);
-		break;
-	case 3: // SRL
-		alu->OP1().pullFrom(*sA);
-		alu->OP2().pullFrom(*tA);
-		dA->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_rshift);
-		break;
-	case 4: // OR
-		alu->OP1().pullFrom(*sA);
-		alu->OP2().pullFrom(*tA);
-		dA->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_or);
-		break;
-	case 5: // SIGN EXTEND
-		alu->OP1().pullFrom(*sA);
-		alu->OP2().pullFrom(*tA);
-		dA->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_extendSign);
-		break;
-	case 6: // XOR
-		alu->OP1().pullFrom(*sA);
-		alu->OP2().pullFrom(*tA);
-		dA->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_xor);
-		break;
-	case 7: // AND
-		alu->OP1().pullFrom(*sA);
-		alu->OP2().pullFrom(*tA);
-		dA->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_and);
-		break;
-	default:
-		cout << "A Field not found!!\n";
-		break;
+            break;
+        case 1: // MOV
+            alu->OP1().pullFrom(*sA);
+            alu->OP2().pullFrom(*tA);
+            dA->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_rop1);
+            break;
+        case 2: // SLL
+            alu->OP1().pullFrom(*sA);
+            alu->OP2().pullFrom(*tA);
+            dA->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_lshift);
+            break;
+        case 3: // SRL
+            alu->OP1().pullFrom(*sA);
+            alu->OP2().pullFrom(*tA);
+            dA->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_rshift);
+            break;
+        case 4: // OR
+            alu->OP1().pullFrom(*sA);
+            alu->OP2().pullFrom(*tA);
+            dA->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_or);
+            break;
+        case 5: // SIGN EXTEND
+            alu->OP1().pullFrom(*sA);
+            alu->OP2().pullFrom(*tA);
+            dA->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_extendSign);
+            break;
+        case 6: // XOR
+            alu->OP1().pullFrom(*sA);
+            alu->OP2().pullFrom(*tA);
+            dA->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_xor);
+            break;
+        case 7: // AND
+            alu->OP1().pullFrom(*sA);
+            alu->OP2().pullFrom(*tA);
+            dA->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_and);
+            break;
+        default:
+            cout << "A Field not found!!\n";
+            break;
     }
 }
 
@@ -351,44 +351,44 @@ void setBfield(long Bfield, BusALU * alu) {
 
     switch(opc) {
         case 0: // No Op
-		break;
-	case 1: // MOV
-		alu->OP1().pullFrom(*sB);
-		alu->OP2().pullFrom(*tB);
-		dB->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_rop1);
-		break;
-	case 2: // CMP
-		alu->OP1().pullFrom(*sB);
-		alu->OP2().pullFrom(*tB);
-		dB->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_not);
-		break;
-	case 3: // Mem Read
-		m.read();
-		SYS[MDR]->latchFrom(m.READ());
-		break;
-	case 4: // Mem Write
-		m.WRITE().pullFrom(*SYS[MDR]);
-		m.write();
-		break;
-	case 5: // SUB
-		alu->OP1().pullFrom(*sB);
-		alu->OP2().pullFrom(*tB);
-		dB->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_sub);
-		break;
-	case 6: // ADD
-		alu->OP1().pullFrom(*sB);
-		alu->OP2().pullFrom(*tB);
-		dB->latchFrom(alu->OUT());
-		alu->perform(BusALU::op_add);
-		break;
-	case 7: // No Op
-		break;
-	default:
-		cout << "B Field not found!!\n";
-		break;
+            break;
+        case 1: // MOV
+            alu->OP1().pullFrom(*sB);
+            alu->OP2().pullFrom(*tB);
+            dB->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_rop1);
+            break;
+        case 2: // CMP
+            alu->OP1().pullFrom(*sB);
+            alu->OP2().pullFrom(*tB);
+            dB->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_not);
+            break;
+        case 3: // Mem Read
+            m.read();
+            SYS[MDR]->latchFrom(m.READ());
+            break;
+        case 4: // Mem Write
+            m.WRITE().pullFrom(*SYS[MDR]);
+            m.write();
+            break;
+        case 5: // SUB
+            alu->OP1().pullFrom(*sB);
+            alu->OP2().pullFrom(*tB);
+            dB->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_sub);
+            break;
+        case 6: // ADD
+            alu->OP1().pullFrom(*sB);
+            alu->OP2().pullFrom(*tB);
+            dB->latchFrom(alu->OUT());
+            alu->perform(BusALU::op_add);
+            break;
+        case 7: // No Op
+            break;
+        default:
+            cout << "B Field not found!!\n";
+            break;
     }
 }
 
@@ -501,70 +501,70 @@ bool Conditional(long cBits) {
 
     switch(type) {
         case 0: // Reg Equal
-		return checkImmRegRef(rs, rT);
-	case 1: // Reg Not Equal
-		return !checkImmRegRef(rs, rT);
-	case 2: // Bits set
-		if(rs->value() & rT == rT) {
-		    return true;
-		}
-		break;
-	case 3: // Bits not set
-		if(rs->value() & rT != rT) {
-		    return true;
-		}
-		break;
-	case 4: // Byte equal
-		if(rs->value() == rT) {
-		    return true;
-		}
-		break;
-	case 5: // Byte Not equal
-		if(rs->value() != rT) {
-		    return true;
-		}
-		break;
-	case 6: // Nybble 1 equal
-		if(rs->value() & 0xf0 == rT) {
-		    return true;
-		}
-		break;
-	case 7: // Nybble 1 not equal
-		if(rs->value() & 0xf0 != rT) {
-		    return true;
-		}
-		break;
-	case 8: // IR 0 Ops
-		IRopc = SYS[IR]->value();
-		if(getMaxOperands(IRopc) == 0) {
-		    return true;
-		}
-		break;
-	case 9: // IR 1 Op
-		IRopc = SYS[IR]->value();
-		if(getMaxOperands(IRopc) == 1) {
-		    return true;
-		}
-		break;
-	case 10: // IR 2 Ops
-		IRopc = SYS[IR]->value();
-		if(getMaxOperands(IRopc) == 2) {
-		    return true;
-		}
-		break;
-	case 11: // IR 3 Ops
-		IRopc = SYS[IR]->value();
-		if(getMaxOperands(IRopc) == 3) {
-		    return true;
-		}
-		break;
-	case 12: // PC Max
-		if(GPR[15]->value() == kMaxAddr) {
-		    return true;
-		}
-		break;
-	default:
-		break;
+            return checkImmRegRef(rs, rT);
+        case 1: // Reg Not Equal
+            return !checkImmRegRef(rs, rT);
+        case 2: // Bits set
+            if(rs->value() & rT == rT) {
+                return true;
+            }
+            break;
+        case 3: // Bits not set
+            if(rs->value() & rT != rT) {
+                return true;
+            }
+            break;
+        case 4: // Byte equal
+            if(rs->value() == rT) {
+                return true;
+            }
+            break;
+        case 5: // Byte Not equal
+            if(rs->value() != rT) {
+                return true;
+            }
+            break;
+        case 6: // Nybble 1 equal
+            if(rs->value() & 0xf0 == rT) {
+                return true;
+            }
+            break;
+        case 7: // Nybble 1 not equal
+            if(rs->value() & 0xf0 != rT) {
+                return true;
+            }
+            break;
+        case 8: // IR 0 Ops
+            IRopc = SYS[IR]->value();
+            if(getMaxOperands(IRopc) == 0) {
+                return true;
+            }
+            break;
+        case 9: // IR 1 Op
+            IRopc = SYS[IR]->value();
+            if(getMaxOperands(IRopc) == 1) {
+                return true;
+            }
+            break;
+        case 10: // IR 2 Ops
+            IRopc = SYS[IR]->value();
+            if(getMaxOperands(IRopc) == 2) {
+                return true;
+            }
+            break;
+        case 11: // IR 3 Ops
+            IRopc = SYS[IR]->value();
+            if(getMaxOperands(IRopc) == 3) {
+                return true;
+            }
+            break;
+        case 12: // PC Max
+            if(GPR[15]->value() == kMaxAddr) {
+                return true;
+            }
+            break;
+        default:
+            break;
     }
     return false;
 }
@@ -636,7 +636,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
 			case 3: // Conditional 
 				cout << "Conditional!\n";
 				cBits = CU_DATA_SIZE-3;
-					if(Conditional(cBits)) {
+                if(Conditional(cBits)) {
 					ALU1.IN1().pullFrom(*SYS[uIR]);
 					SYS[uPC]->latchFrom(ALU1.OUT());
 				}
