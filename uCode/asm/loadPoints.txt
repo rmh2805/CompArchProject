@@ -1,4 +1,17 @@
-halt 0
-fetch 0
-decode 1000
-fetchoperands 1000
+Fetch           0
+    InterpOperand   1A
+    InterpDmp       2B
+    InterpAdd       2E
+    InterpMul       34
+    InterpMul1      3B
+    InterpMul2      3E
+    InterpDiv       40
+    InterpDiv1      47
+    InterpDiv2      4C
+    InterpCmp       4E
+    InterpCpy       51
+    InterpCpy1      55
+    InterpBeq       56
+GetOperand      FFFFFFFF
+Decode          FFFFFFFF
+halt            FFFFFFFF

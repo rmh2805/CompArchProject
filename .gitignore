@@ -1,9 +1,11 @@
 *.o
 *.yy.c
 
-Assembler/*.asm
-Assembler/*.obj
-Assembler/tokenizer
-Assembler/__pycache__
+Asm/*.asm
+Asm/*.obj
+Asm/Assembler/tokenizer
+Asm/Assembler/__pycache__
+Asm/uAsm/tokenizer
+ASm/uAsm/__pycache__
 
 src/main

@@ -16,8 +16,8 @@
 ","                         {}
 ";"                         {}
 
-\/\/[ \tA-Za-z0-9_]*\n        {printf("EOL\n");}
-#[ \tA-Za-z0-9_]*\n         {printf("EOL\n");}
+\/\/[ \tA-Za-z0-9_:\<\>\-\+=,]*\n        {printf("EOL\n");}
+#[ \tA-Za-z0-9_:\<\>\-\+=,]*\n         {printf("EOL\n");}
 \n                          {printf("EOL\n");}
 
     /* Misc */
