@@ -98,6 +98,7 @@ void connect() {
     SYS[uPC]->connectsTo(ALU1.OUT());
     SYS[uPC]->connectsTo(ALU2.OUT());
     SYS[uPC]->connectsTo(ALU1.OP1());
+    SYS[uPC]->connectsTo(ALU2.OP1());
     SYS[uPC]->connectsTo(control_storage.READ());
 
     // IR setup
@@ -105,9 +106,9 @@ void connect() {
     SYS[IR]->connectsTo(ALU2.OUT());
 
     //uIR setup
-    SYS[uIR]->connectsTo(control_storage.READ());
-    SYS[uIR]->connectsTo(ALU1.OP1());
-    SYS[uIR]->connectsTo(ALU1.IN1());
+	SYS[uIR]->connectsTo(control_storage.READ());
+	SYS[uIR]->connectsTo(ALU1.OP1());
+	SYS[uIR]->connectsTo(ALU1.IN1());
 
     // Connect GPRs 
     for(int i = 0; i < 16; i++) {
