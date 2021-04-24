@@ -598,6 +598,9 @@ void execute(const char * codeFile, const char * uCodeFile) {
 	// Read Value from CS into uIR
 	control_storage.read();
 	SYS[uIR]->latchFrom(control_storage.READ()); 
+	Clock::tick();
+
+	// Can Print uPC, uIR
 	
 	// Execute
 	long prefix = (*SYS[uIR])(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
