@@ -222,6 +222,7 @@ void setAfield(long Afield, BusALU * alu) {
 		alu->perform(BusALU::op_and);
 		break;
 	default:
+		cout << "A Field not found!!\n";
 		break;
     }
 }
@@ -284,6 +285,7 @@ void setBfield(long Bfield, BusALU * alu) {
 	case 7: // No Op
 		break;
 	default:
+		cout << "B Field not found!!\n";
 		break;
     }
 }
@@ -379,46 +381,71 @@ bool checkImmRegRef(StorageObject * rs, long rT) {
 }
 
 bool Conditional(long cBits) {
+    // Note: rT here either equals an 8 bit immediate or an 8 bit reference to an IMM register
+    // Because of this Case 2-7 will just compare between rs->value() and rT directly.
+    // If necessary we can implement this in a Constant style switch statement from 0-255.
+    // We are also doing simple bit twiddling with rs as well. This is done because we 
+    // believe that this would be accomplished with simple wire truncation and standard
+    // hardware practices that wouldn't require an ALU in real hardware. 
     long rT = (*SYS[uIR])(CU_DATA_SIZE-cBits-1, CU_DATA_SIZE-cBits-8); // 8 bits
     long rS = (*SYS[uIR])(CU_DATA_SIZE-cBits-9, CU_DATA_SIZE-cBits-14);
     long type = (*SYS[uIR])(CU_DATA_SIZE-cBits-17, CU_DATA_SIZE-cBits-20);
 
     StorageObject * rs;
-    StorageObject * rt;
 
     // Setup rS pointer
     rs = snagReg(rS);
 
     switch(type) {
         case 0: // Reg Equal
-		// Switch on RT
 		return checkImmRegRef(rs, rT);
 	case 1: // Reg Not Equal
-		// Switch on RT
 		return !checkImmRegRef(rs, rT);
 	case 2: // Bits set
+		if(rs->value() & rT == rT) {
+		    return true;
+		}
 		break;
 	case 3: // Bits not set
+		if(rs->value() & rT != rT) {
+		    return true;
+		}
 		break;
 	case 4: // Byte equal
+		if(rs->value() == rT) {
+		    return true;
+		}
 		break;
 	case 5: // Byte Not equal
+		if(rs->value() != rT) {
+		    return true;
+		}
 		break;
 	case 6: // Nybble 1 equal
+		if(rs->value() & 0xf0 == rT) {
+		    return true;
+		}
 		break;
 	case 7: // Nybble 1 not equal
+		if(rs->value() & 0xf0 != rT) {
+		    return true;
+		}
 		break;
-	case 8:
+	case 8: // IR 0 Ops
 		break;
-	case 9:
+	case 9: // IR 1 Op
 		break;
-	case 10:
+	case 10: // IR 2 Ops
 		break;
-	case 11:
+	case 11: // IR 3 Ops
 		break;
-	case 12:
+	case 12: // PC Max
+		if(GPRS[15].value() == kMaxAddr) {
+		    return true;
+		}
 		break;
 	default:
+		cout << "Conditional check did not match proper type!\n";
 		break;
     }
     return false;
@@ -482,6 +509,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
 		}
 		break;
 	     default:
+		cout << "Prefix not found!\n";
 		break;
 	}
 	Clock::tick(); // Tick our clock
