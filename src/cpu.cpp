@@ -68,7 +68,7 @@ StorageObject * SYS[23] = {
     new StorageObject("OP2Scale", kRegSize),
     new StorageObject("OP3Scale", kRegSize),
     new StorageObject("OP4Scale", kRegSize),
-    new StorageObject("IR", kRegSize),
+    new StorageObject("IR", kDataBusSize),
     new StorageObject("uIR", CU_DATA_SIZE),
     new StorageObject("uTmp", kRegSize),
     new StorageObject("uRet2", kRegSize),
@@ -154,6 +154,108 @@ StorageObject * snagReg(long regNum) {
 	cout << "PANIC!\n";
 	return NULL;
     }
+}
+
+int getMaxOperands(long opc) {
+
+    int maxOps;
+    switch(opc) {
+	case 0x0: // HLT
+	    maxOps = 0;
+	    break;
+	case 0x1: // NOP
+	    maxOps = 0;
+	    break;
+	case 0x2: // CLR
+	    maxOps = 1;
+	    break;
+	case 0x3: // DMP
+	    maxOps = 1;
+	    break;
+	case 0x4: // OUT
+	    maxOps = 2;
+	    break;
+	case 0x10: // ADD
+	    maxOps = 3;
+	    break;
+	case 0x11: // SUB
+	    maxOps = 3;
+	    break;
+	case 0x12: // MUL
+	    maxOps = 4;
+	    break;
+	case 0x13: // DIV
+	    maxOps = 4;
+	    break;
+	case 0x14: // MOD
+	    maxOps = 3;
+	    break;
+	case 0x15: // AND
+	    maxOps = 3;
+	    break;
+	case 0x16: // OR
+	    maxOps = 3;
+	    break;
+	case 0x17: // XOR
+	    maxOps = 3;
+	    break;
+	case 0x18: // CMP
+	    maxOps = 2;
+	    break;
+	case 0x19: // INC
+	    maxOps = 1;
+	    break;
+	case 0x1A: // DEC
+	    maxOps = 1;
+	    break;
+        case 0x20: // MOV
+    	    maxOps = 2;
+	    break;
+        case 0x21: // SWP
+            maxOps = 2;	    
+	    break;
+        case 0x22: // CPY
+            maxOps = 4;    
+	    break;
+	case 0x31: // JMP
+	    maxOps = 1;
+	    break;
+	case 0x32: // JAL
+	    maxOps = 1;
+	    break;
+	case 0x33: // RET
+	    maxOps = 0;
+	    break;
+	case 0x34: // BEQ
+	    maxOps = 3;
+	    break;
+	case 0x35: // BNE
+	    maxOps = 3;
+	    break;
+	case 0x36: // BGT
+	    maxOps = 3;
+	    break;
+	case 0x37: // BGE
+	    maxOps = 3;
+	    break;
+	case 0x38: // BIE
+	    maxOps = 3;
+	    break;
+	case 0x39: // BDE
+	    maxOps = 3;
+	    break;
+	case 0x3a: // BAO
+	    maxOps = 1;
+	    break;
+	case 0x3b: // BAC
+	    maxOps = 1;
+	    break;
+	default: 
+	    cout << "Unspecified Instruction...returning 0 for max OPs\n";
+	    maxOps = 0;
+	    break;
+    }
+    return maxOps;
 }
 
 void setAfield(long Afield, BusALU * alu) {
@@ -395,6 +497,7 @@ bool Conditional(long cBits) {
 
     // Setup rS pointer
     rs = snagReg(rS);
+    long IRopc;
 
     switch(type) {
         case 0: // Reg Equal
@@ -432,20 +535,35 @@ bool Conditional(long cBits) {
 		}
 		break;
 	case 8: // IR 0 Ops
+		IRopc = SYS[IR]->value();
+		if(getMaxOperands(IRopc) == 0) {
+		    return true;
+		}
 		break;
 	case 9: // IR 1 Op
+		IRopc = SYS[IR]->value();
+		if(getMaxOperands(IRopc) == 1) {
+		    return true;
+		}
 		break;
 	case 10: // IR 2 Ops
+		IRopc = SYS[IR]->value();
+		if(getMaxOperands(IRopc) == 2) {
+		    return true;
+		}
 		break;
 	case 11: // IR 3 Ops
+		IRopc = SYS[IR]->value();
+		if(getMaxOperands(IRopc) == 3) {
+		    return true;
+		}
 		break;
 	case 12: // PC Max
-		if(GPRS[15].value() == kMaxAddr) {
+		if(GPR[15]->value() == kMaxAddr) {
 		    return true;
 		}
 		break;
 	default:
-		cout << "Conditional check did not match proper type!\n";
 		break;
     }
     return false;
