@@ -582,6 +582,11 @@ void execute(const char * codeFile, const char * uCodeFile) {
     cout << "Entering main Execute Loop\n";
     while(true) { 
 
+	// Check if we are at 0xFFFFFFFF
+	if(SYS[uPC]->value() == 0xffffffff) {
+		cout << "HALTING!\n";
+		break;
+	}
 	// Increment Program Counter and store in uPC and MAR
 	ALU1.OP1().pullFrom(*SYS[uPC]);
 	ALU1.OP2().pullFrom(*IMM[1]);
@@ -603,24 +608,28 @@ void execute(const char * codeFile, const char * uCodeFile) {
 	// Get prefix (first 2 bits of uIR)
 	switch(prefix) {
 	    case 0: // Parallel Operations
+		cout << "Parallel Ops\n";
 		aBits = CU_DATA_SIZE-3;
 		bBits = CU_DATA_SIZE-24;
 		setAfield(aBits, &ALU1);
 		setBfield(bBits, &ALU2);
 		break;
 	    case 1: // A Field jump
+		cout << "A Field Jump\n";
 		aBits = CU_DATA_SIZE-3;
 		setAfield(aBits, &ALU2);
 		ALU1.IN1().pullFrom(*SYS[uIR]);
 		SYS[uPC]->latchFrom(ALU1.OUT());
 		break;
 	    case 2: // B Field jump
+		cout << "B field jump\n";
 		bBits = CU_DATA_SIZE-3;
 		setBfield(bBits, &ALU2);
 		ALU1.IN1().pullFrom(*SYS[uIR]);
 		SYS[uPC]->latchFrom(ALU1.OUT());
 		break;
 	     case 3: // Conditional 
+		cout << "Conditional!\n";
 		cBits = CU_DATA_SIZE-3;
 	        if(Conditional(cBits)) {
 		    ALU1.IN1().pullFrom(*SYS[uIR]);
