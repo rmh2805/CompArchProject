@@ -112,6 +112,59 @@
     0x3F mov OP2Val i0; mov OP2Type i8
     0x40 mov OP2Scale i0; goto Decode
 
+# InterpDiv:
+    0x41 if eq OP1Type i0 halt
+    0x42 if eq OP2Type i0 halt
+    0x43 if nEq OP3Type i0 InterpDiv1
+
+    # Interp DIV from 2 ops
+    # OP 3 <- OP 1, OP 4 <- OP 2
+    0x44 mov OP3Val OP1Val; mov OP4Val OP2Val
+    0x45 mov OP3Type OP1Type; mov OP4Type OP2Type
+    0x46 mov OP3Scale OP1Scale; mov OP4Scale OP2Scale
+
+    0x47 none; goto Decode
+
+# InterpDiv1:
+    # Interpret DIV from 3 ops
+    # OP 3 <- OP 2, OP 4 <- OP 3
+    0x48 mov OP3Val OP2Val; mov OP4Val OP3Val
+    0x49 mov OP3Type OP2Type; mov OP4Type OP3Type
+    0x4A mov OP3Scale OP2Scale; mov OP4Scale OP3Scale
+
+    # If Op 2 is an immediate, Op 2 <- Op 4
+    0x4B if nyb OP2Type 0x10 InterpDiv2
+    0x4C if nNyb OP2Type 0x20 Decode
+
+# InterpDiv2:
+    0x4D mov OP2Val OP4Val; mov OP2Type OP4Type
+    0x4E mov OP2Scale OP4Scale; goto Decode
+
+# InterpCmp:
+    0x4F if eq OP1Type i0 halt
+
+    # OP 2 <- OP 1
+    0x50 mov OP2Type OP1Type; mov OP2Val OP1Val
+    0x51 mov OP2Scale OP1Scale; goto Decode
+
+# InterpCpy:
+    0x52 if eq OP2Type i0 halt
+    0x53 if eq OP2Type i0 halt
+    0x54 if nEq OP3Type i0 InterpCpy1
+
+    0x55 mov OP3Type i8; none
+# InterpCpy1:
+    0x56 mov OP4Type i8; goto Decode
+
+# InterpBeq:
+    0x57 if eq OP1Type i0 halt
+    
+    # OP 3 <- OP 2
+    0x58 mov OP3Type OP2Type; mov OP3Val OP2Val
+    0x59 mov OP3Scale OP2Scale; none
+
+    # OP 2 <- 0
+    0x5A mov OP3Type i8; goto Decode
 
 
 

@@ -5,10 +5,13 @@ Fetch           0
     InterpMul       34
     InterpMul1      3B
     InterpMul2      3E
-    InterpDiv       FFFFFFFF
-    InterpCmp       FFFFFFFF
-    InterpCpy       FFFFFFFF
-    InterpBeq       FFFFFFFF
-Decode          FFFFFFFF
+    InterpDiv       40
+    InterpDiv1      47
+    InterpDiv2      4C
+    InterpCmp       4E
+    InterpCpy       51
+    InterpCpy1      55
+    InterpBeq       56
 GetOperand      FFFFFFFF
+Decode          FFFFFFFF
 halt            FFFFFFFF
