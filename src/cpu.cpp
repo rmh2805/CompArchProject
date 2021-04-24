@@ -582,12 +582,6 @@ void execute(const char * codeFile, const char * uCodeFile) {
     
     cout << "Entering main Execute Loop\n";
     while(true) { 
-		// Check if we are at 0xFFFFFFFF
-		if(SYS[uPC]->value() == 0xffffffff) {
-			cout << "HALTING!\n";
-			break;
-		}
-		
 		// Increment Program Counter and store in uPC and MAR
 		ALU1.OP1().pullFrom(*SYS[uPC]);
 		ALU1.OP2().pullFrom(*IMM[1]);
@@ -596,12 +590,19 @@ void execute(const char * codeFile, const char * uCodeFile) {
 		SYS[uPC]->latchFrom(ALU1.OUT());
 		Clock::tick();
 		
+		// Check if we were at 0xFFFFFFFF
+		if(SYS[uPC]->value() == 0) {
+			cout << "HALTING!\n";
+			break;
+		}
+
 		// Read Value from CS into uIR
 		control_storage.read();
 		SYS[uIR]->latchFrom(control_storage.READ()); 
 		Clock::tick();
 
 		// Can Print uPC, uIR
+		cout << "\t" << uPC->value() << ": ";
 		
 		// Execute
 		long prefix = (*SYS[uIR])(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
