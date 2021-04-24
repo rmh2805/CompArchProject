@@ -107,6 +107,7 @@ void connect() {
     //uIR setup
     SYS[uIR]->connectsTo(control_storage.READ());
     SYS[uIR]->connectsTo(ALU1.OP1());
+    SYS[uIR]->connectsTo(ALU1.IN1());
 
     // Connect GPRs 
     for(int i = 0; i < 16; i++) {
@@ -147,8 +148,11 @@ StorageObject * snagReg(long regNum) {
         return IMM[regNum];
     } else if (regNum <= 0x2f) {
         return SYS[regNum - 16];
-    } else {
+    } else if (regNum <= 0x3f) {
         return GPR[regNum - 48];
+    } else {
+	cout << "PANIC!\n";
+	return NULL;
     }
 }
 
@@ -284,6 +288,96 @@ void setBfield(long Bfield, BusALU * alu) {
     }
 }
 
+bool checkImmRegRef(StorageObject * rs, long rT) {
+	switch (rT) {
+	    case 0:
+		    if (rs->value() == 0) {
+		        return true;
+		    }
+		    break;
+	    case 0x01:
+		    if (rs->value() == 0x01) {
+		        return true;
+		    }
+		    break;
+ 	    case 0x02:
+		    if (rs->value() == 0xFFFFFF00) {
+		        return true;
+		    }
+		    break;
+ 	    case 0x03:
+		    if (rs->value() == 0x1F) {
+		        return true;
+		    }
+		    break;
+ 	    case 0x04:
+		    if (rs->value() == 0x0000FFFF) {
+			return true;
+		    }
+		    break;
+ 	    case 0x05:
+		    if (rs->value() == 0x00FFFFFF) {
+			return true;
+		    }
+		    break;
+ 	    case 0x06:
+		    if (rs->value() == 0x0C) {
+			return true;
+		    }
+		    break;
+ 	    case 0x07:
+		    if (rs->value() == 0x03) {
+			return true;
+		    }
+		    break;
+ 	    case 0x08:
+		    if (rs->value() == 0x10) {
+			return true;
+		    }
+		    break;
+ 	    case 0x09:
+		    if (rs->value() == 0xFF) {
+			return true;
+		    }
+		    break;
+ 	    case 0xa:
+		    if (rs->value() == 0x0F) {
+			return true;
+		    }
+		    break;
+ 	    case 0xb:
+		    if (rs->value() == 0x08) {
+			return true;
+		    }
+		    break;
+ 	    case 0xc:
+		    if (rs->value() == 0x10) {
+			return true;
+		    }
+		    break;
+ 	    case 0xd:
+		    if (rs->value() == 0x04) {
+			return true;
+		    }
+		    break;
+ 	    case 0xe:
+		    if (rs->value() == 0x0D) {
+			return true;
+		    }
+		    break;
+ 	    case 0xf:
+		    if (rs->value() == 0x18) {
+			return true;
+		    }
+		    break;
+	    default: 
+		    cout << "PANIC: We couldn't find an IMM Reg \n";
+		    break;
+
+	}
+	return false;
+}
+
 bool Conditional(long cBits) {
     long rT = (*SYS[uIR])(CU_DATA_SIZE-cBits-1, CU_DATA_SIZE-cBits-8); // 8 bits
     long rS = (*SYS[uIR])(CU_DATA_SIZE-cBits-9, CU_DATA_SIZE-cBits-14);
@@ -297,11 +391,11 @@ bool Conditional(long cBits) {
 
     switch(type) {
         case 0: // Reg Equal
-		rt = snagReg(rT);
-		break;
+		// Switch on RT
+		return checkImmRegRef(rs, rT);
 	case 1: // Reg Not Equal
-		rt = snagReg(rT);
-		break;
+		// Switch on RT
+		return !checkImmRegRef(rs, rT);
 	case 2: // Bits set
 		break;
 	case 3: // Bits not set
@@ -327,6 +421,7 @@ bool Conditional(long cBits) {
 	default:
 		break;
     }
+    return false;
 }
 
 void execute(const char * codeFile, const char * uCodeFile) {
@@ -381,7 +476,10 @@ void execute(const char * codeFile, const char * uCodeFile) {
 		break;
 	     case 3: // Conditional 
 		cBits = CU_DATA_SIZE-3;
-	        Conditional(cBits);
+	        if(Conditional(cBits)) {
+		    ALU1.IN1().pullFrom(*SYS[uIR]);
+		    SYS[uPC]->latchFrom(ALU1.OUT());
+		}
 		break;
 	     default:
 		break;
