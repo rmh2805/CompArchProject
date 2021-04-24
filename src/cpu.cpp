@@ -602,7 +602,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
         Clock::tick();
 
         // Can Print uPC, uIR
-        cout << "\t" << uPC->value() << ": ";
+        cout << "\t" << SYS[uPC]->value() << ": ";
         
         // Execute
         long prefix = (*SYS[uIR])(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
