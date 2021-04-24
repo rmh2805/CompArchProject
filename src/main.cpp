@@ -5,7 +5,7 @@
 
 int main(int argc, char** argv) {
 
-    CPUObject::debug |= CPUObject::trace | CPUObject::memload;
+    //CPUObject::debug |= CPUObject::trace | CPUObject::memload;
     cout << hex;
 
     if(argc <= 1 || argc > 3) {
