@@ -37,7 +37,7 @@ const size_t kRegSize = 32;
 
 const size_t CU_DATA_SIZE = 55;
 
-const size_t kMaxAddr = int(pow(2, kAddrBusSize)) - 1;
+const size_t kMaxAddr = int(pow(2, 20)) - 1;
 
 // Memory
 extern Memory m;

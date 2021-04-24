@@ -44,8 +44,8 @@ StorageObject * IMM[16] = {
     new StorageObject("ImmF", kRegSize, 0x18),
 };
 
-Memory m("Main Memory", kAddrBusSize, kDataBusSize);
-Memory control_storage("Control Storage", CU_DATA_SIZE, CU_DATA_SIZE);
+Memory m("Main Memory", kAddrBusSize, kDataBusSize, kMaxAddr, 1, true);
+Memory control_storage("Control Storage", CU_DATA_SIZE, CU_DATA_SIZE, kMaxAddr, 1, true);
 
 // System Registers
 StorageObject * SYS[23] = {
@@ -260,10 +260,10 @@ int getMaxOperands(long opc) {
 
 void setAfield(long Afield, BusALU * alu) {
 
-    long opc = (*SYS[uIR])(CU_DATA_SIZE-Afield, CU_DATA_SIZE-Afield-2);
-    long rdA = (*SYS[uIR])(CU_DATA_SIZE-Afield-3, CU_DATA_SIZE-Afield-8);
-    long rsA = (*SYS[uIR])(CU_DATA_SIZE-Afield-9, CU_DATA_SIZE-Afield-14);
-    long rtA = (*SYS[uIR])(CU_DATA_SIZE-Afield-15 , CU_DATA_SIZE-Afield-20);
+    long opc = (*SYS[uIR])(Afield, Afield-2);
+    long rdA = (*SYS[uIR])(Afield-3, Afield-8);
+    long rsA = (*SYS[uIR])(Afield-9, Afield-14);
+    long rtA = (*SYS[uIR])(Afield-15, Afield-20);
 
     StorageObject * dA;
     StorageObject * sA;
@@ -331,10 +331,10 @@ void setAfield(long Afield, BusALU * alu) {
 
 void setBfield(long Bfield, BusALU * alu) {
 
-    long opc = (*SYS[uIR])(CU_DATA_SIZE-Bfield, CU_DATA_SIZE-Bfield-2);
-    long rdB = (*SYS[uIR])(CU_DATA_SIZE-Bfield-3, CU_DATA_SIZE-Bfield-8);
-    long rsB = (*SYS[uIR])(CU_DATA_SIZE-Bfield-9, CU_DATA_SIZE-Bfield-14);
-    long rtB = (*SYS[uIR])(CU_DATA_SIZE-Bfield-15 , CU_DATA_SIZE-Bfield-20);
+    long opc = (*SYS[uIR])(Bfield, Bfield-2);
+    long rdB = (*SYS[uIR])(Bfield-3, Bfield-8);
+    long rsB = (*SYS[uIR])(Bfield-9, Bfield-14);
+    long rtB = (*SYS[uIR])(Bfield-15 , Bfield-20);
 
     StorageObject * dB;
     StorageObject * sB;
@@ -579,6 +579,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
     SYS[uPC]->latchFrom(control_storage.READ());
     Clock::tick();
     
+    cout << "Entering main Execute Loop\n";
     while(true) { 
 
 	// Increment Program Counter and store in uPC and MAR

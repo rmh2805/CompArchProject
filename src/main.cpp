@@ -4,6 +4,10 @@
 #define kDefMicroCode "uCode.obj"
 
 int main(int argc, char** argv) {
+
+    CPUObject::debug |= CPUObject::trace | CPUObject::memload;
+    cout << hex;
+
     if(argc <= 1 || argc > 3) {
         cout << "Usage: " << argv[0] << " <code file> [microcode file]" << endl;
         return EXIT_FAILURE;
