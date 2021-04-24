@@ -6,7 +6,7 @@
                                             // Load instruction into IR
     0x03 mov mar pc;     none
     0x04 read;           none
-    0x05 mov mdr ir;     none
+    0x05 mov ir mdr;     none
 
 # FetchOperands:
     0x06 if noops goto Decode               // Skip opernads if there are none
