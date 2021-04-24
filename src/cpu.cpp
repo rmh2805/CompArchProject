@@ -98,6 +98,7 @@ void connect() {
     SYS[uPC]->connectsTo(ALU1.OUT());
     SYS[uPC]->connectsTo(ALU2.OUT());
     SYS[uPC]->connectsTo(ALU1.OP1());
+    SYS[uPC]->connectsTo(ALU2.OP1());
     SYS[uPC]->connectsTo(control_storage.READ());
 
     // IR setup
@@ -105,39 +106,39 @@ void connect() {
     SYS[IR]->connectsTo(ALU2.OUT());
 
     //uIR setup
-    SYS[uIR]->connectsTo(control_storage.READ());
-    SYS[uIR]->connectsTo(ALU1.OP1());
-    SYS[uIR]->connectsTo(ALU1.IN1());
+	SYS[uIR]->connectsTo(control_storage.READ());
+	SYS[uIR]->connectsTo(ALU1.OP1());
+	SYS[uIR]->connectsTo(ALU1.IN1());
 
     // Connect GPRs 
     for(int i = 0; i < 16; i++) {
-	GPR[i]->connectsTo(ALU1.OUT());
-	GPR[i]->connectsTo(ALU2.OUT());
-	GPR[i]->connectsTo(ALU1.OP1());
-	GPR[i]->connectsTo(ALU1.OP2());
-	GPR[i]->connectsTo(ALU2.OP1());
-	GPR[i]->connectsTo(ALU2.OP2());
+		GPR[i]->connectsTo(ALU1.OUT());
+		GPR[i]->connectsTo(ALU2.OUT());
+		GPR[i]->connectsTo(ALU1.OP1());
+		GPR[i]->connectsTo(ALU1.OP2());
+		GPR[i]->connectsTo(ALU2.OP1());
+		GPR[i]->connectsTo(ALU2.OP2());
     }
 
     // Connect Immediate registers
     for(int i = 0; i < 16; i++) {
-	IMM[i]->connectsTo(ALU1.OP1());
-	IMM[i]->connectsTo(ALU1.OP2());
-	IMM[i]->connectsTo(ALU2.OP1());
-	IMM[i]->connectsTo(ALU2.OP2());
+		IMM[i]->connectsTo(ALU1.OP1());
+		IMM[i]->connectsTo(ALU1.OP2());
+		IMM[i]->connectsTo(ALU2.OP1());
+		IMM[i]->connectsTo(ALU2.OP2());
     }
 
     // Basic connect for Systems Registers to ALU
     for(int i = 0; i < 23; i++) {
-	if (i == MDR || i == IR || i == uIR || i == uPC ) {
-		continue;
-	}
-	SYS[i]->connectsTo(ALU1.OUT());
-	SYS[i]->connectsTo(ALU2.OUT());
-	SYS[i]->connectsTo(ALU1.OP1());
-	SYS[i]->connectsTo(ALU1.OP2());
-	SYS[i]->connectsTo(ALU2.OP1());
-	SYS[i]->connectsTo(ALU2.OP2());
+		if (i == MDR || i == IR || i == uIR || i == uPC ) {
+			continue;
+		}
+		SYS[i]->connectsTo(ALU1.OUT());
+		SYS[i]->connectsTo(ALU2.OUT());
+		SYS[i]->connectsTo(ALU1.OP1());
+		SYS[i]->connectsTo(ALU1.OP2());
+		SYS[i]->connectsTo(ALU2.OP1());
+		SYS[i]->connectsTo(ALU2.OP2());
     }
 
 }
