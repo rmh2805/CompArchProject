@@ -489,9 +489,9 @@ bool Conditional(long cBits) {
     // We are also doing simple bit twiddling with rs as well. This is done because we 
     // believe that this would be accomplished with simple wire truncation and standard
     // hardware practices that wouldn't require an ALU in real hardware. 
-    long rT = (*SYS[uIR])(CU_DATA_SIZE-cBits-1, CU_DATA_SIZE-cBits-8); // 8 bits
-    long rS = (*SYS[uIR])(CU_DATA_SIZE-cBits-9, CU_DATA_SIZE-cBits-14);
-    long type = (*SYS[uIR])(CU_DATA_SIZE-cBits-17, CU_DATA_SIZE-cBits-20);
+    long rT = (*SYS[uIR])(cBits-1, cBits-8); // 8 bits
+    long rS = (*SYS[uIR])(cBits-9, cBits-14);
+    long type = (*SYS[uIR])(cBits-17, cBits-20);
 
     StorageObject * rs;
 
