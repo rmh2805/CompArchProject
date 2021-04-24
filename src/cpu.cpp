@@ -141,6 +141,17 @@ void connect() {
 
 }
 
+StorageObject * snagReg(long regNum) {
+    // Get register from number
+    if(regNum <= 0x0f) {
+        return IMM[regNum];
+    } else if (regNum <= 0x2f) {
+        return SYS[regNum - 16];
+    } else {
+        return GPR[regNum - 48];
+    }
+}
+
 void setAfield(long Afield, BusALU * alu) {
 
     long opc = (*SYS[uIR])(CU_DATA_SIZE-Afield, CU_DATA_SIZE-Afield-2);
@@ -153,31 +164,13 @@ void setAfield(long Afield, BusALU * alu) {
     StorageObject * tA;
 
     // Setup rdA pointer
-    if(rdA <= 0x0f) {
-        dA = IMM[rdA];
-    } else if (rdA <= 0x2f) {
-        dA = SYS[rdA];
-    } else {
-        dA = GPR[rdA];
-    }
+    dA = snagReg(rdA);
 
     // Setup rsA pointer
-    if(rsA <= 0x0f) {
-        sA = IMM[rsA];
-    } else if (rsA <= 0x2f) {
-        sA = SYS[rsA];
-    } else {
-        sA = GPR[rsA];
-    }
+    sA = snagReg(rsA);
 
     // Setup rsA pointer
-    if(rtA <= 0x0f) {
-        tA = IMM[rtA];
-    } else if (rtA <= 0x2f) {
-        tA = SYS[rtA];
-    } else {
-        tA = GPR[rtA];
-    }
+    tA = snagReg(rtA);
 
     switch(opc) {
         case 0: // No Op
@@ -241,31 +234,13 @@ void setBfield(long Bfield, BusALU * alu) {
     StorageObject * tB;
 
     // Setup rdB pointer
-    if(rdB <= 0x0f) {
-        dB = IMM[rdB];
-    } else if (rdB <= 0x2f) {
-        dB = SYS[rdB];
-    } else {
-        dB = GPR[rdB];
-    }
+    dB = snagReg(rdB);
 
     // Setup rsB pointer
-    if(rsB <= 0x0f) {
-        sB = IMM[rsB];
-    } else if (rsB <= 0x2f) {
-        sB = SYS[rsB];
-    } else {
-        sB = GPR[rsB];
-    }
+    sB = snagReg(rsB);
 
-    // Setup rsB pointer
-    if(rtB <= 0x0f) {
-        tB = IMM[rtB];
-    } else if (rtB <= 0x2f) {
-        tB = SYS[rtB];
-    } else {
-        tB = GPR[rtB];
-    }
+    // Setup rtB pointer
+    tB = snagReg(rtB);
 
     switch(opc) {
         case 0: // No Op
@@ -309,6 +284,51 @@ void setBfield(long Bfield, BusALU * alu) {
     }
 }
 
+bool Conditional(long cBits) {
+    long rT = (*SYS[uIR])(CU_DATA_SIZE-cBits-1, CU_DATA_SIZE-cBits-8); // 8 bits
+    long rS = (*SYS[uIR])(CU_DATA_SIZE-cBits-9, CU_DATA_SIZE-cBits-14);
+    long type = (*SYS[uIR])(CU_DATA_SIZE-cBits-17, CU_DATA_SIZE-cBits-20);
+
+    StorageObject * rs;
+    StorageObject * rt;
+
+    // Setup rS pointer
+    rs = snagReg(rS);
+
+    switch(type) {
+        case 0: // Reg Equal
+		rt = snagReg(rT);
+		break;
+	case 1: // Reg Not Equal
+		rt = snagReg(rT);
+		break;
+	case 2: // Bits set
+		break;
+	case 3: // Bits not set
+		break;
+	case 4: // Byte equal
+		break;
+	case 5: // Byte Not equal
+		break;
+	case 6: // Nybble 1 equal
+		break;
+	case 7: // Nybble 1 not equal
+		break;
+	case 8:
+		break;
+	case 9:
+		break;
+	case 10:
+		break;
+	case 11:
+		break;
+	case 12:
+		break;
+	default:
+		break;
+    }
+}
+
 void execute(const char * codeFile, const char * uCodeFile) {
     // Load the object files
     m.load(codeFile);
@@ -337,6 +357,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
 	long prefix = (*SYS[uIR])(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
 	long aBits;
 	long bBits;
+	long cBits;
 	
 	// Get prefix (first 2 bits of uIR)
 	switch(prefix) {
@@ -359,6 +380,9 @@ void execute(const char * codeFile, const char * uCodeFile) {
 		SYS[uPC]->latchFrom(ALU1.OUT());
 		break;
 	     case 3: // Conditional 
+		cBits = CU_DATA_SIZE-3;
+	        Conditional(cBits);
+		break;
 	     default:
 		break;
 	}
