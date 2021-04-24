@@ -82,7 +82,7 @@ FetchOpReg2:
 
 FetchOpIdx:
     # Skip grabbing the first register byte if not specified
-    if uR0 & 0x0C == 0x0C, goto FetchOpIdx2
+    if uR0 & 0x0C != 0x0C, goto FetchOpIdx2
      
     IncPC, IncPC                        # Halt on PC overflow, else increment
     MAR <- PC, <No OP>                  # Prepare to grab the next byte
@@ -91,11 +91,11 @@ FetchOpIdx:
     
 FetchOpIdx2:
     <No Op>, uR1 <- uR1 << 0x08
-    if uR0 & 0x03 == 0x03, goto  uRet   # Possibly skip mem read
+    if uR0 & 0x03 != 0x03, goto  uRet   # Possibly skip mem read
 
     IncPC, IncPC                        # Halt on PC overflow, else increment
     MAR <- PC, <No OP>                  # Prepare to grab the next byte 
-    MDR <- Mem[MAR], uR1 <- uR1 << 0x08 # Grab next byte and prepare space 
+    MDR <- Mem[MAR], <No Op>            # Grab next byte and prepare space 
     uR1 <- uR1 | MDR, <No OP>           # Incorporate IMM byte into return
     
     uPC <- uRet, <No OP>                # Return
@@ -103,7 +103,7 @@ FetchOpIdx2:
 FetchOpDsp:
     uR0 <- uR0 & 0x00FFFFFF, uCnt <- 0  # Clear the MSB of uR0 and the count reg
     
-    # Skip to grabbing IMM if not specified
+    # Skip to grabbing reg byte if not specified
     if MDR & 0x0C == 0x0C, goto FetchOpImm
 
     IncPC, IncPC                        # Halt on PC overflow, else increment

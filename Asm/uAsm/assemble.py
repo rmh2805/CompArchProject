@@ -110,8 +110,8 @@ def getLine():
 
 regMap = {'i0': 0x00, 'i1': 0x01, 'i2': 0x02, 'i3': 0x03,
           'i4': 0x04, 'i5': 0x05, 'i6': 0x06, 'i7': 0x07,
-          'i8': 0x08, 'i9': 0x09, 'ia': 0x0A, 'iB': 0x0B,
-          'ic': 0x0C, 'iD': 0x0D, 'ie': 0x0E, 'iF': 0x0F,
+          'i8': 0x08, 'i9': 0x09, 'ia': 0x0A, 'ib': 0x0B,
+          'ic': 0x0C, 'id': 0x0D, 'ie': 0x0E, 'if': 0x0F,
           
           'r0': 0x30, 'r1': 0x31, 'r2': 0x32, 'r3': 0x33,
           'r4': 0x34, 'r5': 0x35, 'r6': 0x36, 'r7': 0x37,
@@ -180,13 +180,13 @@ def doCond(inst, line):
         return
     
     if line[1].val not in regMap:
-        printErr('Unrecognized register \'' + line[1].val + '\'' + line[1].lineNr)
+        printErr('Unrecognized register \'' + line[1].val + '\'',line[1].lineNr)
         exit(1)
     
     inst.condArgs[1] = regMap[line[1].val]
     if operandType == 1:
         if line[2].val not in regMap:
-            printErr('Unrecognized register \'' + line[2].val + '\'' + line[2].lineNr)
+            printErr('Unrecognized register \'' + line[2].val + '\'', line[2].lineNr)
             exit(1)
         iReg = regMap[line[2].val]
             
@@ -267,7 +267,7 @@ def doOpB(inst, line):
 def doOpRegs(line, nRegs, regs):
     for i in range(0, nRegs):
         if line[0].val not in regMap:
-            printErr('Unrecognized register \'' + line[0].val + '\'' + line[0].lineNr)
+            printErr('Unrecognized register \'' + line[0].val + '\'', line[0].lineNr)
             exit(1)
         
         regs[i] = regMap[line[0].val]

@@ -12,6 +12,19 @@ Fetch           0
     InterpCpy       51
     InterpCpy1      55
     InterpBeq       56
-GetOperand      FFFFFFFF
+GetOperand      0FF
+    GetOpType       101
+    GetOpType2      109
+    uRet            10B
+    FetchOpVal      10C
+    FetchOpImm      118
+    FetchOpImmLoop  119
+    FetchOpReg      11E
+    FetchOpReg2     120
+    FetchOpIdx      126
+    FetchOpIdx2     12F
+    FetchOpDsp      137
+    FetchOpScl      141
+    FetchOpScl1     146
 Decode          FFFFFFFF
 halt            FFFFFFFF
