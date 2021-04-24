@@ -259,6 +259,17 @@ int getMaxOperands(long opc) {
     return maxOps;
 }
 
+void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t, char * operation) {
+    cout << "\t" << d->name() << " <- " << r->name() << " " << operation << " " << t->name();
+    cout << "\n\t  " << d->name() << " <- " << r->value() << " " 
+         << operation << " " << t->value() << "\n";
+}
+
+void print2OpmicroInstr(StorageObject *d, StorageObject * r, char * operation) {
+    cout << "\t" << d->name() << " <- " << operation << r->name();
+    cout << "\n\t  " << d->name() << " <- " << operation << r->value() << "\n";
+}
+
 void setAfield(long Afield, BusALU * alu) {
 
     long opc = (*SYS[uIR])(Afield, Afield-2);
@@ -281,26 +292,31 @@ void setAfield(long Afield, BusALU * alu) {
 
     switch(opc) {
         case 0: // No Op
+            cout << "\tNOP\n";
             break;
         case 1: // MOV
+            print2OpmicroInstr(dA, sA, "");
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_rop1);
             break;
         case 2: // SLL
+            print3OpmicroInstr(dA, sA, tA, "<<");
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_lshift);
             break;
         case 3: // SRL
+            print3OpmicroInstr(dA, sA, tA, ">>");
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_rshift);
             break;
         case 4: // OR
+            print3OpmicroInstr(dA, sA, tA, "|");
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
@@ -313,12 +329,14 @@ void setAfield(long Afield, BusALU * alu) {
             alu->perform(BusALU::op_extendSign);
             break;
         case 6: // XOR
+            print3OpmicroInstr(dA, sA, tA, "^");
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_xor);
             break;
         case 7: // AND
+            print3OpmicroInstr(dA, sA, tA, "&");
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
@@ -352,40 +370,50 @@ void setBfield(long Bfield, BusALU * alu) {
 
     switch(opc) {
         case 0: // No Op
+            cout << "\tNOP\n";
             break;
         case 1: // MOV
+            print2OpmicroInstr(dB, sB, "");
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
             alu->perform(BusALU::op_rop1);
             break;
         case 2: // CMP
+            print2OpmicroInstr(dB, sB, "~");
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
             alu->perform(BusALU::op_not);
             break;
         case 3: // Mem Read
+            cout << "\tMDR <- MEM[MAR]\n" << "\t  MDR <- MEM[" << control_storage.MAR().value() 
+                 << "]\n";
             m.read();
             SYS[MDR]->latchFrom(m.READ());
             break;
         case 4: // Mem Write
+            cout << "\tMEM[MAR] <- MDR\n" << "\t  MEM[" << control_storage.MAR().value() 
+                 << "] <- " << SYS[MDR]->value() << "\n";
             m.WRITE().pullFrom(*SYS[MDR]);
             m.write();
             break;
         case 5: // SUB
+            print3OpmicroInstr(dB, sB, tB, "-");
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
             alu->perform(BusALU::op_sub);
             break;
         case 6: // ADD
+            print3OpmicroInstr(dB, sB, tB, "+");
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
             alu->perform(BusALU::op_add);
             break;
         case 7: // No Op
+            cout << "\tNOP\n";
             break;
         default:
             cout << "B Field not found!!\n";
@@ -393,94 +421,119 @@ void setBfield(long Bfield, BusALU * alu) {
     }
 }
 
-bool checkImmRegRef(StorageObject * rs, long rT) {
+bool checkImmRegRef(StorageObject * rs, long rT, char * operation) {
+    cout << "\t" << "if " << rs->name() << "[" << rs->value() << "]" << operation;
 	switch (rT) {
-	    case 0:
+        case 0:
+            cout << 0;
 		    if (rs->value() == 0) {
 		        return true;
 		    }
 		    break;
-	    case 0x01:
+        case 0x01:
+            cout << 1;
 		    if (rs->value() == 0x01) {
 		        return true;
 		    }
 		    break;
- 	    case 0x02:
+        case 0x02:
+            cout << 0xFFFFFF00;
 		    if (rs->value() == 0xFFFFFF00) {
 		        return true;
 		    }
 		    break;
- 	    case 0x03:
+        case 0x03:
+            cout << 0x1F;
 		    if (rs->value() == 0x1F) {
 		        return true;
 		    }
 		    break;
- 	    case 0x04:
+        case 0x04:
+            cout << 0x0000FFFF;
 		    if (rs->value() == 0x0000FFFF) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0x05:
+        case 0x05:
+            cout << 0x00FFFFFF;
 		    if (rs->value() == 0x00FFFFFF) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0x06:
+        case 0x06:
+            cout << 0x0C;
 		    if (rs->value() == 0x0C) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0x07:
+        case 0x07:
+            cout << 0x03;
 		    if (rs->value() == 0x03) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0x08:
+        case 0x08:
+            cout << 0x10;
 		    if (rs->value() == 0x10) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0x09:
+        case 0x09:
+            cout << 0xFF;
 		    if (rs->value() == 0xFF) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0xa:
+        case 0xa:
+            cout << 0x0F;
 		    if (rs->value() == 0x0F) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0xb:
+        case 0xb:
+            cout << 0x08;
 		    if (rs->value() == 0x08) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0xc:
+        case 0xc:
+            cout << 0x10;
 		    if (rs->value() == 0x10) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0xd:
+        case 0xd:
+            cout << 0x04;
 		    if (rs->value() == 0x04) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0xe:
+        case 0xe:
+            cout << 0x0D;
 		    if (rs->value() == 0x0D) {
-			return true;
+                return true;
 		    }
 		    break;
- 	    case 0xf:
+        case 0xf:
+            cout << 0x18;
 		    if (rs->value() == 0x18) {
-			return true;
+                return true;
 		    }
 		    break;
-	    default: 
+        default: 
 		    cout << "PANIC: We couldn't find an IMM Reg \n";
 		    break;
 
 	}
 	return false;
+}
+
+void printCONDmicroInstr(StorageObject * rs, long imm, char * operation) {
+    cout << "\t" << "if " << rs->name() << "[" << rs->value() << "]" << operation << imm;
+}
+
+void printMAXOpsMicroInstr(int max) {
+    cout << "\tif IR[" << SYS[IR]->value() << "] Max#Operands == " << max;
 }
 
 bool Conditional(long cBits) {
@@ -502,64 +555,77 @@ bool Conditional(long cBits) {
 
     switch(type) {
         case 0: // Reg Equal
-            return checkImmRegRef(rs, rT);
+            return checkImmRegRef(rs, rT, " == ");
         case 1: // Reg Not Equal
-            return !checkImmRegRef(rs, rT);
+            return !checkImmRegRef(rs, rT, " != ");
         case 2: // Bits set
+            cout << "\t" << "if " << rs->name() << "[" << rs->value() << "]" << "& " << rT
+                 << " == " << rT;
             if(rs->value() & rT == rT) {
                 return true;
             }
             break;
         case 3: // Bits not set
+            cout << "\t" << "if " << rs->name() << "[" << rs->value() << "]" << "& " << rT
+                 << " != " << rT;
             if(rs->value() & rT != rT) {
                 return true;
             }
             break;
         case 4: // Byte equal
+            printCONDmicroInstr(rs, rT, " == ");
             if(rs->value() == rT) {
                 return true;
             }
             break;
         case 5: // Byte Not equal
+            printCONDmicroInstr(rs, rT, " != ");
             if(rs->value() != rT) {
                 return true;
             }
             break;
         case 6: // Nybble 1 equal
+            printCONDmicroInstr(rs, rT, " & 0xf0 == ");
             if(rs->value() & 0xf0 == rT) {
                 return true;
             }
             break;
         case 7: // Nybble 1 not equal
+            printCONDmicroInstr(rs, rT, " & 0xf0 != ");
             if(rs->value() & 0xf0 != rT) {
                 return true;
             }
             break;
         case 8: // IR 0 Ops
+            printMAXOpsMicroInstr(0);
             IRopc = SYS[IR]->value();
             if(getMaxOperands(IRopc) == 0) {
                 return true;
             }
             break;
         case 9: // IR 1 Op
+            printMAXOpsMicroInstr(1);
             IRopc = SYS[IR]->value();
             if(getMaxOperands(IRopc) == 1) {
                 return true;
             }
             break;
         case 10: // IR 2 Ops
+            printMAXOpsMicroInstr(2);
             IRopc = SYS[IR]->value();
             if(getMaxOperands(IRopc) == 2) {
                 return true;
             }
             break;
         case 11: // IR 3 Ops
+            printMAXOpsMicroInstr(3);
             IRopc = SYS[IR]->value();
             if(getMaxOperands(IRopc) == 3) {
                 return true;
             }
             break;
         case 12: // PC Max
+            printCONDmicroInstr(GPR[15], kMaxAddr, " == ");
             if(GPR[15]->value() == kMaxAddr) {
                 return true;
             }
@@ -602,7 +668,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
         Clock::tick();
 
         // Can Print uPC, uIR
-        cout << "\t" << SYS[uPC]->value() << ": ";
+        cout << "uPC: " << SYS[uPC]->value() << "\n";
         
         // Execute
         long prefix = (*SYS[uIR])(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
@@ -613,7 +679,6 @@ void execute(const char * codeFile, const char * uCodeFile) {
         // Get prefix (first 2 bits of uIR)
         switch(prefix) {
             case 0: // Parallel Operations
-                cout << "Parallel Ops\n";
                 aBits = CU_DATA_SIZE-3;
                 bBits = CU_DATA_SIZE-24;
                 setAfield(aBits, &ALU1);
@@ -621,30 +686,32 @@ void execute(const char * codeFile, const char * uCodeFile) {
                 break;
             
             case 1: // A Field jump
-                cout << "A Field Jump\n";
                 aBits = CU_DATA_SIZE-3;
                 setAfield(aBits, &ALU2);
                 ALU1.IN1().pullFrom(*SYS[uIR]);
                 SYS[uPC]->latchFrom(ALU1.OUT());
                 ALU1.perform(BusALU::op_rop1);
+                cout << "\tuJMP: uPC <- uIR[" << (SYS[uIR]->value() & 0xFFFFFFFF) << "]\n";
                 break;
             
             case 2: // B Field jump
-                cout << "B field jump\n";
                 bBits = CU_DATA_SIZE-3;
                 setBfield(bBits, &ALU2);
                 ALU1.IN1().pullFrom(*SYS[uIR]);
                 SYS[uPC]->latchFrom(ALU1.OUT());
                 ALU1.perform(BusALU::op_rop1);
+                cout << "\tuJMP: uPC <- uIR[" << (SYS[uIR]->value() & 0xFFFFFFFF) << "]\n";
                 break;
 
             case 3: // Conditional 
-                cout << "Conditional!\n";
                 cBits = CU_DATA_SIZE-3;
                 if(Conditional(cBits)) {
                     ALU1.IN1().pullFrom(*SYS[uIR]);
                     SYS[uPC]->latchFrom(ALU1.OUT());
                     ALU1.perform(BusALU::op_rop1);
+                    cout << ": TAKEN: uPC <- uIR[" << (SYS[uIR]->value() & 0xFFFFFFFF) << "]\n";
+                } else {
+                    cout << ": NOT TAKEN\n";
                 }
                 break;
             
