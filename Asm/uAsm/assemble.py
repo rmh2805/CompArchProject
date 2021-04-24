@@ -274,7 +274,7 @@ def setAddr(inst, line):
             printErr("Must specify load point to generate offsets", line[-1].lineNr)
             exit(1)
 
-        inst.address = loadPoints['.'] + int(OFF.val)
+        inst.address = loadPoints['.'] + inst.offset + int(line[-1].val)
     elif line[-1].tokType != 'INT':
         if line[-1].val not in loadPoints:
             printErr('Non-integer conditional destination', line[-1].lineNr)
