@@ -582,6 +582,12 @@ void execute(const char * codeFile, const char * uCodeFile) {
     
     cout << "Entering main Execute Loop\n";
     while(true) { 
+        // Check if we were at 0xFFFFFFFF
+        if(SYS[uPC]->value() == 0xFFFFFFFF) {
+            cout << "HALTING!\n";
+            break;
+        }
+        
         // Increment Program Counter and store in uPC and MAR
         ALU1.OP1().pullFrom(*SYS[uPC]);
         ALU1.OP2().pullFrom(*IMM[1]);
@@ -589,12 +595,6 @@ void execute(const char * codeFile, const char * uCodeFile) {
         control_storage.MAR().latchFrom(ALU1.OUT());
         SYS[uPC]->latchFrom(ALU1.OUT());
         Clock::tick();
-        
-        // Check if we were at 0xFFFFFFFF
-        if(SYS[uPC]->value() == 0) {
-            cout << "HALTING!\n";
-            break;
-        }
         
         // Read Value from CS into uIR
         control_storage.read();
@@ -626,6 +626,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
                 setAfield(aBits, &ALU2);
                 ALU1.IN1().pullFrom(*SYS[uIR]);
                 SYS[uPC]->latchFrom(ALU1.OUT());
+                ALU1.perform(BusALU::op_rop1);
                 break;
             
             case 2: // B Field jump
@@ -634,13 +635,16 @@ void execute(const char * codeFile, const char * uCodeFile) {
                 setBfield(bBits, &ALU2);
                 ALU1.IN1().pullFrom(*SYS[uIR]);
                 SYS[uPC]->latchFrom(ALU1.OUT());
+                ALU1.perform(BusALU::op_rop1);
                 break;
+
             case 3: // Conditional 
                 cout << "Conditional!\n";
                 cBits = CU_DATA_SIZE-3;
                 if(Conditional(cBits)) {
                     ALU1.IN1().pullFrom(*SYS[uIR]);
                     SYS[uPC]->latchFrom(ALU1.OUT());
+                    ALU1.perform(BusALU::op_rop1);
                 }
                 break;
             
