@@ -132,7 +132,7 @@ void connect() {
     }
 
     // Basic connect for Systems Registers to ALU
-    for(int i = 0; i < 23; i++) {
+    for(int i = 0; i < 24; i++) {
         if (i == MDR || i == IR || i == MAR || i == uPC ) {
             continue;
         }
