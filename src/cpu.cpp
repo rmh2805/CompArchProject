@@ -574,7 +574,7 @@ bool Conditional() {
             return getMaxOperands(SYS[IR]->value()) == 3;
 
         case 12: // PC Max
-            cout << "PC (" << GPR[15]->value() << ") == PC_MAX"
+            cout << "PC (" << GPR[15]->value() << ") == PC_MAX";
             return GPR[15]->value() == kMaxAddr;
 
         default:
