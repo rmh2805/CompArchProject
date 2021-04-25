@@ -107,25 +107,25 @@ COL             5FF
     BDE             FFFFFFFF
     BAO             FFFFFFFF
     BAC             FFFFFFFF
-Control         FFFFFFFF
+ALU             6FF
+    ADD             6FF
+    SUB             700
+    AND             701
+    OR              702
+    XOR             703
+    CMP             704
+    INC             705
+    DEC             706
+    MUL             FFFFFFFF
+    DIV             FFFFFFFF
+    MOD             FFFFFFFF
+Control         7FF
     HLT             FFFFFFFF
     CLR             FFFFFFFF
     DMP             FFFFFFFF
     OUT             FFFFFFFF
     NOP             FFFFFFFF
-ALU             FFFFFFFF
-    ADD             FFFFFFFF
-    SUB             FFFFFFFF
-    MUL             FFFFFFFF
-    DIV             FFFFFFFF
-    MOD             FFFFFFFF
-    AND             FFFFFFFF
-    OR              FFFFFFFF
-    XOR             FFFFFFFF
-    CMP             FFFFFFFF
-    INC             FFFFFFFF
-    DEC             FFFFFFFF
-MEM             FFFFFFFF
+MEM             8FF
     MOV             FFFFFFFF
     SWP             FFFFFFFF
     CPY             FFFFFFFF
