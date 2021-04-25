@@ -12,6 +12,8 @@ Fetch           0
     InterpCpy       51
     InterpCpy1      55
     InterpBeq       56
+RegVal          9F
+    RegValRet       BF
 GetOperand      0FF
     GetOpType       101
     GetOpType2      109
@@ -26,6 +28,8 @@ GetOperand      0FF
     FetchOpDsp      137
     FetchOpScl      141
     FetchOpScl1     149
+ScaleOp         19F
+    ScaleOp1        1AC
 Decode          1FF
     DecodeDmp       21B
     DecodeOut       223
@@ -47,6 +51,12 @@ Decode          1FF
     DecodeBeq1      28D
     DecodeBie       292
     DecodeBranch    295
+PrefixOp        2BF
+    PrefixOp1       2C1
+    PrefixOp2       2C6
+MemOp           2CF
+    MemOp1          2D5
+    MemOp2          2D6
 EvalOp          2FF
     EvalNyb         30C
     EvalImm         30D
@@ -64,11 +74,14 @@ EvalOp          2FF
     EvalPDc         379
     EvalPIc         37F
     EvalPIc1        384
-RegVal          9F
-    RegValRet       BF
-ScaleOp         FFFFFFFF
-MemOp           FFFFFFFF
-PrefixOp        FFFFFFFF
+Writeback       3FF
+    WritebackAdd    40F
+    WritebackMul    41A
+    WritebackInc    426
+    WritebackSwp    428
+PrefixRet       FFFFFFFF
+MemRet          FFFFFFFF
+WriteRet        FFFFFFFF
 Control         FFFFFFFF
     HLT             FFFFFFFF
     CLR             FFFFFFFF

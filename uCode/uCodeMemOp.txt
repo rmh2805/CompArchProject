@@ -25,4 +25,4 @@ MemOp2:
     uR0 <- uR0 | MDR, <No Op>
 
     if uCnt == 0x00, goto uRet
-    uTmp <- uTmp - 1, goto GetValMem2
+    uTmp <- uTmp - 1, goto MemOp2
