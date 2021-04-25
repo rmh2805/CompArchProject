@@ -2,23 +2,27 @@
 #include "cpu.h"
 
 #define kDefMicroCode "../uCode/asm/uCode.obj"
+#define kDefUTrace true
 
 int main(int argc, char** argv) {
 
     //CPUObject::debug |= CPUObject::trace | CPUObject::memload;
     cout << hex;
 
-    if(argc <= 1 || argc > 3) {
-        cout << "Usage: " << argv[0] << " <code file> [microcode file]" << endl;
+    if(argc <= 1 || argc > 4) {
+        cout << "Usage: " << argv[0] << " <code file> [microTrace on (y/n)] " 
+             << "[microcode file]" << endl;
         return EXIT_FAILURE;
     }
     
     connect();
     
     if(argc == 2) {
-        execute(argv[1], kDefMicroCode);
+        execute(argv[1], kDefMicroCode, kDefUTrace);
+    } else if(argc == 3) {
+        execute(argv[1], kDefMicroCode, argv[2][0] == 'y');
     } else {
-        execute(argv[1], argv[2]);
+        execute(argv[1], argv[3], argv[2][0] == 'y');
     }
     
     return EXIT_SUCCESS;

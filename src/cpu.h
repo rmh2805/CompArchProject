@@ -50,6 +50,6 @@ extern BusALU ALU2;
 
 void connect();
 
-void execute(const char * codeFile, const char * uCodeFile);
+void execute(const char * codeFile, const char * uCodeFile, bool doUTrace);
 
 #endif //_CPU_H_
