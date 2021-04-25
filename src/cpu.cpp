@@ -184,6 +184,8 @@ void execute(const char * codeFile, const char * uCodeFile) {
     SYS[uPC]->latchFrom(control_storage.READ());
     Clock::tick();
     
+    long lastuPC = 0;
+
     cout << "Entering Main Execute Loop\n";
     while(true) { 
         // Check if we were at 0xFFFFFFFF
@@ -208,6 +210,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
         // Can Print uPC, uIR
         cout << "\t" << setw(3) << setfill('0') << SYS[uPC]->value() << ": " ;
         
+
         // Execute
         long prefix = (uIR.value() >> 53);
         long bBits;
@@ -257,6 +260,12 @@ void execute(const char * codeFile, const char * uCodeFile) {
                 break;
         }
         Clock::tick(); // Tick our clock
+
+        // Insert an extra line after uJumps
+        if (SYS[uPC]->value() - lastuPC != 1) {
+            cout << "\n";
+        }
+        lastuPC = SYS[uPC]->value();
     }
 }
 
@@ -540,7 +549,6 @@ bool Conditional() {
     long rS = (uIR.value() >> 38) & 0x3f;
     long type = (uIR.value() >> 32) & 0x0f;
     StorageObject * rs = snagReg(rS);
-    long IRopc;
 
     switch(type) {
         case 0: // Reg Equal
