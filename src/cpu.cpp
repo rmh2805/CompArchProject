@@ -206,14 +206,6 @@ void execute(const char * codeFile, const char * uCodeFile) {
         SYS[uPC]->latchFrom(ALU1.OUT());
         Clock::tick();
         
-        // Read Value from CS into uIR
-        control_storage.read();
-        uIR.latchFrom(control_storage.READ()); 
-        Clock::tick();
-
-        // Can Print uPC, uIR
-        cout << "\t" << setw(3) << setfill('0') << SYS[uPC]->value() << ": " ;
-
         // Trigger macro trace calls here
         switch(SYS[uPC]->value()) {
             case 0x001:
@@ -228,6 +220,14 @@ void execute(const char * codeFile, const char * uCodeFile) {
             default:
                 break;
         }
+
+        // Read Value from CS into uIR
+        control_storage.read();
+        uIR.latchFrom(control_storage.READ()); 
+        Clock::tick();
+    
+        // Can Print uPC, uIR
+        cout << "\t" << setw(3) << setfill('0') << SYS[uPC]->value() << ": " ;
         
 
         // Execute
@@ -631,6 +631,10 @@ bool Conditional() {
 }
 
 
+void printInstMnemonic(int opc) {
+    cout << opc;
+}
+
 void macroTrace(int phase) {
     static int opc = 0x100; //Can't get this otherwise
     static long OP1[3] = {0, 0, 0}, val1 = 0;
@@ -668,6 +672,7 @@ void macroTrace(int phase) {
             if (IR = 0x100) {
                 return;
             }
+            
         default:
             return;
     }
