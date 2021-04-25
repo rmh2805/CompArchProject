@@ -432,7 +432,7 @@ void setBfield(long Bfield, BusALU * alu) {
 }
 
 bool checkImmRegRef(StorageObject * rs, long rT, char * operation) {
-    cout << "\t" << "if " << rs->name() << "[" << rs->value() << "]" << operation;
+    cout << "if " << rs->name() << "[" << rs->value() << "]" << operation;
 	switch (rT) {
         case 0:
             cout << 0;
