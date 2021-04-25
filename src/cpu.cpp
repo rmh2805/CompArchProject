@@ -610,3 +610,58 @@ bool Conditional() {
     }
     return false;
 }
+
+
+void macroTrace(int phase) {
+    static int IR = 0x100; //Can't get this otherwise
+    static long OP1[3] = {0, 0, 0}, val1 = 0;
+    static long OP2[3] = {0, 0, 0}, val2 = 0;
+    static long OP3[3] = {0, 0, 0}, val3 = 0;
+    static long OP4[3] = {0, 0, 0}, val4 = 0;
+
+    switch(phase) {
+        case 0:                                 // Store decode phase values
+            IR = SYS[IR]->value();
+            
+            OP1[0] = SYS[OP1Type]->value();
+            OP1[1] = SYS[OP1Val]->value(); 
+            OP1[2] = SYS[OP1Scale];
+            
+            OP2[0] = SYS[OP2Type]->value();
+            OP2[1] = SYS[OP2Val]->value(); 
+            OP2[2] = SYS[OP2Scale];
+            
+            OP3[0] = SYS[OP3Type]->value();
+            OP3[1] = SYS[OP3Val]->value(); 
+            OP3[2] = SYS[OP3Scale];
+            
+            OP4[0] = SYS[OP4Type]->value();
+            OP4[1] = SYS[OP4Val]->value(); 
+            OP4[2] = SYS[OP4Scale];
+            return;
+        case 1:                                 // Store branch phase values
+            val1 = SYS[OP1Val]->value();
+            val2 = SYS[OP2Val]->value();
+            val3 = SYS[OP3Val]->value();
+            val4 = SYS[OP4Val]->value();
+            return;
+        case 2:                                 // Print the macro trace
+            if (IR = 0x100) {
+                return;
+            }
+        default:
+            return;
+    }
+}
+
+void macroTraceDecode() {
+    macroTrace(0);
+}
+
+void macroTraceBranch() {
+    macroTrace(1);
+}
+
+void macroTraceFetch() {
+    macroTrace(2);
+}
