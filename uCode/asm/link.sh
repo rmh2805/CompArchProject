@@ -8,6 +8,7 @@
 ./assemble.sh memOp.asm         2D0 > memOp.obj
 ./assemble.sh PrefixOp.asm      2C0 > PrefixOp.obj
 ./assemble.sh Writeback.asm     400 > Writeback.obj
+./assemble.sh PrefixRet.asm     430 > PrefixRet.obj
 
 python3 ../../Asm/uAsm/link.py uCode.obj 0 \
         fetch.obj       0   \
@@ -18,4 +19,5 @@ python3 ../../Asm/uAsm/link.py uCode.obj 0 \
         PrefixOp.obj    2C0 \
         memOp.obj       2D0 \
         EvalOp.obj      300 \
-        Writeback.obj   400
+        Writeback.obj   400 \
+        PrefixRet.obj   430

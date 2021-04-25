@@ -79,7 +79,7 @@ Writeback       3FF
     WritebackMul    41A
     WritebackInc    426
     WritebackSwp    428
-PrefixRet       FFFFFFFF
+PrefixRet       42F
 MemRet          FFFFFFFF
 WriteRet        FFFFFFFF
 Control         FFFFFFFF
