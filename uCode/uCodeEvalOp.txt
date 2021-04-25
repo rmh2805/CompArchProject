@@ -57,7 +57,7 @@ EvalReg1:
     uR0 <- uR0 & 0xFF, uPC <- uRet          # truncate and return
     if uTmp != 0x01, goto +1                # Skip unless targeting low half
     uR0 <- uR0 & 0x0000FFFF, uPC <- uRet    # truncate and return
-    if uTmp != 0x10, goto +1                # Skip unless targeting low 3 bytes
+    if uTmp != 0x02, goto +1                # Skip unless targeting low 3 bytes
     uR0 <- uR0 & 0x00FFFFFF, uPC <- uRet    # truncate and return
     uPC <- uRet, <No Op>                    # return with full value
 
@@ -142,6 +142,7 @@ EvalDec:
 
 EvalDec1:
     uTmp <- uR1 & 0x0C, <No Op>             # Grab the rs value
+    uR1 <- uR1 | 0x0C, <No Op>              # Set truncation bits
 
     if uTmp != 0x00, goto +1                # Skip unless targeting reg 0
     Regs[0] <- Regs[0] + uR2, goto EvalReg  # Modify reg 0 and grab reg
@@ -194,16 +195,20 @@ EvalDec1:
     <No Op>, goto halt                      # Halt on bad register
 
 EvalPDc:
-    uRet2 <- uRet, <No Op>
+    uRet2 <- uRet, uTmp2 <- uR1 & 0x03
+    uR1 <- uR1 | 0x03, <No Op>
     uRet <- uPC, goto EvalReg
-    uRet <- uRet2, uTmp <- uR1 & 0x03
+    uRet <- uRet2, uTmp <- uTmp2
+
     uR2 <- 0, uTmp <- uTmp + 1
     uR2 <- uR2 - uTmp, goto EvalPIc1
 
 EvalPIc:
-    uRet2 <- uRet, <No Op>
+    uRet2 <- uRet, uTmp2 <- uR1 & 0x03
+    uR1 <- uR1 | 0x03, <No Op>
     uRet <- uPC, goto EvalReg
-    uRet <- uRet2, uR2 <- uR1 & 0x03
+    uRet <- uRet2, uR2 <- uTmp2
+    
     uR2 <- uR2 + 1, <No Op>
 
 EvalPIc1:

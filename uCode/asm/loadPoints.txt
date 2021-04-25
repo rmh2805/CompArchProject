@@ -47,7 +47,24 @@ Decode          1FF
     DecodeBeq1      28D
     DecodeBie       292
     DecodeBranch    295
-EvalOp          FFFFFFFF
+EvalOp          2FF
+    EvalNyb         30C
+    EvalImm         30D
+    EvalReg         30E
+    EvalReg1        317
+    EvalMem         31F
+    EvalIdx         32C
+    EvalIdx1        335
+    EvalIdx2        33E
+    EvalDsp         33F
+    EvalDsp1        34A
+    EvalInc         34B
+    EvalDec         34D
+    EvalDec1        350
+    EvalPDc         379
+    EvalPIc         37F
+    EvalPIc1        384
+RegVal          FFFFFFFF
 ScaleOp         FFFFFFFF
 MemOp           FFFFFFFF
 PrefixOp        FFFFFFFF
