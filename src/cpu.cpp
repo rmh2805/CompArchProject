@@ -632,7 +632,7 @@ bool Conditional() {
 
 
 void macroTrace(int phase) {
-    static int IR = 0x100; //Can't get this otherwise
+    static int opc = 0x100; //Can't get this otherwise
     static long OP1[3] = {0, 0, 0}, val1 = 0;
     static long OP2[3] = {0, 0, 0}, val2 = 0;
     static long OP3[3] = {0, 0, 0}, val3 = 0;
@@ -640,7 +640,7 @@ void macroTrace(int phase) {
 
     switch(phase) {
         case 0:                                 // Store decode phase values
-            IR = SYS[IR]->value();
+            opc = IR.value();
             
             OP1[0] = SYS[OP1Type]->value();
             OP1[1] = SYS[OP1Val]->value(); 
@@ -674,6 +674,7 @@ void macroTrace(int phase) {
 }
 
 void macroTraceDecode() {
+    cout << "decodemacro\n";
     macroTrace(0);
 }
 
