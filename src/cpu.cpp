@@ -90,19 +90,23 @@ StorageObject * SYS[24] = {
 StorageObject uIR("uIR", CU_DATA_SIZE);
 
 //==========================<Helper Fxn Declaration>==========================//
+// Register locator helpers
 StorageObject * snagReg(long regNum);
-int getMaxOperands(long opc);
-void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t, char * operation);
+bool checkImmRegRef(StorageObject * rs, long rT, char * operation);
+
+// Trace print helpers 
+void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t,
+                            char * operation);
 void print2OpmicroInstr(StorageObject *d, StorageObject * r, char * operation);
+void printCONDmicroInstr(StorageObject * rs, long imm, char * operation);
 void printMAXOpsMicroInstr(int max);
 
 void setAfield(BusALU * alu);
 void setBfield(long Bfield, BusALU * alu);
 
-bool checkImmRegRef(StorageObject * rs, long rT, char * operation);
 
 bool Conditional();
-void printCONDmicroInstr(StorageObject * rs, long imm, char * operation);
+int getMaxOperands(long opc);
 
 //===============================<Primary Fxns>===============================//
 void connect() {
@@ -478,126 +482,13 @@ void setBfield(long Bfield, BusALU * alu) {
 }
 
 bool checkImmRegRef(StorageObject * rs, long rT, char * operation) {
+    if(rT < 0 || rT >= 16) {
+        cout << "**ERROR** Unable to find immediate register '" << rT <<"'\n";
+        return false; 
+    }
     cout << "if " << rs->name() << "[" << rs->value() << "]" << operation;
-	switch (rT) {
-        case 0:
-            cout << 0;
-		    if (rs->value() == 0) {
-		        return true;
-		    }
-		    break;
-
-        case 0x01:
-            cout << 1;
-		    if (rs->value() == 0x01) {
-		        return true;
-		    }
-		    break;
-
-        case 0x02:
-            cout << 0xFFFFFF00;
-		    if (rs->value() == 0xFFFFFF00) {
-		        return true;
-		    }
-		    break;
-
-        case 0x03:
-            cout << 0x1F;
-		    if (rs->value() == 0x1F) {
-		        return true;
-		    }
-		    break;
-
-        case 0x04:
-            cout << 0x0000FFFF;
-		    if (rs->value() == 0x0000FFFF) {
-                return true;
-		    }
-		    break;
-
-        case 0x05:
-            cout << 0x00FFFFFF;
-		    if (rs->value() == 0x00FFFFFF) {
-                return true;
-		    }
-		    break;
-
-        case 0x06:
-            cout << 0x0C;
-		    if (rs->value() == 0x0C) {
-                return true;
-		    }
-		    break;
-
-        case 0x07:
-            cout << 0x03;
-		    if (rs->value() == 0x03) {
-                return true;
-		    }
-		    break;
-
-        case 0x08:
-            cout << 0x10;
-		    if (rs->value() == 0x10) {
-                return true;
-		    }
-		    break;
-
-        case 0x09:
-            cout << 0xFF;
-		    if (rs->value() == 0xFF) {
-                return true;
-		    }
-		    break;
-
-        case 0xa:
-            cout << 0x0F;
-		    if (rs->value() == 0x0F) {
-                return true;
-		    }
-		    break;
-
-        case 0xb:
-            cout << 0x08;
-		    if (rs->value() == 0x08) {
-                return true;
-		    }
-		    break;
-
-        case 0xc:
-            cout << 0x10;
-		    if (rs->value() == 0x10) {
-                return true;
-		    }
-		    break;
-
-        case 0xd:
-            cout << 0x04;
-		    if (rs->value() == 0x04) {
-                return true;
-		    }
-		    break;
-
-        case 0xe:
-            cout << 0x0D;
-		    if (rs->value() == 0x0D) {
-                return true;
-		    }
-		    break;
-
-        case 0xf:
-            cout << 0x18;
-		    if (rs->value() == 0x18) {
-                return true;
-		    }
-		    break;
-
-        default: 
-		    cout << "PANIC: We couldn't find an IMM Reg \n";
-		    break;
-
-	}
-	return false;
+    cout << immVals[rT];
+    return rs->value() == immVals[rT];
 }
 
 void printCONDmicroInstr(StorageObject * rs, long imm, char * operation) {
