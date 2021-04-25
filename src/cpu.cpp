@@ -321,14 +321,30 @@ int getMaxOperands(long opc) {
 }
 
 void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t, 
-                            string operation) {
-    cout << d->name() << " <- " << r->name() << "[" << r->value() << "]"
-         << " " << operation << " " << t->name() << "[" << t->value() << "]";
+                            string operation, bool immR = false, 
+                            bool immT = false) {
+    cout << d->name() << " <- ";
+    if(immR) {
+        cout << "0x" << r->value();
+    } else {
+         r->name() << "[" << r->value() << "]"
+    }
+    cout << " " << operation << " ";
+    if(immT) {
+        cout << "0x" << t->value();
+    } else {
+         t->name() << "[" << t->value() << "]"
+    }
 }
 
-void print2OpmicroInstr(StorageObject *d, StorageObject * r, string operation) {
-    cout << d->name() << " <- " << operation << r->name() << "[" 
-            << r->value() << "]";
+void print2OpmicroInstr(StorageObject *d, StorageObject * r, string operation,
+                            bool immR = false) {
+    cout << d->name() << " <- " << operation;
+    if(immR) {
+        cout << "0x" << r->value();
+    } else {
+         r->name() << "[" << r->value() << "]"
+    }
 }
 
 void setAfield(BusALU * alu) {
