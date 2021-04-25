@@ -365,7 +365,7 @@ void setAfield(BusALU * alu) {
             break;
 
         case 1: // MOV
-            print2OpmicroInstr(dA, sA, "", (rsA >- 0x00 && rsA < 0x10));
+            print2OpmicroInstr(dA, sA, "", (rsA >= 0x00 && rsA < 0x10));
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
@@ -374,8 +374,8 @@ void setAfield(BusALU * alu) {
 
         case 2: // SLL
             print3OpmicroInstr(dA, sA, tA, "<<", 
-                                (rsA >- 0x00 && rsA < 0x10), 
-                                (rtA >- 0x00 && rtA < 0x10));
+                                (rsA >= 0x00 && rsA < 0x10), 
+                                (rtA >= 0x00 && rtA < 0x10));
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
@@ -384,8 +384,8 @@ void setAfield(BusALU * alu) {
 
         case 3: // SRL
             print3OpmicroInstr(dA, sA, tA, ">>"
-                                (rsA >- 0x00 && rsA < 0x10), 
-                                (rtA >- 0x00 && rtA < 0x10));
+                                (rsA >= 0x00 && rsA < 0x10), 
+                                (rtA >= 0x00 && rtA < 0x10));
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
@@ -394,8 +394,8 @@ void setAfield(BusALU * alu) {
 
         case 4: // OR
             print3OpmicroInstr(dA, sA, tA, "|"
-                                (rsA >- 0x00 && rsA < 0x10), 
-                                (rtA >- 0x00 && rtA < 0x10));
+                                (rsA >= 0x00 && rsA < 0x10), 
+                                (rtA >= 0x00 && rtA < 0x10));
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
@@ -411,8 +411,8 @@ void setAfield(BusALU * alu) {
 
         case 6: // XOR
             print3OpmicroInstr(dA, sA, tA, "^"
-                                (rsA >- 0x00 && rsA < 0x10), 
-                                (rtA >- 0x00 && rtA < 0x10));
+                                (rsA >= 0x00 && rsA < 0x10), 
+                                (rtA >= 0x00 && rtA < 0x10));
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
@@ -421,8 +421,8 @@ void setAfield(BusALU * alu) {
 
         case 7: // AND
             print3OpmicroInstr(dA, sA, tA, "&"
-                                (rsA >- 0x00 && rsA < 0x10), 
-                                (rtA >- 0x00 && rtA < 0x10));
+                                (rsA >= 0x00 && rsA < 0x10), 
+                                (rtA >= 0x00 && rtA < 0x10));
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
@@ -461,7 +461,7 @@ void setBfield(long Bfield, BusALU * alu) {
             break;
 
         case 1: // MOV
-            print2OpmicroInstr(dB, sB, "", (rsB >- 0x00 && rsB < 0x10));
+            print2OpmicroInstr(dB, sB, "", (rsB >= 0x00 && rsB < 0x10));
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
@@ -469,7 +469,7 @@ void setBfield(long Bfield, BusALU * alu) {
             break;
 
         case 2: // CMP
-            print2OpmicroInstr(dB, sB, "~", (rsB >- 0x00 && rsB < 0x10));
+            print2OpmicroInstr(dB, sB, "~", (rsB >= 0x00 && rsB < 0x10));
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
@@ -490,8 +490,8 @@ void setBfield(long Bfield, BusALU * alu) {
 
         case 5: // SUB
             print3OpmicroInstr(dB, sB, tB, "-"
-                                (rsB >- 0x00 && rsB < 0x10), 
-                                (rtB >- 0x00 && rtB < 0x10));
+                                (rsB >= 0x00 && rsB < 0x10), 
+                                (rtB >= 0x00 && rtB < 0x10));
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
@@ -500,8 +500,8 @@ void setBfield(long Bfield, BusALU * alu) {
 
         case 6: // ADD
             print3OpmicroInstr(dB, sB, tB, "+"
-                                (rsB >- 0x00 && rsB < 0x10), 
-                                (rtB >- 0x00 && rtB < 0x10));
+                                (rsB >= 0x00 && rsB < 0x10), 
+                                (rtB >= 0x00 && rtB < 0x10));
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
