@@ -7,71 +7,55 @@ JAL:
     uTmp <- pB, uR0 <- pS - 4
     uCnt <- 0x03, <No Op>
 
-jal_loop_write_pb:
+JAL_LOOP_PB:
     MAR <- uCnt, MDR <- uTmp
     Mem[MAR] <- MDR, <No Op>
     
-    uTmp <- uTmp >> 8, uR0 <- uR0 - 1
-    if uCnt == 0x00, goto jal_break_pb
-    uCnt <- uCnt - 1, goto jal_loop_write_pb
+    uTmp <- uTmp >> 8, uR0 <- uR0 + 1
+    if uCnt == 0x00, goto JAL_BREAK_PB
+    uCnt <- uCnt - 1, goto JAL_LOOP_PB
 
-jal_break_pb:
+JAL_BREAK_PB:
     pB <- pS - 4, <No Op> // Quickly reset pB
     uTmp <- pR, uR0 <- pS - 8 // Setup uTmp and uR0 again for pS
     uCnt <- 0x03, <No Op> // Reset uCnt
 
-jal_loop_write_pr:
+JAL_LOOP_PR:
     MAR <- uCnt, MDR <- uTmp
     Mem[MAR] <- MDR, <No Op>
     
-    uTmp <- uTmp >> 8, uR0 <- uR0 - 1
-    if uCnt == 0x00, goto break_pr
-    uCnt <- uCnt - 1, goto loop_write_pr
+    uTmp <- uTmp >> 8, uR0 <- uR0 + 1
+    if uCnt == 0x00, goto JAL_BREAK_PR
+    uCnt <- uCnt - 1, goto JAL_LOOP_PR
 
-jal_break_pr:
+JAL_BREAK_PR:
     pS <- pS - 8, pR <- PC
     PC <- OP1Val, goto Writeback
 
 RET:
-    PC <- pR, <No Op> // Set return point
-    // Setup for pR read
-    uTmp <- pR, uR0 <- pB - 4
-    uCnt <- 0x03, <No Op>
+    PC <- pR, <No Op>                       // Use current return ptr
+    uR0 <- pB - 4, uCnt <- 0x03             // Prepare for pR read
 
-ret_loop_read_pr:
+RET_LOOP_PR:
     MAR <- uR0, <No Op>
-    MDR <- Mem[MAR], uTmp <- uTmp << 0x08 // Shift for next byte
-    uTmp <- uTmp | MDR, uR0 <- uR0 - 1 // Insert next byte
-    if uCnt == 0x00, goto ret_break_pr
-    uCnt <- uCnt - 1, goto ret_loop_read_pr
+    MDR <- Mem[MAR], uR <- uR << 0x08       // Shift for next byte
+    uR <- uR | MDR, uR0 <- uR0 + 1          // Insert next byte
+    if uCnt == 0x00, goto RET_BREAK_PR
+    uCnt <- uCnt - 1, goto RET_LOOP_PR
 
-ret_break_pr:
-    // Setup for pS read
-    uTmp <- pS, uR0 <- pB + 4
-    uCnt <- 0x03, <No Op>
+RET_BREAK_PR:
+    pS <- pB + 4, <No Op>                   // Restore PS
+    uCnt <- 0x03, uR0 <- pB                 // Prepare for pB read
 
-ret_loop_read_ps:
-    // Do ps Read
-    MAR <- uR0, <No Op>
-    MDR <- Mem[MAR], uTmp <- uTmp << 0x08 // Shift for next byte
-    uTmp <- uTmp | MDR, uR0 <- uR0 - 1 // Insert next byte
-    if uCnt == 0x00, goto ret_break_pr
-    uCnt <- uCnt - 1, goto ret_loop_read_pr
-
-ret_break_ps:
-    // Setup for pB read
-    uTmp <- pB, uR0 <- pB
-    uCnt <- 0x03, <No Op>
-
-ret_loop_read_pb:
+RET_LOOP_PB:
     // Do pB read
     MAR <- uR0, <No Op>
-    MDR <- Mem[MAR], uTmp <- uTmp << 0x08 // Shift for next byte
-    uTmp <- uTmp | MDR, uR0 <- uR0 - 1 // Insert next byte
-    if uCnt == 0x00, goto ret_break_pr
-    uCnt <- uCnt - 1, goto ret_loop_read_pr
+    MDR <- Mem[MAR], pB <- pB << 0x08       // Shift for next byte
+    pB <- pB | MDR, uR0 <- uR0 + 1          // Insert next byte
+    if uCnt == 0x00, goto RET_BREAK_PB
+    uCnt <- uCnt - 1, goto RET_READ_PB
 
-ret_break_pb:
+RET_BREAK_PB:
     goto Writeback, <No Op>
 
 BEQ:

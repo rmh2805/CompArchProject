@@ -11,6 +11,7 @@
 ./assemble.sh PrefixRet.asm     430 > PrefixRet.obj
 ./assemble.sh MemRet.asm        440 > MemRet.obj
 ./assemble.sh writeRet.asm      500 > writeRet.obj
+./assemble.sh COL.asm           600 > COL.obj
 
 python3 ../../Asm/uAsm/link.py uCode.obj 0 \
         fetch.obj       0   \
@@ -24,4 +25,5 @@ python3 ../../Asm/uAsm/link.py uCode.obj 0 \
         Writeback.obj   400 \
         PrefixRet.obj   430 \
         MemRet.obj      440 \
-        writeRet.obj    500
+        writeRet.obj    500 \
+        COL.obj         600 

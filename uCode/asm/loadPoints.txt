@@ -87,6 +87,26 @@ WriteRet        4FF
     WriteRetReg     514
     WriteRetInc     53D
     WriteRetDec     53E
+COL             5FF
+    JMP             5FF
+    JAL             60F
+        JAL_LOOP_PB     611
+        JAL_BREAK_PB    616
+        JAL_LOOP_PR     619
+        JAL_BREAK_PR    61E
+    RET             FFFFFFFF
+        RET_LOOP_PB     FFFFFFFF
+        RET_BREAK_PB    FFFFFFFF
+        RET_LOOP_PR     FFFFFFFF
+        RET_BREAK_PR    FFFFFFFF
+    BEQ             FFFFFFFF
+    BNE             FFFFFFFF
+    BGT             FFFFFFFF
+    BGE             FFFFFFFF
+    BIE             FFFFFFFF
+    BDE             FFFFFFFF
+    BAO             FFFFFFFF
+    BAC             FFFFFFFF
 Control         FFFFFFFF
     HLT             FFFFFFFF
     CLR             FFFFFFFF
@@ -109,16 +129,4 @@ MEM             FFFFFFFF
     MOV             FFFFFFFF
     SWP             FFFFFFFF
     CPY             FFFFFFFF
-COL             FFFFFFFF
-    JMP             FFFFFFFF
-    JAL             FFFFFFFF
-    RET             FFFFFFFF
-    BEQ             FFFFFFFF
-    BNE             FFFFFFFF
-    BGT             FFFFFFFF
-    BGE             FFFFFFFF
-    BIE             FFFFFFFF
-    BDE             FFFFFFFF
-    BAO             FFFFFFFF
-    BAC             FFFFFFFF
 halt            FFFFFFFF
