@@ -101,6 +101,10 @@ void print2OpmicroInstr(StorageObject *d, StorageObject * r, string operation);
 void printCONDmicroInstr(StorageObject * rs, long imm, string operation);
 void printMAXOpsMicroInstr(int max);
 
+void macroTraceDecode();
+void macroTraceBranch();
+void macroTraceFetch();
+
 void setAfield(BusALU * alu);
 void setBfield(long Bfield, BusALU * alu);
 
@@ -209,6 +213,21 @@ void execute(const char * codeFile, const char * uCodeFile) {
 
         // Can Print uPC, uIR
         cout << "\t" << setw(3) << setfill('0') << SYS[uPC]->value() << ": " ;
+
+        // Trigger macro trace calls here
+        switch(SYS[uPC]->value()) {
+            case 0x001:
+                macroTraceFetch();
+                break;
+            case 0x200:
+                macroTraceDecode();
+                break;
+            case 0x296:
+                macroTraceBranch();
+                break;
+            default:
+                break;
+        }
         
 
         // Execute
