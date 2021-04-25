@@ -206,7 +206,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
         Clock::tick();
 
         // Can Print uPC, uIR
-        cout << "\t" << setw(3) << setfill(' ') << SYS[uPC]->value() << ": " ;
+        cout << "\t" << setw(3) << setfill('0') << SYS[uPC]->value() << ": " ;
         
         // Execute
         long prefix = (uIR.value() >> 53);
