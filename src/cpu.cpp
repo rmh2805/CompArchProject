@@ -48,7 +48,7 @@ Memory m("Main Memory", kAddrBusSize, kDataBusSize, kMaxAddr, 1, true);
 Memory control_storage("Control Storage", CU_DATA_SIZE, CU_DATA_SIZE, kMaxAddr, 1, true);
 
 // System Registers
-StorageObject * SYS[23] = {
+StorageObject * SYS[24] = {
     new StorageObject("uPC", kRegSize),
     new StorageObject("uRET", kRegSize),
     new StorageObject("uR0", kRegSize),
@@ -72,6 +72,7 @@ StorageObject * SYS[23] = {
     new StorageObject("IR", kDataBusSize),
     new StorageObject("uTmp", kRegSize),
     new StorageObject("uRet2", kRegSize),
+    new StorageObject("uTmp2", kRegSize),
 };
 
 StorageObject uIR("uIR", CU_DATA_SIZE);
