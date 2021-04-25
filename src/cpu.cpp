@@ -550,13 +550,13 @@ bool Conditional() {
             return !checkImmRegRef(rs, rT, " != ");
 
         case 2: // Bits set
-            cout << "if " << rs->name() << "[" << rs->value() << "]" << "& " << rT
-                 << " == " << rT;
+            cout << "if " << rs->name() << "[" << rs->value() << "]" << " & " 
+                    << rT << " == " << rT;
             return !((rs->value() & rT) ^ rT);
 
         case 3: // Bits not set
-            cout << "if " << rs->name() << "[" << rs->value() << "]" << "& " << rT
-                 << " != " << rT;
+            cout << "if " << rs->name() << "[" << rs->value() << "]" << " & " 
+                    << rT << " != " << rT;
             return (rs->value() & rT) ^ rT;
 
         case 4: // Byte equal
