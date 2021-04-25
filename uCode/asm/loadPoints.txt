@@ -81,7 +81,12 @@ Writeback       3FF
     WritebackSwp    428
 PrefixRet       42F
 MemRet          43F
-WriteRet        FFFFFFFF
+WriteRet        4FF
+    WriteRetMem     50E
+    WriteRetMem1    50F
+    WriteRetReg     514
+    WriteRetInc     53D
+    WriteRetDec     53E
 Control         FFFFFFFF
     HLT             FFFFFFFF
     CLR             FFFFFFFF

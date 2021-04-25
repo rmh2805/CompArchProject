@@ -52,12 +52,12 @@ WriteRetReg:
 
     if uTmp != 0x00, goto +1
     Regs[0] <- uR2, uPC <- uRet
-    if uTmp != 0x01, goto +1
+    if uTmp != 0x04, goto +1
     Regs[1] <- uR2, uPC <- uRet
-    if uTmp != 0x02, goto +1
+    if uTmp != 0x08, goto +1
     Regs[12] <- uR2, uPC <- uRet
 
-    uTmp <- uCnt & 0xFF
+    uTmp <- uCnt & 0xFF, <No Op>
     
     if uTmp != 0x00, goto +1
     Regs[0x0] <- uR2, uPC <- uRet
