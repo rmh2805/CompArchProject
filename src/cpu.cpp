@@ -320,13 +320,15 @@ int getMaxOperands(long opc) {
     return maxOps;
 }
 
-void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t, string operation) {
+void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t, 
+                            string operation) {
     cout << d->name() << " <- " << r->name() << "[" << r->value() << "]"
          << " " << operation << " " << t->name() << "[" << t->value() << "]";
 }
 
 void print2OpmicroInstr(StorageObject *d, StorageObject * r, string operation) {
-    cout << d->name() << " <- " << operation << r->name() << "[" << r->value() << "]";
+    cout << d->name() << " <- " << operation << r->name() << "[" 
+            << r->value() << "]";
 }
 
 void setAfield(BusALU * alu) {
@@ -345,6 +347,7 @@ void setAfield(BusALU * alu) {
         case 0: // No Op
             cout << "NOP";
             break;
+
         case 1: // MOV
             print2OpmicroInstr(dA, sA, "");
             alu->OP1().pullFrom(*sA);
@@ -352,6 +355,7 @@ void setAfield(BusALU * alu) {
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_rop1);
             break;
+
         case 2: // SLL
             print3OpmicroInstr(dA, sA, tA, "<<");
             alu->OP1().pullFrom(*sA);
@@ -359,6 +363,7 @@ void setAfield(BusALU * alu) {
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_lshift);
             break;
+
         case 3: // SRL
             print3OpmicroInstr(dA, sA, tA, ">>");
             alu->OP1().pullFrom(*sA);
@@ -366,6 +371,7 @@ void setAfield(BusALU * alu) {
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_rshift);
             break;
+
         case 4: // OR
             print3OpmicroInstr(dA, sA, tA, "|");
             alu->OP1().pullFrom(*sA);
@@ -373,12 +379,14 @@ void setAfield(BusALU * alu) {
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_or);
             break;
+
         case 5: // SIGN EXTEND
             alu->OP1().pullFrom(*sA);
             alu->OP2().pullFrom(*tA);
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_extendSign);
             break;
+
         case 6: // XOR
             print3OpmicroInstr(dA, sA, tA, "^");
             alu->OP1().pullFrom(*sA);
@@ -386,6 +394,7 @@ void setAfield(BusALU * alu) {
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_xor);
             break;
+
         case 7: // AND
             print3OpmicroInstr(dA, sA, tA, "&");
             alu->OP1().pullFrom(*sA);
@@ -393,19 +402,17 @@ void setAfield(BusALU * alu) {
             dA->latchFrom(alu->OUT());
             alu->perform(BusALU::op_and);
             break;
+
         default:
-            cout << "A Field not found!!\n";
+            cout << "**ERROR** Unknown A Field op '"<< opc <<"'\n";
             break;
     }
 }
 
 void setBfield(long Bfield, BusALU * alu) {
 
-    long opc;
-    long rdB;
-    long rsB;
-    long rtB;
-    if (Bfield == 52) { // We are looking at the beginning   
+    long opc, rdB, rsB, rtB;
+    if (Bfield == 52) { // We are looking at the upper half (used in goto B)
         opc = uIR.value() >> 50 & 0x7;
         rdB = uIR.value() >> 44 & 0x3f;
         rsB = uIR.value() >> 38 & 0x3f;
@@ -417,23 +424,16 @@ void setBfield(long Bfield, BusALU * alu) {
         rtB = uIR.value() >> 11 & 0x3f;
     }
 
-    StorageObject * dB;
-    StorageObject * sB;
-    StorageObject * tB;
-
-    // Setup rdB pointer
-    dB = snagReg(rdB);
-
-    // Setup rsB pointer
-    sB = snagReg(rsB);
-
-    // Setup rtB pointer
-    tB = snagReg(rtB);
+    // Set up operand pointers
+    StorageObject * dB = snagReg(rdB);
+    StorageObject * sB = snagReg(rsB);
+    StorageObject * tB = snagReg(rtB);
 
     switch(opc) {
         case 0: // No Op
             cout << "NOP";
             break;
+
         case 1: // MOV
             print2OpmicroInstr(dB, sB, "");
             alu->OP1().pullFrom(*sB);
@@ -441,6 +441,7 @@ void setBfield(long Bfield, BusALU * alu) {
             dB->latchFrom(alu->OUT());
             alu->perform(BusALU::op_rop1);
             break;
+
         case 2: // CMP
             print2OpmicroInstr(dB, sB, "~");
             alu->OP1().pullFrom(*sB);
@@ -448,16 +449,19 @@ void setBfield(long Bfield, BusALU * alu) {
             dB->latchFrom(alu->OUT());
             alu->perform(BusALU::op_not);
             break;
+
         case 3: // Mem Read
             cout << "MDR <- MEM[" << SYS[MAR]->value() << "]";
             m.read();
             SYS[MDR]->latchFrom(m.READ());
             break;
+            
         case 4: // Mem Write
             cout << "MEM[" << SYS[MAR]->value() << "] <- MDR";
             m.WRITE().pullFrom(*SYS[MDR]);
             m.write();
             break;
+
         case 5: // SUB
             print3OpmicroInstr(dB, sB, tB, "-");
             alu->OP1().pullFrom(*sB);
@@ -465,6 +469,7 @@ void setBfield(long Bfield, BusALU * alu) {
             dB->latchFrom(alu->OUT());
             alu->perform(BusALU::op_sub);
             break;
+
         case 6: // ADD
             print3OpmicroInstr(dB, sB, tB, "+");
             alu->OP1().pullFrom(*sB);
@@ -472,11 +477,13 @@ void setBfield(long Bfield, BusALU * alu) {
             dB->latchFrom(alu->OUT());
             alu->perform(BusALU::op_add);
             break;
-        case 7: // No Op
+
+        case 7: // No Op (undefined)
             cout << "NOP";
             break;
+
         default:
-            cout << "B Field not found!!\n";
+            cout << "**ERROR** unknown B field op '" << opc << "`\n";
             break;
     }
 }
@@ -492,7 +499,8 @@ bool checkImmRegRef(StorageObject * rs, long rT, string operation) {
 }
 
 void printCONDmicroInstr(StorageObject * rs, long imm, string operation) {
-    cout << "if " << rs->name() << "[" << rs->value() << "]" << operation << imm;
+    cout << "if " << rs->name() << "[" << rs->value() << "]" << operation 
+        << imm;
 }
 
 void printMAXOpsMicroInstr(int max) {
@@ -500,19 +508,18 @@ void printMAXOpsMicroInstr(int max) {
 }
 
 bool Conditional() {
-    // Note: rT here either equals an 8 bit immediate or an 8 bit reference to an IMM register
-    // Because of this Case 2-7 will just compare between rs->value() and rT directly.
-    // If necessary we can implement this in a Constant style switch statement from 0-255.
-    // We are also doing simple bit twiddling with rs as well. This is done because we 
-    // believe that this would be accomplished with simple wire truncation and standard
-    // hardware practices that wouldn't require an ALU in real hardware. 
+    // Note: rT here either equals an 8 bit immediate or an 8 bit reference to 
+    //       an IMM register. Because of this Case 2-7 will just compare between
+    //       rs->value() and rT directly. If necessary we can implement this in 
+    //       a Constant style switch statement from 0-255. We are also doing 
+    //       simple bit twiddling with rs as well. This is done because we  
+    //       believe that this would be accomplished with simple wire truncation
+    //       and standalone gates that wouldn't require a full ALU in real 
+    //       hardware.
     long rT = (uIR.value() >> 44) & 0xff;
     long rS = (uIR.value() >> 38) & 0x3f;
     long type = (uIR.value() >> 32) & 0x0f;
-    StorageObject * rs;
-
-    // Setup rS pointer
-    rs = snagReg(rS);
+    StorageObject * rs = snagReg(rS);
     long IRopc;
 
     switch(type) {
@@ -525,32 +532,20 @@ bool Conditional() {
         case 2: // Bits set
             cout << "if " << rs->name() << "[" << rs->value() << "]" << "& " << rT
                  << " == " << rT;
-            if(rs->value() & rT == rT) {
-                return true;
-            }
-            break;
+            return rs->value() & rT == rT;
 
         case 3: // Bits not set
             cout << "if " << rs->name() << "[" << rs->value() << "]" << "& " << rT
                  << " != " << rT;
-            if(rs->value() & rT != rT) {
-                return true;
-            }
-            break;
+            return rs->value() & rT != rT;
 
         case 4: // Byte equal
             printCONDmicroInstr(rs, rT, " == ");
-            if(rs->value() == rT) {
-                return true;
-            }
-            break;
+            return rs->value() == rT;
 
         case 5: // Byte Not equal
-            printCONDmicroInstr(rs, rT, " != ");
-            if(rs->value() != rT) {
-                return true;
-            }
-            break;
+            printCONDmicroInstr(rs, rT, " == ");
+            return rs->value() != rT;
 
         case 6: // Nybble 1 equal
             printCONDmicroInstr(rs, rT, " & 0xf0 == ");
@@ -564,42 +559,23 @@ bool Conditional() {
 
         case 8: // IR 0 Ops
             printMAXOpsMicroInstr(0);
-            IRopc = SYS[IR]->value();
-            if(getMaxOperands(IRopc) == 0) {
-                return true;
-            }
-            break;
+            return getMaxOperands(SYS[IR]->value()) == 0;
 
         case 9: // IR 1 Op
             printMAXOpsMicroInstr(1);
-            IRopc = SYS[IR]->value();
-            if(getMaxOperands(IRopc) == 1) {
-                return true;
-            }
-            break;
+            return getMaxOperands(SYS[IR]->value()) == 1;
 
         case 10: // IR 2 Ops
             printMAXOpsMicroInstr(2);
-            IRopc = SYS[IR]->value();
-            if(getMaxOperands(IRopc) == 2) {
-                return true;
-            }
-            break;
+            return getMaxOperands(SYS[IR]->value()) == 2;
 
         case 11: // IR 3 Ops
             printMAXOpsMicroInstr(3);
-            IRopc = SYS[IR]->value();
-            if(getMaxOperands(IRopc) == 3) {
-                return true;
-            }
-            break;
+            return getMaxOperands(SYS[IR]->value()) == 3;
 
         case 12: // PC Max
-            printCONDmicroInstr(GPR[15], kMaxAddr, " == ");
-            if(GPR[15]->value() == kMaxAddr) {
-                return true;
-            }
-            break;
+            cout << "PC (" << GPR[15]->value() << ") == PC_MAX"
+            return GPR[15]->value() == kMaxAddr;
 
         default:
             break;
