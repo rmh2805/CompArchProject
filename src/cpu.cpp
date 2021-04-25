@@ -625,19 +625,19 @@ void macroTrace(int phase) {
             
             OP1[0] = SYS[OP1Type]->value();
             OP1[1] = SYS[OP1Val]->value(); 
-            OP1[2] = SYS[OP1Scale];
+            OP1[2] = SYS[OP1Scale]->value();
             
             OP2[0] = SYS[OP2Type]->value();
             OP2[1] = SYS[OP2Val]->value(); 
-            OP2[2] = SYS[OP2Scale];
+            OP2[2] = SYS[OP2Scale]->value();
             
             OP3[0] = SYS[OP3Type]->value();
             OP3[1] = SYS[OP3Val]->value(); 
-            OP3[2] = SYS[OP3Scale];
+            OP3[2] = SYS[OP3Scale]->value();
             
             OP4[0] = SYS[OP4Type]->value();
             OP4[1] = SYS[OP4Val]->value(); 
-            OP4[2] = SYS[OP4Scale];
+            OP4[2] = SYS[OP4Scale]->value();
             return;
         case 1:                                 // Store branch phase values
             val1 = SYS[OP1Val]->value();
