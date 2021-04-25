@@ -74,7 +74,14 @@ EvalOp          2FF
     EvalPDc         379
     EvalPIc         37F
     EvalPIc1        384
-Writeback       FFFFFFFF
+Writeback       3FF
+    WritebackAdd    40F
+    WritebackMul    41A
+    WritebackInc    426
+    WritebackSwp    428
+PrefixRet       FFFFFFFF
+MemRet          FFFFFFFF
+WriteRet        FFFFFFFF
 Control         FFFFFFFF
     HLT             FFFFFFFF
     CLR             FFFFFFFF
