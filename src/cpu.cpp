@@ -672,6 +672,8 @@ void macroTrace(int phase) {
             if (opc == 0x100) {
                 return;
             }
+            printInstMnemonic(opc);
+            cout << "\n";
             
         default:
             return;
