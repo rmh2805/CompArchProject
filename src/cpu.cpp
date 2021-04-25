@@ -44,7 +44,7 @@ StorageObject * IMM[16] = {
     new StorageObject("ImmF", kRegSize, 0x18),
 };
 
-Memory m("Main Memory", kAddrBusSize, kDataBusSize, kMaxAddr, 1, true);
+Memory m("Main_Memory", kAddrBusSize, kDataBusSize, kMaxAddr, 1, true);
 Memory control_storage("Control_Storage", CU_DATA_SIZE, CU_DATA_SIZE, kMaxAddr, 1, true);
 
 // System Registers
@@ -56,7 +56,7 @@ StorageObject * SYS[24] = {
     new StorageObject("uR2", kRegSize),
     new StorageObject("uCnt", kRegSize),
     new StorageObject("MDR", kRegSize),
-    &control_storage.MAR(),
+    &m.MAR(),
     new StorageObject("OP1Val", kRegSize),
     new StorageObject("OP1Type", kRegSize),
     new StorageObject("OP2Val", kRegSize),
