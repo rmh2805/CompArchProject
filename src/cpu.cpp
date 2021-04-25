@@ -640,7 +640,7 @@ void macroTrace(int phase) {
 
     switch(phase) {
         case 0:                                 // Store decode phase values
-            opc = IR.value();
+            opc = SYS[IR]->value();
             
             OP1[0] = SYS[OP1Type]->value();
             OP1[1] = SYS[OP1Val]->value(); 
@@ -665,7 +665,7 @@ void macroTrace(int phase) {
             val4 = SYS[OP4Val]->value();
             return;
         case 2:                                 // Print the macro trace
-            if (IR = 0x100) {
+            if (opc == 0x100) {
                 return;
             }
         default:
@@ -674,7 +674,6 @@ void macroTrace(int phase) {
 }
 
 void macroTraceDecode() {
-    cout << "decodemacro\n";
     macroTrace(0);
 }
 
