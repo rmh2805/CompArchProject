@@ -575,7 +575,7 @@ bool Conditional() {
 
         case 12: // PC Max
             cout << "if PC (" << GPR[15]->value() << ") == PC_MAX";
-            return GPR[15]->value() == kMaxAddr;
+            return GPR[15]->value() >= kMaxAddr;
 
         default:
             break;
