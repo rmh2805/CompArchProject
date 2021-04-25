@@ -1,7 +1,7 @@
 #include "includes.h"
 #include "cpu.h"
 
-#define kDefMicroCode "uCode.obj"
+#define kDefMicroCode "../uCode/asm/uCode.obj"
 
 int main(int argc, char** argv) {
 
