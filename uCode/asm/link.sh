@@ -6,6 +6,7 @@
 ./assemble.sh RegVal.asm         A0 > RegVal.obj 
 ./assemble.sh ScaleOp.asm       1A0 > ScaleOp.obj
 ./assemble.sh memOp.asm         2D0 > memOp.obj
+./assemble.sh PrefixOp.asm      2C0 > PrefixOp.obj
 
 python3 ../../Asm/uAsm/link.py uCode.obj 0 \
         fetch.obj       0   \
@@ -13,5 +14,6 @@ python3 ../../Asm/uAsm/link.py uCode.obj 0 \
         GetOperand.obj  100 \
         ScaleOp.obj     1A0 \
         Decode.obj      200 \
+        PrefixOp.obj    2C0 \
         memOp.obj       2D0 \
         EvalOp.obj      300 

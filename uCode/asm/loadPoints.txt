@@ -51,6 +51,12 @@ Decode          1FF
     DecodeBeq1      28D
     DecodeBie       292
     DecodeBranch    295
+PrefixOp        2BF
+    PrefixOp1       2C1
+    PrefixOp2       2C6
+MemOp           2CF
+    MemOp1          2D5
+    MemOp2          2D6
 EvalOp          2FF
     EvalNyb         30C
     EvalImm         30D
@@ -68,10 +74,7 @@ EvalOp          2FF
     EvalPDc         379
     EvalPIc         37F
     EvalPIc1        384
-MemOp           2CF
-    MemOp1          2D5
-    MemOp2          2D6
-PrefixOp        FFFFFFFF
+Writeback       FFFFFFFF
 Control         FFFFFFFF
     HLT             FFFFFFFF
     CLR             FFFFFFFF
