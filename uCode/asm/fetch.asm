@@ -11,7 +11,7 @@
 # FetchOperands:
     0x06 if noops goto Decode               // Skip opernads if there are none
                                             // Grab the first operand
-    0x07 mov uPC uRet;       goto GetOperand
+    0x07 mov uRet uPC;       goto GetOperand
     0x08 mov OP1Type uR0;    mov OP1val uR1
     0x09 mov OP1Scale ur2;   none
                                             // Break checks
