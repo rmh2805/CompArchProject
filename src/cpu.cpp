@@ -24,24 +24,35 @@ StorageObject * GPR[16] = {
     new StorageObject("PC", kRegSize),
 };
 
+long immVals[16] = {
+    0         , 1,
+    0xFFFFFF00, 0x1F,
+    0x0000FFFF, 0x00FFFFFF,
+    0x0C      , 0x03,
+    0x10      , 0xFF,
+    0x0F      , 0x08,
+    0x10      , 0x04,
+    0x0D      , 0x18
+};
+
 // Immediate Registers
 StorageObject * IMM[16] = {
-    new StorageObject("Imm0", kRegSize, 0x0),
-    new StorageObject("Imm1", kRegSize, 0x1),
-    new StorageObject("Imm2", kRegSize, 0xFFFFFF00),
-    new StorageObject("Imm3", kRegSize, 0x1F),
-    new StorageObject("Imm4", kRegSize, 0x0000FFFF),
-    new StorageObject("Imm5", kRegSize, 0x00FFFFFF),
-    new StorageObject("Imm6", kRegSize, 0x0C),
-    new StorageObject("Imm7", kRegSize, 0x03),
-    new StorageObject("Imm8", kRegSize, 0x10),
-    new StorageObject("Imm9", kRegSize, 0xFF),
-    new StorageObject("ImmA", kRegSize, 0x0F),
-    new StorageObject("ImmB", kRegSize, 0x08),
-    new StorageObject("ImmC", kRegSize, 0x10),
-    new StorageObject("ImmD", kRegSize, 0x04),
-    new StorageObject("ImmE", kRegSize, 0x0D),
-    new StorageObject("ImmF", kRegSize, 0x18),
+    new StorageObject("Imm0", kRegSize, immVals[0x0]),
+    new StorageObject("Imm1", kRegSize, immVals[0x1]),
+    new StorageObject("Imm2", kRegSize, immVals[0x2]),
+    new StorageObject("Imm3", kRegSize, immVals[0x3]),
+    new StorageObject("Imm4", kRegSize, immVals[0x4]),
+    new StorageObject("Imm5", kRegSize, immVals[0x5]),
+    new StorageObject("Imm6", kRegSize, immVals[0x6]),
+    new StorageObject("Imm7", kRegSize, immVals[0x7]),
+    new StorageObject("Imm8", kRegSize, immVals[0x8]),
+    new StorageObject("Imm9", kRegSize, immVals[0x9]),
+    new StorageObject("ImmA", kRegSize, immVals[0xA]),
+    new StorageObject("ImmB", kRegSize, immVals[0xB]),
+    new StorageObject("ImmC", kRegSize, immVals[0xC]),
+    new StorageObject("ImmD", kRegSize, immVals[0xD]),
+    new StorageObject("ImmE", kRegSize, immVals[0xE]),
+    new StorageObject("ImmF", kRegSize, immVals[0xF]),
 };
 
 Memory m("Main_Memory", kAddrBusSize, kDataBusSize, kMaxAddr, 1, true);
@@ -78,7 +89,6 @@ StorageObject * SYS[24] = {
 StorageObject uIR("uIR", CU_DATA_SIZE);
 
 void connect() {
-
     // Memory Setup
     m.MAR().connectsTo(ALU1.OUT());
     m.MAR().connectsTo(ALU2.OUT());	
@@ -113,7 +123,7 @@ void connect() {
     uIR.connectsTo(ALU1.OP1());
     uIR.connectsTo(ALU1.IN1());
 
-    // Connect GPRs 
+    // Connect GPRs and IMMs
     for(int i = 0; i < 16; i++) {
         GPR[i]->connectsTo(ALU1.OUT());
         GPR[i]->connectsTo(ALU2.OUT());
@@ -121,10 +131,7 @@ void connect() {
         GPR[i]->connectsTo(ALU1.OP2());
         GPR[i]->connectsTo(ALU2.OP1());
         GPR[i]->connectsTo(ALU2.OP2());
-    }
 
-    // Connect Immediate registers
-    for(int i = 0; i < 16; i++) {
         IMM[i]->connectsTo(ALU1.OP1());
         IMM[i]->connectsTo(ALU1.OP2());
         IMM[i]->connectsTo(ALU2.OP1());
@@ -155,7 +162,7 @@ StorageObject * snagReg(long regNum) {
     } else if (regNum <= 0x3f) {
         return GPR[regNum - 48];
     } else {
-        cout << "PANIC!\n";
+        cout << "**ERROR** Attempted to access an unknown register '"<< regNum <<"'\n";
         return NULL;
     }
 }
@@ -164,98 +171,42 @@ int getMaxOperands(long opc) {
 
     int maxOps;
     switch(opc) {
-        case 0x0: // HLT
-            maxOps = 0;
-            break;
-        case 0x1: // NOP
-            maxOps = 0;
-            break;
         case 0x2: // CLR
-            maxOps = 1;
-            break;
         case 0x3: // DMP
-            maxOps = 1;
-            break;
-        case 0x4: // OUT
-            maxOps = 2;
-            break;
-        case 0x10: // ADD
-            maxOps = 3;
-            break;
-        case 0x11: // SUB
-            maxOps = 3;
-            break;
-        case 0x12: // MUL
-            maxOps = 4;
-            break;
-        case 0x13: // DIV
-            maxOps = 4;
-            break;
-        case 0x14: // MOD
-            maxOps = 3;
-            break;
-        case 0x15: // AND
-            maxOps = 3;
-            break;
-        case 0x16: // OR
-            maxOps = 3;
-            break;
-        case 0x17: // XOR
-            maxOps = 3;
-            break;
-        case 0x18: // CMP
-            maxOps = 2;
-            break;
         case 0x19: // INC
-            maxOps = 1;
-            break;
         case 0x1A: // DEC
-            maxOps = 1;
-            break;
-        case 0x20: // MOV
-    	    maxOps = 2;
-            break;
-        case 0x21: // SWP
-            maxOps = 2;	    
-            break;
-        case 0x22: // CPY
-            maxOps = 4;    
-            break;
         case 0x31: // JMP
-            maxOps = 1;
-            break;
         case 0x32: // JAL
-            maxOps = 1;
-            break;
-        case 0x33: // RET
-            maxOps = 0;
-            break;
-        case 0x34: // BEQ
-            maxOps = 3;
-            break;
-        case 0x35: // BNE
-            maxOps = 3;
-            break;
-        case 0x36: // BGT
-            maxOps = 3;
-            break;
-        case 0x37: // BGE
-            maxOps = 3;
-            break;
-        case 0x38: // BIE
-            maxOps = 3;
-            break;
-        case 0x39: // BDE
-            maxOps = 3;
-            break;
         case 0x3a: // BAO
-            maxOps = 1;
-            break;
         case 0x3b: // BAC
             maxOps = 1;
             break;
-        default: 
-            cout << "Unspecified Instruction...returning 0 for max OPs\n";
+        case 0x4: // OUT
+        case 0x18: // CMP
+        case 0x20: // MOV
+        case 0x21: // SWP
+            maxOps = 2;
+            break;
+        case 0x10: // ADD
+        case 0x11: // SUB
+        case 0x14: // MOD
+        case 0x15: // AND
+        case 0x16: // OR
+        case 0x17: // XOR
+        case 0x34: // BEQ
+        case 0x35: // BNE
+        case 0x36: // BGT
+        case 0x37: // BGE
+        case 0x38: // BIE
+        case 0x39: // BDE
+            maxOps = 3;
+            break;
+        case 0x12: // MUL
+        case 0x22: // CPY
+        case 0x13: // DIV
+            maxOps = 4;
+            break;
+        default:   // All other instructions
             maxOps = 0;
             break;
     }
