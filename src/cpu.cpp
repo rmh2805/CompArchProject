@@ -327,13 +327,13 @@ void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t,
     if(immR) {
         cout << "0x" << r->value();
     } else {
-         r->name() << "[" << r->value() << "]"
+         cout << r->name() << "[" << r->value() << "]";
     }
     cout << " " << operation << " ";
     if(immT) {
         cout << "0x" << t->value();
     } else {
-         t->name() << "[" << t->value() << "]"
+         cout << t->name() << "[" << t->value() << "]";
     }
 }
 
@@ -343,7 +343,7 @@ void print2OpmicroInstr(StorageObject *d, StorageObject * r, string operation,
     if(immR) {
         cout << "0x" << r->value();
     } else {
-         r->name() << "[" << r->value() << "]"
+         cout << r->name() << "[" << r->value() << "]";
     }
 }
 
