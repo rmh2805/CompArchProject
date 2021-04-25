@@ -1,6 +1,6 @@
 #include "cpu.h"
 
-//=========================================<CPU Objects>==========================================//
+//===============================<CPU Objects>================================//
 BusALU ALU1("ALU1", kAddrBusSize);
 BusALU ALU2("ALU2", kAddrBusSize);
 
@@ -56,7 +56,8 @@ StorageObject * IMM[16] = {
 };
 
 Memory m("Main_Memory", kAddrBusSize, kDataBusSize, kMaxAddr, 1, true);
-Memory control_storage("Control_Storage", CU_DATA_SIZE, CU_DATA_SIZE, kMaxAddr, 1, true);
+Memory control_storage("Control_Storage", CU_DATA_SIZE, CU_DATA_SIZE, kMaxAddr, 
+                        1, true);
 
 // System Registers
 StorageObject * SYS[24] = {
@@ -88,6 +89,22 @@ StorageObject * SYS[24] = {
 
 StorageObject uIR("uIR", CU_DATA_SIZE);
 
+//==========================<Helper Fxn Declaration>==========================//
+StorageObject * snagReg(long regNum);
+int getMaxOperands(long opc);
+void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t, char * operation);
+void print2OpmicroInstr(StorageObject *d, StorageObject * r, char * operation);
+void printMAXOpsMicroInstr(int max);
+
+void setAfield(BusALU * alu);
+void setBfield(long Bfield, BusALU * alu);
+
+bool checkImmRegRef(StorageObject * rs, long rT, char * operation);
+
+bool Conditional();
+void printCONDmicroInstr(StorageObject * rs, long imm, char * operation);
+
+//===============================<Primary Fxns>===============================//
 void connect() {
     // Memory Setup
     m.MAR().connectsTo(ALU1.OUT());
@@ -153,6 +170,93 @@ void connect() {
 
 }
 
+void execute(const char * codeFile, const char * uCodeFile) {
+    // Load the object files
+    m.load(codeFile);
+    control_storage.load(uCodeFile);
+
+    // Set starting PC Values
+    GPR[15]->latchFrom(m.READ());
+    SYS[uPC]->latchFrom(control_storage.READ());
+    Clock::tick();
+    
+    cout << "Entering Main Execute Loop\n";
+    while(true) { 
+        // Check if we were at 0xFFFFFFFF
+        if(SYS[uPC]->value() == 0xFFFFFFFF) {
+            cout << "HALTING!\n";
+            break;
+        }
+        
+        // Increment Program Counter and store in uPC and MAR
+        ALU1.OP1().pullFrom(*SYS[uPC]);
+        ALU1.OP2().pullFrom(*IMM[1]);
+        ALU1.perform(BusALU::op_add); // Add uPC + 1
+        control_storage.MAR().latchFrom(ALU1.OUT());
+        SYS[uPC]->latchFrom(ALU1.OUT());
+        Clock::tick();
+        
+        // Read Value from CS into uIR
+        control_storage.read();
+        uIR.latchFrom(control_storage.READ()); 
+        Clock::tick();
+
+        // Can Print uPC, uIR
+        cout << "uPC[" << SYS[uPC]->value() << "]: " ;
+        
+        // Execute
+        long prefix = (uIR.value() >> 53);
+        long bBits;
+        
+        // Get prefix (first 2 bits of uIR)
+        switch(prefix) {
+            case 0: // Parallel Operations
+                bBits = CU_DATA_SIZE-24;
+                setAfield(&ALU1);
+                cout << ", ";
+                setBfield(bBits, &ALU2);
+                cout << "\n";
+                break;
+            
+            case 1: // A Field jump
+                setAfield(&ALU2);
+                cout << ", ";
+                ALU1.IN1().pullFrom(uIR);
+                SYS[uPC]->latchFrom(ALU1.OUT());
+                ALU1.perform(BusALU::op_rop1);
+                cout << "uJMP: uPC <- uIR[" << (uIR.value() & 0xFFFFFFFF) << "]\n";
+                break;
+            
+            case 2: // B Field jump
+                bBits = CU_DATA_SIZE-3;
+                cout << "uJMP: uPC <- uIR[" << (uIR.value() & 0xFFFFFFFF) << "], ";
+                setBfield(bBits, &ALU2);
+                cout << "\n";
+                ALU1.IN1().pullFrom(uIR);
+                SYS[uPC]->latchFrom(ALU1.OUT());
+                ALU1.perform(BusALU::op_rop1);
+                break;
+
+            case 3: // Conditional 
+                if(Conditional()) {
+                    ALU1.IN1().pullFrom(uIR);
+                    SYS[uPC]->latchFrom(ALU1.OUT());
+                    ALU1.perform(BusALU::op_rop1);
+                    cout << ": TAKEN: uPC <- uIR[" << (uIR.value() & 0xFFFFFFFF) << "]\n";
+                } else {
+                    cout << ": NOT TAKEN\n";
+                }
+                break;
+
+            default:
+                cout << "Prefix not found!\n";
+                break;
+        }
+        Clock::tick(); // Tick our clock
+    }
+}
+
+//==========================<Helper Fxn Definition>===========================//
 StorageObject * snagReg(long regNum) {
     // Get register from number
     if(regNum <= 0x0f) {
@@ -168,7 +272,6 @@ StorageObject * snagReg(long regNum) {
 }
 
 int getMaxOperands(long opc) {
-
     int maxOps;
     switch(opc) {
         case 0x2: // CLR
@@ -229,18 +332,10 @@ void setAfield(BusALU * alu) {
     long rsA = uIR.value() >> 38 & 0x3f;
     long rtA = uIR.value() >> 32 & 0x3f;
 
-    StorageObject * dA;
-    StorageObject * sA;
-    StorageObject * tA;
-
-    // Setup rdA pointer
-    dA = snagReg(rdA);
-
-    // Setup rsA pointer
-    sA = snagReg(rsA);
-
-    // Setup rsA pointer
-    tA = snagReg(rtA);
+    // Setup Operand register pointers
+    StorageObject * dA = snagReg(rdA);
+    StorageObject * sA = snagReg(rsA);
+    StorageObject * tA = snagReg(rtA);
 
     switch(opc) {
         case 0: // No Op
@@ -619,90 +714,4 @@ bool Conditional() {
             break;
     }
     return false;
-}
-
-void execute(const char * codeFile, const char * uCodeFile) {
-    // Load the object files
-    m.load(codeFile);
-    control_storage.load(uCodeFile);
-
-    // Set starting PC Values
-    GPR[15]->latchFrom(m.READ());
-    SYS[uPC]->latchFrom(control_storage.READ());
-    Clock::tick();
-    
-    cout << "Entering Main Execute Loop\n";
-    while(true) { 
-        // Check if we were at 0xFFFFFFFF
-        if(SYS[uPC]->value() == 0xFFFFFFFF) {
-            cout << "HALTING!\n";
-            break;
-        }
-        
-        // Increment Program Counter and store in uPC and MAR
-        ALU1.OP1().pullFrom(*SYS[uPC]);
-        ALU1.OP2().pullFrom(*IMM[1]);
-        ALU1.perform(BusALU::op_add); // Add uPC + 1
-        control_storage.MAR().latchFrom(ALU1.OUT());
-        SYS[uPC]->latchFrom(ALU1.OUT());
-        Clock::tick();
-        
-        // Read Value from CS into uIR
-        control_storage.read();
-        uIR.latchFrom(control_storage.READ()); 
-        Clock::tick();
-
-        // Can Print uPC, uIR
-        cout << "uPC[" << SYS[uPC]->value() << "]: " ;
-        
-        // Execute
-        long prefix = (uIR.value() >> 53);
-        long bBits;
-        
-        // Get prefix (first 2 bits of uIR)
-        switch(prefix) {
-            case 0: // Parallel Operations
-                bBits = CU_DATA_SIZE-24;
-                setAfield(&ALU1);
-                cout << ", ";
-                setBfield(bBits, &ALU2);
-                cout << "\n";
-                break;
-            
-            case 1: // A Field jump
-                setAfield(&ALU2);
-                cout << ", ";
-                ALU1.IN1().pullFrom(uIR);
-                SYS[uPC]->latchFrom(ALU1.OUT());
-                ALU1.perform(BusALU::op_rop1);
-                cout << "uJMP: uPC <- uIR[" << (uIR.value() & 0xFFFFFFFF) << "]\n";
-                break;
-            
-            case 2: // B Field jump
-                bBits = CU_DATA_SIZE-3;
-                cout << "uJMP: uPC <- uIR[" << (uIR.value() & 0xFFFFFFFF) << "], ";
-                setBfield(bBits, &ALU2);
-                cout << "\n";
-                ALU1.IN1().pullFrom(uIR);
-                SYS[uPC]->latchFrom(ALU1.OUT());
-                ALU1.perform(BusALU::op_rop1);
-                break;
-
-            case 3: // Conditional 
-                if(Conditional()) {
-                    ALU1.IN1().pullFrom(uIR);
-                    SYS[uPC]->latchFrom(ALU1.OUT());
-                    ALU1.perform(BusALU::op_rop1);
-                    cout << ": TAKEN: uPC <- uIR[" << (uIR.value() & 0xFFFFFFFF) << "]\n";
-                } else {
-                    cout << ": NOT TAKEN\n";
-                }
-                break;
-
-            default:
-                cout << "Prefix not found!\n";
-                break;
-        }
-        Clock::tick(); // Tick our clock
-    }
 }
