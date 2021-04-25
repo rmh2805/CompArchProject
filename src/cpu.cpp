@@ -643,9 +643,53 @@ bool Conditional() {
     return false;
 }
 
+void printInstMnemonic(int opc);
 
-void printInstMnemonic(int opc) {
-    cout << opc;
+void printMacroArg(long * op, long val) {
+    int opType = op[0] & 0xFF;
+    long prefixes = op[0] >> 8;
+    bool scaledArg = !op[2];
+    bool memArg = !((opType & 0xF0) ^ 0x40) || !((opType & 0xF0) ^ 0x50) ||
+                  !((opType & 0xF0) ^ 0x60) || !((opType & 0xF0) ^ 0x70) ||
+                  !((opType & 0xF0) ^ 0x80);
+    
+    if (!((opType & 0xF0) ^ 0x10) || !((opType & 0xF0) ^ 0x20)) {
+        cout << "IMM 0x" << val;
+    } else if (!((opType & 0xF0) ^ 0x30)) {
+        cout << "REG "  << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else if (!((opType & 0xF0) ^ 0x40)) {
+        cout << "REG_IND " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else if (!((opType & 0xF0) ^ 0x50)) {
+        cout << "MEM_IND " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else if (!((opType & 0xF0) ^ 0x60)) {
+        cout << "IDX " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else if (!((opType & 0xF0) ^ 0x70)) {
+        cout << "DSP " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else if (!((opType & 0xF0) ^ 0x80)) {
+        cout << "ABS " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else if (!((opType & 0xF0) ^ 0x90)) {
+        cout << "INC " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else if (!((opType & 0xF0) ^ 0xA0)) {
+        cout << "DEC " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else if (!((opType & 0xF0) ^ 0xC0)) {
+        cout << "PRE_INC " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else if (!((opType & 0xF0) ^ 0xD0)) {
+        cout << "PST_INC " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    } else {
+        cout << "UNKNOWN " << op[0] << " " << op[1] << " " << op[2] << " [" 
+             << val << "]";
+    }
+    
 }
 
 void macroTrace(int phase) {
@@ -654,6 +698,7 @@ void macroTrace(int phase) {
     static long OP2[3] = {0, 0, 0}, val2 = 0;
     static long OP3[3] = {0, 0, 0}, val3 = 0;
     static long OP4[3] = {0, 0, 0}, val4 = 0;
+    static long * vals[4] = {&val1, &val2, &val3, &val4};
 
     switch(phase) {
         case 0:                                 // Store decode phase values
@@ -686,6 +731,26 @@ void macroTrace(int phase) {
                 return;
             }
             printInstMnemonic(opc);
+            for(int i = 0; i < getMaxOperands(opc); i++) {
+                if (i != 0) {
+                    cout << ",";
+                }
+                cout << " ";
+                switch(i) {
+                    case 0:
+                        printMacroArg(OP1, *vals[i]);
+                        break;
+                    case 1:
+                        printMacroArg(OP2, *vals[i]);
+                        break;
+                    case 2:
+                        printMacroArg(OP3, *vals[i]);
+                        break;
+                    case 3:
+                        printMacroArg(OP4, *vals[i]);
+                        break;
+                }
+            }
             cout << "\n";
             
         default:
@@ -703,4 +768,106 @@ void macroTraceBranch() {
 
 void macroTraceFetch() {
     macroTrace(2);
+}
+
+void printInstMnemonic(int opc) {
+    switch(opc) {
+        // CPU Control instructions
+        case 0x00:
+            cout << "HLT";
+            break;
+        case 0x02:
+            cout << "CLR";
+            break;
+        case 0x03:
+            cout << "DMP";
+            break;
+        case 0x04:
+            cout << "OUT";
+            break;
+        
+        // ALU instructions
+        case 0x10:
+            cout << "ADD";
+            break;
+        case 0x11:
+            cout << "SUB";
+            break;
+        case 0x12:
+            cout << "MUL";
+            break;
+        case 0x13:
+            cout << "DIV";
+            break;
+        case 0x14:
+            cout << "MOD";
+            break;
+        case 0x15:
+            cout << "AND";
+            break;
+        case 0x16:
+            cout << " OR";
+            break;
+        case 0x17:
+            cout << "XOR";
+            break;
+        case 0x18:
+            cout << "CMP";
+            break;
+        case 0x19:
+            cout << "INC";
+            break;
+        case 0x1A:
+            cout << "DEC";
+            break;
+            
+        // Memory Instructions
+        case 0x20:
+            cout << "MOV";
+            break;
+        case 0x21:
+            cout << "SWP";
+            break;
+        case 0x22:
+            cout << "CPY";
+            break;
+            
+        // COL Instructions
+        case 0x31:
+            cout << "JMP";
+            break;
+        case 0x32:
+            cout << "JAL";
+            break;
+        case 0x33:
+            cout << "RET";
+            break;
+        case 0x34:
+            cout << "BEQ";
+            break;
+        case 0x35:
+            cout << "BNE";
+            break;
+        case 0x36:
+            cout << "BGT";
+            break;
+        case 0x37:
+            cout << "BGE";
+            break;
+        case 0x38:
+            cout << "BIE";
+            break;
+        case 0x39:
+            cout << "BDE";
+            break;
+        case 0x3A:
+            cout << "BAO";
+            break;
+        case 0x3B:
+            cout << "BAC";
+            break;
+        
+        default:
+            cout << "NOP";
+    }
 }
