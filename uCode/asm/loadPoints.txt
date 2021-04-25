@@ -28,6 +28,8 @@ GetOperand      0FF
     FetchOpDsp      137
     FetchOpScl      141
     FetchOpScl1     149
+ScaleOp         19F
+    ScaleOp1        1AC
 Decode          1FF
     DecodeDmp       21B
     DecodeOut       223
@@ -66,9 +68,9 @@ EvalOp          2FF
     EvalPDc         379
     EvalPIc         37F
     EvalPIc1        384
-ScaleOp         19F
-    ScaleOp1        1AC
-MemOp           FFFFFFFF
+MemOp           2CF
+    MemOp1          2D5
+    MemOp2          2D6
 PrefixOp        FFFFFFFF
 Control         FFFFFFFF
     HLT             FFFFFFFF

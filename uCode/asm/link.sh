@@ -5,6 +5,7 @@
 ./assemble.sh EvalOp.asm        300 > EvalOp.obj
 ./assemble.sh RegVal.asm         A0 > RegVal.obj 
 ./assemble.sh ScaleOp.asm       1A0 > ScaleOp.obj
+./assemble.sh memOp.asm         2D0 > memOp.obj
 
 python3 ../../Asm/uAsm/link.py uCode.obj 0 \
         fetch.obj       0   \
@@ -12,4 +13,5 @@ python3 ../../Asm/uAsm/link.py uCode.obj 0 \
         GetOperand.obj  100 \
         ScaleOp.obj     1A0 \
         Decode.obj      200 \
+        memOp.obj       2D0 \
         EvalOp.obj      300 
