@@ -92,13 +92,13 @@ StorageObject uIR("uIR", CU_DATA_SIZE);
 //==========================<Helper Fxn Declaration>==========================//
 // Register locator helpers
 StorageObject * snagReg(long regNum);
-bool checkImmRegRef(StorageObject * rs, long rT, char * operation);
+bool checkImmRegRef(StorageObject * rs, long rT, string operation);
 
 // Trace print helpers 
 void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t,
-                            char * operation);
-void print2OpmicroInstr(StorageObject *d, StorageObject * r, char * operation);
-void printCONDmicroInstr(StorageObject * rs, long imm, char * operation);
+                            string operation);
+void print2OpmicroInstr(StorageObject *d, StorageObject * r, string operation);
+void printCONDmicroInstr(StorageObject * rs, long imm, string operation);
 void printMAXOpsMicroInstr(int max);
 
 void setAfield(BusALU * alu);
@@ -320,12 +320,12 @@ int getMaxOperands(long opc) {
     return maxOps;
 }
 
-void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t, char * operation) {
+void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t, string operation) {
     cout << d->name() << " <- " << r->name() << "[" << r->value() << "]"
          << " " << operation << " " << t->name() << "[" << t->value() << "]";
 }
 
-void print2OpmicroInstr(StorageObject *d, StorageObject * r, char * operation) {
+void print2OpmicroInstr(StorageObject *d, StorageObject * r, string operation) {
     cout << d->name() << " <- " << operation << r->name() << "[" << r->value() << "]";
 }
 
@@ -481,7 +481,7 @@ void setBfield(long Bfield, BusALU * alu) {
     }
 }
 
-bool checkImmRegRef(StorageObject * rs, long rT, char * operation) {
+bool checkImmRegRef(StorageObject * rs, long rT, string operation) {
     if(rT < 0 || rT >= 16) {
         cout << "**ERROR** Unable to find immediate register '" << rT <<"'\n";
         return false; 
@@ -491,7 +491,7 @@ bool checkImmRegRef(StorageObject * rs, long rT, char * operation) {
     return rs->value() == immVals[rT];
 }
 
-void printCONDmicroInstr(StorageObject * rs, long imm, char * operation) {
+void printCONDmicroInstr(StorageObject * rs, long imm, string operation) {
     cout << "if " << rs->name() << "[" << rs->value() << "]" << operation << imm;
 }
 
