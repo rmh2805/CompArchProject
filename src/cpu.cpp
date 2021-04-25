@@ -132,7 +132,7 @@ void connect() {
     }
 
     // Basic connect for Systems Registers to ALU
-    for(int i = 0; i < 23; i++) {
+    for(int i = 0; i < 24; i++) {
         if (i == MDR || i == IR || i == MAR || i == uPC ) {
             continue;
         }
@@ -271,12 +271,12 @@ void print2OpmicroInstr(StorageObject *d, StorageObject * r, char * operation) {
     cout << d->name() << " <- " << operation << r->name() << "[" << r->value() << "]";
 }
 
-void setAfield(long Afield, BusALU * alu) {
+void setAfield(BusALU * alu) {
 
-    long opc = uIR(Afield, Afield-2);
-    long rdA = uIR(Afield-3, Afield-8);
-    long rsA = uIR(Afield-9, Afield-14);
-    long rtA = uIR(Afield-15, Afield-20);
+    long opc = uIR.value() >> 50 & 0x7;
+    long rdA = uIR.value() >> 44 & 0x3f;
+    long rsA = uIR.value() >> 38 & 0x3f;
+    long rtA = uIR.value() >> 32 & 0x3f;
 
     StorageObject * dA;
     StorageObject * sA;
@@ -351,10 +351,21 @@ void setAfield(long Afield, BusALU * alu) {
 
 void setBfield(long Bfield, BusALU * alu) {
 
-    long opc = uIR(Bfield, Bfield-2);
-    long rdB = uIR(Bfield-3, Bfield-8);
-    long rsB = uIR(Bfield-9, Bfield-14);
-    long rtB = uIR(Bfield-15 , Bfield-20);
+    long opc;
+    long rdB;
+    long rsB;
+    long rtB;
+    if (Bfield == 52) { // We are looking at the beginning   
+        opc = uIR.value() >> 50 & 0x7;
+        rdB = uIR.value() >> 44 & 0x3f;
+        rsB = uIR.value() >> 38 & 0x3f;
+        rtB = uIR.value() >> 32 & 0x3f;
+    } else {
+        opc = uIR.value() >> 29 & 0x7;
+        rdB = uIR.value() >> 23 & 0x3f;
+        rsB = uIR.value() >> 17 & 0x3f;
+        rtB = uIR.value() >> 11 & 0x3f;
+    }
 
     StorageObject * dB;
     StorageObject * sB;
@@ -421,7 +432,7 @@ void setBfield(long Bfield, BusALU * alu) {
 }
 
 bool checkImmRegRef(StorageObject * rs, long rT, char * operation) {
-    cout << "\t" << "if " << rs->name() << "[" << rs->value() << "]" << operation;
+    cout << "if " << rs->name() << "[" << rs->value() << "]" << operation;
 	switch (rT) {
         case 0:
             cout << 0;
@@ -551,17 +562,16 @@ void printMAXOpsMicroInstr(int max) {
     cout << "if IR[" << SYS[IR]->value() << "] MaxNrOps == " << max;
 }
 
-bool Conditional(long cBits) {
+bool Conditional() {
     // Note: rT here either equals an 8 bit immediate or an 8 bit reference to an IMM register
     // Because of this Case 2-7 will just compare between rs->value() and rT directly.
     // If necessary we can implement this in a Constant style switch statement from 0-255.
     // We are also doing simple bit twiddling with rs as well. This is done because we 
     // believe that this would be accomplished with simple wire truncation and standard
     // hardware practices that wouldn't require an ALU in real hardware. 
-    long rT = uIR(cBits-1, cBits-8); // 8 bits
-    long rS = uIR(cBits-9, cBits-14);
-    long type = uIR(cBits-17, cBits-20);
-
+    long rT = (uIR.value() >> 44) & 0xff;
+    long rS = (uIR.value() >> 38) & 0x3f;
+    long type = (uIR.value() >> 32) & 0x0f;
     StorageObject * rs;
 
     // Setup rS pointer
@@ -699,25 +709,21 @@ void execute(const char * codeFile, const char * uCodeFile) {
         cout << "uPC[" << SYS[uPC]->value() << "]: ";
         
         // Execute
-        long prefix = uIR(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
-        long aBits;
+        long prefix = (uIR.value() >> 53);
         long bBits;
-        long cBits;
         
         // Get prefix (first 2 bits of uIR)
         switch(prefix) {
             case 0: // Parallel Operations
-                aBits = CU_DATA_SIZE-3;
                 bBits = CU_DATA_SIZE-24;
-                setAfield(aBits, &ALU1);
+                setAfield(&ALU1);
                 cout << ", ";
                 setBfield(bBits, &ALU2);
                 cout << "\n";
                 break;
             
             case 1: // A Field jump
-                aBits = CU_DATA_SIZE-3;
-                setAfield(aBits, &ALU2);
+                setAfield(&ALU2);
                 cout << ", ";
                 ALU1.IN1().pullFrom(uIR);
                 SYS[uPC]->latchFrom(ALU1.OUT());
@@ -736,8 +742,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
                 break;
 
             case 3: // Conditional 
-                cBits = CU_DATA_SIZE-3;
-                if(Conditional(cBits)) {
+                if(Conditional()) {
                     ALU1.IN1().pullFrom(uIR);
                     SYS[uPC]->latchFrom(ALU1.OUT());
                     ALU1.perform(BusALU::op_rop1);
