@@ -552,12 +552,12 @@ bool Conditional() {
         case 2: // Bits set
             cout << "if " << rs->name() << "[" << rs->value() << "]" << "& " << rT
                  << " == " << rT;
-            return rs->value() & rT == rT;
+            return !((rs->value() & rT) ^ rT);
 
         case 3: // Bits not set
             cout << "if " << rs->name() << "[" << rs->value() << "]" << "& " << rT
                  << " != " << rT;
-            return rs->value() & rT != rT;
+            return (rs->value() & rT) ^ rT;
 
         case 4: // Byte equal
             printCONDmicroInstr(rs, rT, " == ");
