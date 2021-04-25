@@ -56,6 +56,7 @@ StorageObject * SYS[23] = {
     new StorageObject("uR2", kRegSize),
     new StorageObject("uCnt", kRegSize),
     new StorageObject("MDR", kRegSize),
+    &control_storage.MAR(),
     new StorageObject("OP1Val", kRegSize),
     new StorageObject("OP1Type", kRegSize),
     new StorageObject("OP2Val", kRegSize),
@@ -69,10 +70,11 @@ StorageObject * SYS[23] = {
     new StorageObject("OP3Scale", kRegSize),
     new StorageObject("OP4Scale", kRegSize),
     new StorageObject("IR", kDataBusSize),
-    new StorageObject("uIR", CU_DATA_SIZE),
     new StorageObject("uTmp", kRegSize),
     new StorageObject("uRet2", kRegSize),
 };
+
+StorageObject uIR("uIR", CU_DATA_SIZE);
 
 void connect() {
 
@@ -106,9 +108,9 @@ void connect() {
     SYS[IR]->connectsTo(ALU2.OUT());
 
     //uIR setup
-    SYS[uIR]->connectsTo(control_storage.READ());
-    SYS[uIR]->connectsTo(ALU1.OP1());
-    SYS[uIR]->connectsTo(ALU1.IN1());
+    uIR.connectsTo(control_storage.READ());
+    uIR.connectsTo(ALU1.OP1());
+    uIR.connectsTo(ALU1.IN1());
 
     // Connect GPRs 
     for(int i = 0; i < 16; i++) {
@@ -130,7 +132,7 @@ void connect() {
 
     // Basic connect for Systems Registers to ALU
     for(int i = 0; i < 23; i++) {
-        if (i == MDR || i == IR || i == uIR || i == uPC ) {
+        if (i == MDR || i == IR || i == MAR || i == uPC ) {
             continue;
         }
         SYS[i]->connectsTo(ALU1.OUT());
@@ -152,8 +154,8 @@ StorageObject * snagReg(long regNum) {
     } else if (regNum <= 0x3f) {
         return GPR[regNum - 48];
     } else {
-	cout << "PANIC!\n";
-	return NULL;
+        cout << "PANIC!\n";
+        return NULL;
     }
 }
 
@@ -260,22 +262,20 @@ int getMaxOperands(long opc) {
 }
 
 void print3OpmicroInstr(StorageObject * d, StorageObject * r, StorageObject * t, char * operation) {
-    cout << "\t" << d->name() << " <- " << r->name() << " " << operation << " " << t->name();
-    cout << "\n\t  " << d->name() << " <- " << r->value() << " " 
-         << operation << " " << t->value() << "\n";
+    cout << "\t" << d->name() << " <- " << r->name() << "[" << r->value() << "]"
+         << " " << operation << " " << t->name() << "[" << t->value() << "]\n";
 }
 
 void print2OpmicroInstr(StorageObject *d, StorageObject * r, char * operation) {
-    cout << "\t" << d->name() << " <- " << operation << r->name();
-    cout << "\n\t  " << d->name() << " <- " << operation << r->value() << "\n";
+    cout << "\t" << d->name() << " <- " << operation << r->name() << "[" << r->value() << "]\n";
 }
 
 void setAfield(long Afield, BusALU * alu) {
 
-    long opc = (*SYS[uIR])(Afield, Afield-2);
-    long rdA = (*SYS[uIR])(Afield-3, Afield-8);
-    long rsA = (*SYS[uIR])(Afield-9, Afield-14);
-    long rtA = (*SYS[uIR])(Afield-15, Afield-20);
+    long opc = uIR(Afield, Afield-2);
+    long rdA = uIR(Afield-3, Afield-8);
+    long rsA = uIR(Afield-9, Afield-14);
+    long rtA = uIR(Afield-15, Afield-20);
 
     StorageObject * dA;
     StorageObject * sA;
@@ -350,10 +350,10 @@ void setAfield(long Afield, BusALU * alu) {
 
 void setBfield(long Bfield, BusALU * alu) {
 
-    long opc = (*SYS[uIR])(Bfield, Bfield-2);
-    long rdB = (*SYS[uIR])(Bfield-3, Bfield-8);
-    long rsB = (*SYS[uIR])(Bfield-9, Bfield-14);
-    long rtB = (*SYS[uIR])(Bfield-15 , Bfield-20);
+    long opc = uIR(Bfield, Bfield-2);
+    long rdB = uIR(Bfield-3, Bfield-8);
+    long rsB = uIR(Bfield-9, Bfield-14);
+    long rtB = uIR(Bfield-15 , Bfield-20);
 
     StorageObject * dB;
     StorageObject * sB;
@@ -543,9 +543,9 @@ bool Conditional(long cBits) {
     // We are also doing simple bit twiddling with rs as well. This is done because we 
     // believe that this would be accomplished with simple wire truncation and standard
     // hardware practices that wouldn't require an ALU in real hardware. 
-    long rT = (*SYS[uIR])(cBits-1, cBits-8); // 8 bits
-    long rS = (*SYS[uIR])(cBits-9, cBits-14);
-    long type = (*SYS[uIR])(cBits-17, cBits-20);
+    long rT = uIR(cBits-1, cBits-8); // 8 bits
+    long rS = uIR(cBits-9, cBits-14);
+    long type = uIR(cBits-17, cBits-20);
 
     StorageObject * rs;
 
@@ -664,14 +664,14 @@ void execute(const char * codeFile, const char * uCodeFile) {
         
         // Read Value from CS into uIR
         control_storage.read();
-        SYS[uIR]->latchFrom(control_storage.READ()); 
+        uIR.latchFrom(control_storage.READ()); 
         Clock::tick();
 
         // Can Print uPC, uIR
         cout << "uPC: " << SYS[uPC]->value() << "\n";
         
         // Execute
-        long prefix = (*SYS[uIR])(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
+        long prefix = uIR(CU_DATA_SIZE-1, CU_DATA_SIZE-2);
         long aBits;
         long bBits;
         long cBits;
@@ -688,28 +688,28 @@ void execute(const char * codeFile, const char * uCodeFile) {
             case 1: // A Field jump
                 aBits = CU_DATA_SIZE-3;
                 setAfield(aBits, &ALU2);
-                ALU1.IN1().pullFrom(*SYS[uIR]);
+                ALU1.IN1().pullFrom(uIR);
                 SYS[uPC]->latchFrom(ALU1.OUT());
                 ALU1.perform(BusALU::op_rop1);
-                cout << "\tuJMP: uPC <- uIR[" << (SYS[uIR]->value() & 0xFFFFFFFF) << "]\n";
+                cout << "\tuJMP: uPC <- uIR[" << (uIR.value() & 0xFFFFFFFF) << "]\n";
                 break;
             
             case 2: // B Field jump
                 bBits = CU_DATA_SIZE-3;
                 setBfield(bBits, &ALU2);
-                ALU1.IN1().pullFrom(*SYS[uIR]);
+                ALU1.IN1().pullFrom(uIR);
                 SYS[uPC]->latchFrom(ALU1.OUT());
                 ALU1.perform(BusALU::op_rop1);
-                cout << "\tuJMP: uPC <- uIR[" << (SYS[uIR]->value() & 0xFFFFFFFF) << "]\n";
+                cout << "\tuJMP: uPC <- uIR[" << (uIR.value() & 0xFFFFFFFF) << "]\n";
                 break;
 
             case 3: // Conditional 
                 cBits = CU_DATA_SIZE-3;
                 if(Conditional(cBits)) {
-                    ALU1.IN1().pullFrom(*SYS[uIR]);
+                    ALU1.IN1().pullFrom(uIR);
                     SYS[uPC]->latchFrom(ALU1.OUT());
                     ALU1.perform(BusALU::op_rop1);
-                    cout << ": TAKEN: uPC <- uIR[" << (SYS[uIR]->value() & 0xFFFFFFFF) << "]\n";
+                    cout << ": TAKEN: uPC <- uIR[" << (uIR.value() & 0xFFFFFFFF) << "]\n";
                 } else {
                     cout << ": NOT TAKEN\n";
                 }

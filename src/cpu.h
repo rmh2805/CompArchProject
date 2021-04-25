@@ -13,6 +13,7 @@ enum sys_names {
     uR2,
     uCnt,
     MDR,
+    MAR, 
     OP1Val,
     OP1Type,
     OP2Val,
@@ -26,7 +27,6 @@ enum sys_names {
     OP3Scale,
     OP4Scale,
     IR,
-    uIR,
     uTmp,
     uRet2,
 };
