@@ -617,16 +617,12 @@ bool Conditional() {
 
         case 6: // Nybble 1 equal
             printCONDmicroInstr(rs, rT, " & 0xf0 == ");
-            if(rs->value() & 0xf0 == rT) {
-                return true;
-            }
+            return !((rs->value() & 0xf0) ^ rT);
             break;
 
         case 7: // Nybble 1 not equal
             printCONDmicroInstr(rs, rT, " & 0xf0 != ");
-            if(rs->value() & 0xf0 != rT) {
-                return true;
-            }
+            return (rs->value() & 0xf0) ^ rT;
             break;
 
         case 8: // IR 0 Ops
@@ -706,7 +702,7 @@ void execute(const char * codeFile, const char * uCodeFile) {
         Clock::tick();
 
         // Can Print uPC, uIR
-        cout << "uPC[" << SYS[uPC]->value() << "]: ";
+        cout << "uPC[" << SYS[uPC]->value() << "]: " ;
         
         // Execute
         long prefix = (uIR.value() >> 53);
