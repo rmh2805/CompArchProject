@@ -120,7 +120,7 @@ ALU             6FF
     DIV             FFFFFFFF
     MOD             FFFFFFFF
 Control         7FF
-    HLT             FFFFFFFF
+    HLT             7FF
     CLR             FFFFFFFF
     DMP             FFFFFFFF
     OUT             FFFFFFFF
