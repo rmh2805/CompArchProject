@@ -198,7 +198,7 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
     while(true) { 
         // Check if we were at 0xFFFFFFFF
         if(SYS[uPC]->value() == 0xFFFFFFFF) {
-            cout << "HALTING on  PC overflow!\n";
+            cout << "HLT\n";
             break;
         }
         
