@@ -120,10 +120,10 @@ ALU             6FF
     MOD             FFFFFFFF
 Control         7FF
     HLT             7FF
-    CLR             FFFFFFFF
-    DMP             FFFFFFFF
-    OUT             FFFFFFFF
-    NOP             FFFFFFFF
+    NOP             800
+    CLR             801
+    DMP             802
+    OUT             803
 MEM             8FF
     MOV             FFFFFFFF
     SWP             FFFFFFFF
