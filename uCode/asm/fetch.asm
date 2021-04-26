@@ -164,7 +164,7 @@
     0x59 mov OP3Scale OP2Scale; none
 
     # OP 2 <- 0
-    0x5A mov OP3Type i8; goto Decode
+    0x5A mov OP2Type i0; goto Decode
 
 
 
