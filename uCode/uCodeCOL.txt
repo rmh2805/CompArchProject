@@ -38,8 +38,8 @@ RET:
 
 RET_LOOP_PR:
     MAR <- uR0, <No Op>
-    MDR <- Mem[MAR], uR <- uR << 0x08       // Shift for next byte
-    uR <- uR | MDR, uR0 <- uR0 + 1          // Insert next byte
+    MDR <- Mem[MAR], pR <- pR << 0x08       // Shift for next byte
+    pR <- pR | MDR, uR0 <- uR0 + 1          // Insert next byte
     if uCnt == 0x00, goto RET_BREAK_PR
     uCnt <- uCnt - 1, goto RET_LOOP_PR
 
@@ -52,11 +52,8 @@ RET_LOOP_PB:
     MAR <- uR0, <No Op>
     MDR <- Mem[MAR], pB <- pB << 0x08       // Shift for next byte
     pB <- pB | MDR, uR0 <- uR0 + 1          // Insert next byte
-    if uCnt == 0x00, goto RET_BREAK_PB
+    if uCnt == 0x00, goto Writeback
     uCnt <- uCnt - 1, goto RET_READ_PB
-
-RET_BREAK_PB:
-    goto Writeback, <No Op>
 
 BEQ:
     uTmp <- OP1Val - OP2Val, <No OP>

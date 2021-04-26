@@ -94,16 +94,15 @@ COL             5FF
         JAL_BREAK_PB    616
         JAL_LOOP_PR     619
         JAL_BREAK_PR    61E
-    RET             FFFFFFFF
-        RET_LOOP_PB     FFFFFFFF
-        RET_BREAK_PB    FFFFFFFF
-        RET_LOOP_PR     FFFFFFFF
-        RET_BREAK_PR    FFFFFFFF
-    BEQ             64F
-    BNE             FFFFFFFF
-    BGT             FFFFFFFF
-    BGE             FFFFFFFF
-    BIE             FFFFFFFF
+    RET             62F
+        RET_LOOP_PR     631
+        RET_BREAK_PR    636
+        RET_LOOP_PB     638
+    BEQ             63F
+    BNE             642
+    BGT             64F
+    BGE             653
+    BIE             65F
     BDE             FFFFFFFF
     BAO             FFFFFFFF
     BAC             FFFFFFFF
