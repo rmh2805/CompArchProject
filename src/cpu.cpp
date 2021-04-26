@@ -299,6 +299,10 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
         }
         lastuPC = SYS[uPC]->value();
     }
+
+    
+    macroTraceFetch();
+    
 }
 
 //==========================<Helper Fxn Definition>===========================//
