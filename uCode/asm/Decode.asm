@@ -185,11 +185,11 @@
     0x87 mov OP1Val uR0; goto DecodeBranch
 
 # DecodeBeq:
-    0x88 if nyb OP1Type 0x40 DecodeBeq1     # Check theat OP 1 is a memory op
-    0x89 if nyb OP1Type 0x50 DecodeBeq1
-    0x8A if nyb OP1Type 0x60 DecodeBeq1
-    0x8B if nyb OP1Type 0x70 DecodeBeq1
-    0x8C if nyb OP1Type 0x80 DecodeBeq1
+    0x88 if nyb OP3Type 0x40 DecodeBeq1     # Check theat OP 1 is a memory op
+    0x89 if nyb OP3Type 0x50 DecodeBeq1
+    0x8A if nyb OP3Type 0x60 DecodeBeq1
+    0x8B if nyb OP3Type 0x70 DecodeBeq1
+    0x8C if nyb OP3Type 0x80 DecodeBeq1
     0x8D none; goto halt                    # Halt (op1 must be memory)
 
 # DecodeBeq1:
