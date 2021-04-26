@@ -694,6 +694,7 @@ void printMacroArg(long * op, long val) {
 }
 
 void macroTrace(int phase) {
+    static int lastPC = 0;
     static int opc = 0x100; //Can't get this otherwise
     static long OP1[3] = {0, 0, 0}, val1 = 0;
     static long OP2[3] = {0, 0, 0}, val2 = 0;
@@ -729,8 +730,12 @@ void macroTrace(int phase) {
             return;
         case 2:                                 // Print the macro trace
             if (opc == 0x100) {
+                lastPC = GPR[15]->value();
                 return;
             }
+            cout << (lastPC + 1) << ": ";
+            lastPC = GPR[15]->value();
+
             printInstMnemonic(opc);
             for(int i = 0; i < getMaxOperands(opc); i++) {
                 if (i != 0) {
