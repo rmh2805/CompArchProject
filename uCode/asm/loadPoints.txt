@@ -99,7 +99,7 @@ COL             5FF
         RET_BREAK_PB    FFFFFFFF
         RET_LOOP_PR     FFFFFFFF
         RET_BREAK_PR    FFFFFFFF
-    BEQ             FFFFFFFF
+    BEQ             64F
     BNE             FFFFFFFF
     BGT             FFFFFFFF
     BGE             FFFFFFFF

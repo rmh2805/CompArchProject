@@ -31,3 +31,12 @@
     0x20 mov PC OP1Val; goto Writeback      # PC <- dst, return
 
 
+# RET HERE
+
+# BEQ
+    0x50 sub uTmp OP1Val OP2Val; none
+    0x51 if nEq uTmp i0 Writeback
+    0x52 mov PC OP3Val; goto Writeback
+
+
+
