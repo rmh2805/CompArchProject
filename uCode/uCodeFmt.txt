@@ -66,6 +66,7 @@ Registers:
         22: OP3Scale    | 23: OP4Scale
         24: IR          | 25: uTmp
         26: uRet2       | 27: uTmp2
+        28: o1          | 29: 
 
     - Register File 0x30 - 0x3F
         30: r0          | 31: r1
