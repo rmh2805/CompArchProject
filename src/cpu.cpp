@@ -605,7 +605,7 @@ bool Conditional() {
             return rs->value() == rT;
 
         case 5: // Byte Not equal
-            if (uTrace) printCONDmicroInstr(rs, rT, " == ");
+            if (uTrace) printCONDmicroInstr(rs, rT, " != ");
             return rs->value() != rT;
 
         case 6: // Nybble 1 equal
@@ -733,7 +733,7 @@ void macroTrace(int phase) {
                 lastPC = GPR[15]->value();
                 return;
             }
-            cout << (lastPC + 1) << ": ";
+            cout << std::setfill('0') << std::setw(4) << (lastPC + 1) << ": ";
             lastPC = GPR[15]->value();
 
             printInstMnemonic(opc);
