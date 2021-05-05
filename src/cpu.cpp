@@ -651,8 +651,20 @@ bool Conditional() {
 void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS, 
                     long * OP1, long * OP2, long * OP3, long * OP4);
 
+StorageObject* traceSnagReg(long * op) {
+    
+    if(!((op[0] & 0x0C) ^ 0x00)) 
+        return snagReg(0x30);
+    if(!((op[0] & 0x0C) ^ 0x04)) 
+        return snagReg(0x31);
+    if(!((op[0] & 0x0C) ^ 0x08)) 
+        return snagReg(0x3B);
+    return snagReg(0x30 | (op[1] & 0x0F));
+}
+
 void printMacroArg(long * op, long val, bool useVal = true, bool outCheck = false) {
     char oBuf[128];
+    char buf[128];
 
     int opType = op[0] & 0xFF;
     long prefixes = op[0] >> 8;
@@ -660,37 +672,42 @@ void printMacroArg(long * op, long val, bool useVal = true, bool outCheck = fals
     bool memArg = !((opType & 0xF0) ^ 0x40) || !((opType & 0xF0) ^ 0x50) ||
                   !((opType & 0xF0) ^ 0x60) || !((opType & 0xF0) ^ 0x70) ||
                   !((opType & 0xF0) ^ 0x80);
+    bool didVal = false;
     
     if (!((opType & 0xF0) ^ 0x10) || !((opType & 0xF0) ^ 0x20)) {
-        sprintf(oBuf, "IMM");
-        if(!outCheck) sprintf(oBuf + strlen(oBuf), " 0x%04x", val);
-        return;
+        sprintf(oBuf, "                 IMM ");
+        didVal = true;
+        if(!outCheck) sprintf(oBuf + strlen(oBuf), "[%08lx]", val);
     } else if (!((opType & 0xF0) ^ 0x30)) {
-        cout << "REG "  << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)        %2s ", op[0], op[2], traceSnagReg(op)->name());
     } else if (!((opType & 0xF0) ^ 0x40)) {
-        cout << "REG_IND " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)  MEM(%2s)=", op[0], op[2], traceSnagReg(op)->name());
     } else if (!((opType & 0xF0) ^ 0x50)) {
-        cout << "MEM_IND " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)   MEM_IND ", op[0], op[2]);
     } else if (!((opType & 0xF0) ^ 0x60)) {
-        cout << "IDX " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)       IDX ", op[0], op[2]);
     } else if (!((opType & 0xF0) ^ 0x70)) {
-        cout << "DSP " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)       DSP ", op[0], op[2]);
     } else if (!((opType & 0xF0) ^ 0x80)) {
-        cout << "ABS " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%04lx) MEM(%08lx)=", op[2], op[1]);
     } else if (!((opType & 0xF0) ^ 0x90)) {
-        cout << "INC " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)       %2s+ ", op[0], op[2], traceSnagReg(op)->name());
     } else if (!((opType & 0xF0) ^ 0xA0)) {
-        cout << "DEC " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)       -%2s ", op[0], op[2], traceSnagReg(op)->name());
     } else if (!((opType & 0xF0) ^ 0xC0)) {
-        cout << "PRE_INC " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)       +%2s ", op[0], op[2], traceSnagReg(op)->name());
     } else if (!((opType & 0xF0) ^ 0xD0)) {
-        cout << "PST_INC " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)       %2s- ", op[0], op[2], traceSnagReg(op)->name());
     } else {
-        cout << "UNKNOWN " << op[0] << " " << op[1] << " " << op[2];
+        sprintf(oBuf, "(%02lx, %04lx)       ??? ", op[0], op[2]);
     }
     
-    if(useVal) {
-        cout << " [" << val << "]";
+    if(useVal && !didVal) {
+        sprintf(oBuf + strlen(oBuf), "[%08lx]", val);
+    }
+    cout << " " << oBuf;
+    for(int i = strlen(oBuf); i <= 28; i++) {
+        cout << " ";
     }
     
 }
@@ -778,17 +795,17 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             break;
         case 0x02:
             if(!skipMnemonic) cout << "CLR";
-            cout << "\t dst:";
+            cout << ",  dst:";
             printMacroArg(OP1, 0);
             break;
         case 0x03:
             if(!skipMnemonic) cout << "DMP";
-            cout << "\t dst:";
+            cout << ",  dst:";
             printMacroArg(OP1, *vals[0]);
             break;
         case 0x04:
             if(!skipMnemonic) cout << "OUT";
-            cout << "\t src:";
+            cout << ",  src:";
             printMacroArg(OP1, *vals[0]);
             cout << ",  dst:";
             OP2[0] = 0x3F;
@@ -800,7 +817,7 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
         // ALU instructions
         case 0x10:
             if(!skipMnemonic) cout << "ADD";
-            cout << "\t dst:";
+            cout << ",  dst:";
             printMacroArg(OP1, RETS[0]);
             cout << ", src1:";
             printMacroArg(OP2, *vals[1]);
@@ -813,7 +830,7 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             return printMacroInst(0x10, true, vals, RETS, OP1, OP2, OP3, OP4);
         case 0x12:
             if(!skipMnemonic) cout << "MUL";
-            cout << "\t dst:";
+            cout << ",  dst:";
             printMacroArg(OP1, RETS[0]);
             cout << ",  ovf:";
             printMacroArg(OP2, RETS[1], true, true);
@@ -824,7 +841,7 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             break;
         case 0x13:
             if(!skipMnemonic) cout << "DIV";
-            cout << "\t dst:";
+            cout << ",  dst:";
             printMacroArg(OP1, RETS[0], true, true);
             cout << ",  mod:";
             printMacroArg(OP2, RETS[1], true, true);
@@ -851,14 +868,14 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             break;
         case 0x18:
             if(!skipMnemonic) cout << "CMP";
-            cout << "\t dst:";
+            cout << ",  dst:";
             printMacroArg(OP1, RETS[0]);
             cout << ",  src:";
             printMacroArg(OP2, *vals[1]);
             break;
         case 0x19:
             if(!skipMnemonic) cout << "INC";
-            cout << "\t dst:";
+            cout << ",  dst:";
             printMacroArg(OP1, RETS[0]);
             break;
         case 0x1A:
@@ -873,7 +890,7 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             break;
         case 0x21:
             if(!skipMnemonic) cout << "SWP";
-            cout << "\t dst:";
+            cout << ",  dst:";
             printMacroArg(OP1, *vals[0]);
             cout << ",  src:";
             printMacroArg(OP2, *vals[1]);
@@ -881,7 +898,7 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
         case 0x22:
             if(!skipMnemonic) cout << "CPY";
             if(!skipMnemonic) cout << "MUL";
-            cout << "\t dst:";
+            cout << ",  dst:";
             printMacroArg(OP1, *vals[0]);
             cout << ",  src:";
             printMacroArg(OP2, *vals[1]);
@@ -905,7 +922,7 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             break;
         case 0x34:
             if(!skipMnemonic) cout << "BEQ";
-            cout << "\tsrc1:";
+            cout << ", src1:";
             printMacroArg(OP1, *vals[0]);
             cout << ", src2:";
             printMacroArg(OP2, *vals[1]);
