@@ -9,10 +9,10 @@
     0x05 if byte IR 0x11 DecodeAdd          # Decode for SUB
     0x06 if byte IR 0x12 DecodeMUL          # Decode for MUL
     0x07 if byte IR 0x13 DecodeDIV          # Decode for DIV
-    0x08 if byte IR 0x10 DecodeAdd          # Decode for MOD
-    0x09 if byte IR 0x10 DecodeAdd          # Decode for AND
-    0x0A if byte IR 0x10 DecodeAdd          # Decode for OR
-    0x0B if byte IR 0x10 DecodeAdd          # Decode for XOR
+    0x08 if byte IR 0x14 DecodeAdd          # Decode for MOD
+    0x09 if byte IR 0x15 DecodeAdd          # Decode for AND
+    0x0A if byte IR 0x16 DecodeAdd          # Decode for OR
+    0x0B if byte IR 0x17 DecodeAdd          # Decode for XOR
     0x0C if byte IR 0x18 DecodeCmp          # Decode for CMP
     0x0D if byte IR 0x19 DecodeInc          # Decode for INC
     0x0E if byte IR 0x1A DecodeInc          # Decode for DEC
