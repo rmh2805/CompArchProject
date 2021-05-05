@@ -221,6 +221,9 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
             case 0x296:
                 macroTraceBranch();
                 break;
+            case 0x400:
+                macroTraceWriteback();
+                break;
             default:
                 break;
         }
@@ -701,6 +704,7 @@ void macroTrace(int phase) {
     static long OP3[3] = {0, 0, 0}, val3 = 0;
     static long OP4[3] = {0, 0, 0}, val4 = 0;
     static long * vals[4] = {&val1, &val2, &val3, &val4};
+    static long RETS[3] = {0, 0, 0};
 
     switch(phase) {
         case 0:                                 // Store decode phase values
@@ -728,6 +732,13 @@ void macroTrace(int phase) {
             val3 = SYS[OP3Val]->value();
             val4 = SYS[OP4Val]->value();
             return;
+        
+        case 3:
+            RETS[0] = SYS[uR0];
+            RETS[1] = SYS[uR1];
+            RETS[2] = SYS[uR2];
+            return;
+
         case 2:                                 // Print the macro trace
             if (opc == 0x100) {
                 lastPC = GPR[15]->value();
@@ -774,6 +785,10 @@ void macroTraceBranch() {
 
 void macroTraceFetch() {
     macroTrace(2);
+}
+
+void macroTraceWriteback() {
+    macroTrace(3);
 }
 
 void printInstMnemonic(int opc) {
