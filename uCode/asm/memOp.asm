@@ -24,5 +24,5 @@
     0x08 read; none
     0x09 or uR0 uR0 MDR; none
     
-    0x0A if eq uCnt i0 uRet
+    0x0A if eq uTmp i0 uRet
     0x0B sub uTmp uTmp i1; goto MemOp2
