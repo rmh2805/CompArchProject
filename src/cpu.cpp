@@ -658,58 +658,131 @@ StorageObject* traceSnagReg(long * op) {
     if(!((op[0] & 0x0C) ^ 0x04)) 
         return snagReg(0x31);
     if(!((op[0] & 0x0C) ^ 0x08)) 
-        return snagReg(0x3B);
+        return snagReg(0x3D);
     return snagReg(0x30 | (op[1] & 0x0F));
 }
 
-void printMacroArg(long * op, long val, bool useVal = true, bool outCheck = false) {
+#define MACRO_ARG_WIDTH 27
+void printMacroArgTxt(long * op) {
     char oBuf[128];
-    char buf[128];
+    
+    if(op == NULL) {
+        for(int i = 0; i <= MACRO_ARG_WIDTH; i++) {
+            cout << " ";
+        }
+        return;
+    }
 
     int opType = op[0] & 0xFF;
     long prefixes = op[0] >> 8;
-    bool scaledArg = !op[2];
+    bool scaledArg = op[2] != 0;
     bool memArg = !((opType & 0xF0) ^ 0x40) || !((opType & 0xF0) ^ 0x50) ||
                   !((opType & 0xF0) ^ 0x60) || !((opType & 0xF0) ^ 0x70) ||
                   !((opType & 0xF0) ^ 0x80);
     bool didVal = false;
     
-    if (!((opType & 0xF0) ^ 0x10) || !((opType & 0xF0) ^ 0x20)) {
-        sprintf(oBuf, "                 IMM ");
-        didVal = true;
-        if(!outCheck) sprintf(oBuf + strlen(oBuf), "[%08lx]", val);
-    } else if (!((opType & 0xF0) ^ 0x30)) {
-        sprintf(oBuf, "(%02lx, %04lx)        %2s ", op[0], op[2], traceSnagReg(op)->name());
-    } else if (!((opType & 0xF0) ^ 0x40)) {
-        sprintf(oBuf, "(%02lx, %04lx)  MEM(%2s)=", op[0], op[2], traceSnagReg(op)->name());
-    } else if (!((opType & 0xF0) ^ 0x50)) {
-        sprintf(oBuf, "(%02lx, %04lx)   MEM_IND ", op[0], op[2]);
-    } else if (!((opType & 0xF0) ^ 0x60)) {
-        sprintf(oBuf, "(%02lx, %04lx)       IDX ", op[0], op[2]);
-    } else if (!((opType & 0xF0) ^ 0x70)) {
-        sprintf(oBuf, "(%02lx, %04lx)       DSP ", op[0], op[2]);
-    } else if (!((opType & 0xF0) ^ 0x80)) {
-        sprintf(oBuf, "(%04lx) MEM(%08lx)=", op[2], op[1]);
-    } else if (!((opType & 0xF0) ^ 0x90)) {
-        sprintf(oBuf, "(%02lx, %04lx)       %2s+ ", op[0], op[2], traceSnagReg(op)->name());
+    if(!((opType & 0xF0) ^ 0x10)) {             // Nybble Immediate
+        sprintf(oBuf, "<IMM> $%08lx", op[0] & 0x0F);
+    } else if (!((opType & 0xF0) ^ 0x20)) {     // Immediate
+        sprintf(oBuf, "<IMM> $%08lx", op[1]);
+    } else if (!((opType & 0xF0) ^ 0x30)) {     // Register
+        sprintf(oBuf, "<REG> %%%2s", traceSnagReg(op)->name());
+    } else if (!((opType & 0xF0) ^ 0x40)) {     // Register Indirect
+        sprintf(oBuf, "<RID> (%%%2s)", traceSnagReg(op)->name());
+    } else if (!((opType & 0xF0) ^ 0x50)) {     // Memory Indirect
+        sprintf(oBuf, "<MID> @(%08lx)", op[1]);
+        
+    } else if (!((opType & 0xF0) ^ 0x60)) {     // Index
+        StorageObject *r1, *r2;
+        int ext1 = (op[1] >> 8) & 0xFF;
+        int ext2 = op[1] & 0xFF;
+        
+        int rs1 = (op[0] >> 2) & 0x03;
+        int rs2 = op[0] & 0x03;
+        
+        //Grab register 1
+        if(!(rs1 ^ 0x00)) {
+            r1 = snagReg(0x30);
+        } else if(!(rs1 ^ 0x00)) {
+            r1 = snagReg(0x31);
+        } else if(!(rs1 ^ 0x00)) {
+            r1 = snagReg(0x3D);
+        } else {
+            r1 = snagReg(0x30 | (ext1 & 0x0F));
+        }
+        
+        //Grab register 2
+        if(!(rs2 ^ 0x00)) {
+            r2 = snagReg(0x30);
+        } else if(!(rs2 ^ 0x00)) {
+            r2 = snagReg(0x31);
+        } else if(!(rs2 ^ 0x00)) {
+            r2 = snagReg(0x3D);
+        } else {
+            r2 = snagReg(0x30 | (ext1 & 0x0F));
+        }
+        
+        sprintf(oBuf, "<IDX> (%%%2s+%%%2s)", r1->name(), r2->name());
+        
+    } else if (!((opType & 0xF0) ^ 0x70)) {     // Displacement
+        StorageObject *r1;
+        int ext1 = (op[0] >> 24) & 0xFF;
+        
+        int rs1 = (op[0] >> 2) & 0x03;
+        
+        //Grab register 1
+        if(!(rs1 ^ 0x00)) {
+            r1 = snagReg(0x30);
+        } else if(!(rs1 ^ 0x00)) {
+            r1 = snagReg(0x31);
+        } else if(!(rs1 ^ 0x00)) {
+            r1 = snagReg(0x3D);
+        } else {
+            r1 = snagReg(0x30 | (ext1 & 0x0F));
+        }
+        sprintf(oBuf, "<DSP> %08lx(%%%2s) ", op[1], r1->name()); //todo second reg
+    } else if (!((opType & 0xF0) ^ 0x80)) {     // Absolute value
+        sprintf(oBuf, "<ABS> %08lx", op[1]);
+    } else if (!((opType & 0xF0) ^ 0x90)) {     // Increment
+        sprintf(oBuf, "<INC> (%%%2s)+", traceSnagReg(op)->name());
     } else if (!((opType & 0xF0) ^ 0xA0)) {
-        sprintf(oBuf, "(%02lx, %04lx)       -%2s ", op[0], op[2], traceSnagReg(op)->name());
+        sprintf(oBuf, "<DEC> -(%%%2s)", traceSnagReg(op)->name());
     } else if (!((opType & 0xF0) ^ 0xC0)) {
-        sprintf(oBuf, "(%02lx, %04lx)       +%2s ", op[0], op[2], traceSnagReg(op)->name());
+        sprintf(oBuf, "<PIC> +(%%%2s)", traceSnagReg(op)->name());
     } else if (!((opType & 0xF0) ^ 0xD0)) {
-        sprintf(oBuf, "(%02lx, %04lx)       %2s- ", op[0], op[2], traceSnagReg(op)->name());
+        sprintf(oBuf, "<PDC> (%%%2s)-", traceSnagReg(op)->name());
     } else {
-        sprintf(oBuf, "(%02lx, %04lx)       ??? ", op[0], op[2]);
+        sprintf(oBuf, "(%08lx, %08lx)", op[0], op[1]);
     }
     
-    if(useVal && !didVal) {
-        sprintf(oBuf + strlen(oBuf), "[%08lx]", val);
+    // Scaling
+    if(scaledArg) {
+        sprintf(oBuf + strlen(oBuf), "[%%%2s,%1lx]", "  ", ((op[2] >> 8) & 0x03) + 1);
     }
-    cout << " " << oBuf;
-    for(int i = strlen(oBuf); i <= 28; i++) {
+    
+    // Print out
+    cout << oBuf;
+    for(int i = strlen(oBuf); i <= MACRO_ARG_WIDTH; i++) {
         cout << " ";
     }
     
+}
+
+void printMacroArgVals(long val, long ret = 0, bool doRet = false) {
+    char buf[128];
+    buf[0] = 0;
+    
+    if(doRet) {
+        sprintf(buf + strlen(buf), "[%08lx] ", ret);
+    }
+    
+    sprintf(buf + strlen(buf), "(%08lx) ", val);
+    
+    // Print out
+    cout << buf;
+    for(int i = strlen(buf); i <= MACRO_ARG_WIDTH; i++) {
+        cout << " ";
+    }
 }
 
 void macroTrace(int phase) {
@@ -788,41 +861,107 @@ void macroTraceWriteback() {
 
 void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS, 
                     long * OP1, long * OP2, long * OP3, long * OP4) {
+    
+            
     switch(opc) {
         // CPU Control instructions
         case 0x00:
             if(!skipMnemonic) cout << "HLT";
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
             break;
+            
         case 0x02:
             if(!skipMnemonic) cout << "CLR";
-            cout << ",  dst:";
-            printMacroArg(OP1, 0);
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            
+            cout << "\n          | ";
+            printMacroArgVals(0);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
             break;
         case 0x03:
             if(!skipMnemonic) cout << "DMP";
-            cout << ",  dst:";
-            printMacroArg(OP1, *vals[0]);
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            
+            cout << "\n          | ";
+            printMacroArgVals(*vals[0]);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
             break;
         case 0x04:
             if(!skipMnemonic) cout << "OUT";
-            cout << ",  src:";
-            printMacroArg(OP1, *vals[0]);
-            cout << ",  dst:";
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
             OP2[0] = 0x3F;
             OP2[1] = 0x28;
             OP2[2] = 0x00;
-            printMacroArg(OP2, 0, false);
+            printMacroArgTxt(OP2);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            
+            
+            cout << "\n          | ";
+            printMacroArgVals(*vals[0]);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
             break;
         
         // ALU instructions
         case 0x10:
             if(!skipMnemonic) cout << "ADD";
-            cout << ",  dst:";
-            printMacroArg(OP1, RETS[0]);
-            cout << ", src1:";
-            printMacroArg(OP2, *vals[1]);
-            cout << ", src2:";
-            printMacroArg(OP3, *vals[2]);
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
+            printMacroArgTxt(OP2);
+            cout << " | ";
+            printMacroArgTxt(OP3);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            
+            cout << "\n          | ";
+            printMacroArgVals(*vals[0], RETS[0], true);
+            cout << " | ";
+            printMacroArgVals(*vals[1]);
+            cout << " | ";
+            printMacroArgVals(*vals[2]);
+            cout << " | ";
+            printMacroArgTxt(NULL);
             
             break;
         case 0x11:
@@ -830,25 +969,27 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             return printMacroInst(0x10, true, vals, RETS, OP1, OP2, OP3, OP4);
         case 0x12:
             if(!skipMnemonic) cout << "MUL";
-            cout << ",  dst:";
-            printMacroArg(OP1, RETS[0]);
-            cout << ",  ovf:";
-            printMacroArg(OP2, RETS[1], true, true);
-            cout << ", src1:";
-            printMacroArg(OP3, *vals[2]);
-            cout << ", src2:";
-            printMacroArg(OP4, *vals[3]);
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
+            printMacroArgTxt(OP2);
+            cout << " | ";
+            printMacroArgTxt(OP3);
+            cout << " | ";
+            printMacroArgTxt(OP4);
+            
+            cout << "\n          | ";
+            printMacroArgVals(*vals[0], RETS[0], true);
+            cout << " | ";
+            printMacroArgVals(*vals[1], RETS[1], true);
+            cout << " | ";
+            printMacroArgVals(*vals[2]);
+            cout << " | ";
+            printMacroArgVals(*vals[3]);
             break;
         case 0x13:
             if(!skipMnemonic) cout << "DIV";
-            cout << ",  dst:";
-            printMacroArg(OP1, RETS[0], true, true);
-            cout << ",  mod:";
-            printMacroArg(OP2, RETS[1], true, true);
-            cout << ", src1:";
-            printMacroArg(OP3, *vals[2]);
-            cout << ", src2:";
-            printMacroArg(OP4, *vals[3]);
+            return printMacroInst(0x12, true, vals, RETS, OP1, OP2, OP3, OP4);
             break;
         case 0x14:
             if(!skipMnemonic) cout << "MOD";
@@ -868,15 +1009,43 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             break;
         case 0x18:
             if(!skipMnemonic) cout << "CMP";
-            cout << ",  dst:";
-            printMacroArg(OP1, RETS[0]);
-            cout << ",  src:";
-            printMacroArg(OP2, *vals[1]);
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
+            printMacroArgTxt(OP2);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            
+            cout << "\n          | ";
+            printMacroArgVals(*vals[0], RETS[0], true);
+            cout << " | ";
+            printMacroArgVals(*vals[1]);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
             break;
         case 0x19:
             if(!skipMnemonic) cout << "INC";
-            cout << ",  dst:";
-            printMacroArg(OP1, RETS[0]);
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            
+            cout << "\n          | ";
+            printMacroArgVals(*vals[0], RETS[0], true);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
             break;
         case 0x1A:
             if(!skipMnemonic) cout << "DEC";
@@ -890,22 +1059,43 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             break;
         case 0x21:
             if(!skipMnemonic) cout << "SWP";
-            cout << ",  dst:";
-            printMacroArg(OP1, *vals[0]);
-            cout << ",  src:";
-            printMacroArg(OP2, *vals[1]);
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
+            printMacroArgTxt(OP2);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            
+            cout << "\n          | ";
+            printMacroArgVals(*vals[0], RETS[0], true);
+            cout << " | ";
+            printMacroArgVals(*vals[1], RETS[1], true);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            cout << " | ";
+            printMacroArgTxt(NULL);
             break;
         case 0x22:
             if(!skipMnemonic) cout << "CPY";
-            if(!skipMnemonic) cout << "MUL";
-            cout << ",  dst:";
-            printMacroArg(OP1, *vals[0]);
-            cout << ",  src:";
-            printMacroArg(OP2, *vals[1]);
-            cout << ",  sel:";
-            printMacroArg(OP3, *vals[2]);
-            cout << ",  lim:";
-            printMacroArg(OP4, *vals[3]);
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
+            printMacroArgTxt(OP2);
+            cout << " | ";
+            printMacroArgTxt(OP3);
+            cout << " | ";
+            printMacroArgTxt(OP4);
+            
+            cout << "\n          | ";
+            printMacroArgVals(*vals[0]);
+            cout << " | ";
+            printMacroArgVals(*vals[1]);
+            cout << " | ";
+            printMacroArgVals(*vals[2]);
+            cout << " | ";
+            printMacroArgVals(*vals[3]);
             break;
             
         // COL Instructions
@@ -919,15 +1109,27 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             break;
         case 0x33:
             if(!skipMnemonic) cout << "RET";
+            return printMacroInst(0x00, true, vals, RETS, OP1, OP2, OP3, OP4);
             break;
         case 0x34:
             if(!skipMnemonic) cout << "BEQ";
-            cout << ", src1:";
-            printMacroArg(OP1, *vals[0]);
-            cout << ", src2:";
-            printMacroArg(OP2, *vals[1]);
-            cout << ",  dst:";
-            printMacroArg(OP3, *vals[2]);
+            cout << " | ";
+            printMacroArgTxt(OP1);
+            cout << " | ";
+            printMacroArgTxt(OP2);
+            cout << " | ";
+            printMacroArgTxt(OP3);
+            cout << " | ";
+            printMacroArgTxt(NULL);
+            
+            cout << "\n          | ";
+            printMacroArgVals(*vals[0]);
+            cout << " | ";
+            printMacroArgVals(*vals[1]);
+            cout << " | ";
+            printMacroArgVals(*vals[2]);
+            cout << " | ";
+            printMacroArgTxt(NULL);
             break;
         case 0x35:
             if(!skipMnemonic) cout << "BNE";
@@ -960,7 +1162,15 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
         
         default:
             if(!skipMnemonic) cout << "NOP";
+            return printMacroInst(0x00, true, vals, RETS, OP1, OP2, OP3, OP4);
     }
     
     cout << "\n";
+    cout << "          | ";
+    printMacroArgTxt(NULL);
+    cout << " | ";
+    printMacroArgTxt(NULL);
+    cout << " | ";
+    printMacroArgTxt(NULL);
+    cout << " |\n";
 }
