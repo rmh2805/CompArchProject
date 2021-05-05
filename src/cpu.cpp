@@ -647,9 +647,10 @@ bool Conditional() {
     return false;
 }
 
-void printInstMnemonic(int opc);
+void printMacroInst(int opc, bool skipMnemonic, long* vals, long * RETS, 
+                    long * OP1, long * OP2, long * OP3, long * OP4);
 
-void printMacroArg(long * op, long val) {
+void printMacroArg(long * op, long val, long* retVal) {
     int opType = op[0] & 0xFF;
     long prefixes = op[0] >> 8;
     bool scaledArg = !op[2];
@@ -747,28 +748,7 @@ void macroTrace(int phase) {
             cout << std::setfill('0') << std::setw(4) << (lastPC + 1) << ": ";
             lastPC = GPR[15]->value();
 
-            printInstMnemonic(opc);
-            for(int i = 0; i < getMaxOperands(opc); i++) {
-                if (i != 0) {
-                    cout << ",";
-                }
-                cout << " ";
-                switch(i) {
-                    case 0:
-                        printMacroArg(OP1, *vals[i]);
-                        break;
-                    case 1:
-                        printMacroArg(OP2, *vals[i]);
-                        break;
-                    case 2:
-                        printMacroArg(OP3, *vals[i]);
-                        break;
-                    case 3:
-                        printMacroArg(OP4, *vals[i]);
-                        break;
-                }
-            }
-            cout << "\n";
+            printMacroInst(opc, false, vals, RETS, OP1, OP2, OP3, OP4);
             
         default:
             return;
@@ -791,7 +771,8 @@ void macroTraceWriteback() {
     macroTrace(3);
 }
 
-void printInstMnemonic(int opc) {
+void printMacroInst(int opc, bool skipMnemonic, long* vals, long * RETS, 
+                    long * OP1, long * OP2, long * OP3, long * OP4) {
     switch(opc) {
         // CPU Control instructions
         case 0x00:
