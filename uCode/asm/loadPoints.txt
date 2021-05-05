@@ -115,7 +115,8 @@ ALU             6FF
     CMP             704
     INC             705
     DEC             706
-    MUL             FFFFFFFF
+    MUL             70F
+        MUL_LOOP        710
     DIV             FFFFFFFF
     MOD             FFFFFFFF
 Control         7FF
