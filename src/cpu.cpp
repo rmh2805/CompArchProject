@@ -652,6 +652,8 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
                     long * OP1, long * OP2, long * OP3, long * OP4);
 
 void printMacroArg(long * op, long val, bool useVal = true, bool outCheck = false) {
+    char oBuf[128];
+
     int opType = op[0] & 0xFF;
     long prefixes = op[0] >> 8;
     bool scaledArg = !op[2];
@@ -660,8 +662,8 @@ void printMacroArg(long * op, long val, bool useVal = true, bool outCheck = fals
                   !((opType & 0xF0) ^ 0x80);
     
     if (!((opType & 0xF0) ^ 0x10) || !((opType & 0xF0) ^ 0x20)) {
-        cout << "IMM";
-        if(!outCheck) cout << " 0x" << val;
+        sprintf(oBuf, "IMM");
+        if(!outCheck) sprintf(oBuf + strlen(oBuf), " 0x%04x", val);
         return;
     } else if (!((opType & 0xF0) ^ 0x30)) {
         cout << "REG "  << op[0] << " " << op[1] << " " << op[2];
