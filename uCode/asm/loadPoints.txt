@@ -115,9 +115,14 @@ ALU             6FF
     CMP             704
     INC             705
     DEC             706
-    MUL             FFFFFFFF
-    DIV             FFFFFFFF
-    MOD             FFFFFFFF
+    MOD             707
+    DIV             70A
+    DO_DIV                70F
+        DO_DIV_LOOP            71A
+        DO_DIV_BREAK           71E
+    MUL             72F
+        MUL_LOOP        731
+        MUL_LOOP_1      734
 Control         7FF
     HLT             7FF
     NOP             800

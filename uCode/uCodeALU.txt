@@ -69,5 +69,3 @@ DoubleAddLoop:
    if uCnt == 0, goto Writeback
    OP1Val <- OP1Val >> 1, uCnt <- uCnt - 1
    <No Op>, goto DoubleAddLoop
-
-   <No Op>, goto Writeback
