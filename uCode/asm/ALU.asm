@@ -48,7 +48,7 @@
     0x1E add uR0 uR0 i1; goto DO_DIV_LOOP
 
 # DO_DIV_BREAK:
-    0x1F add uR1 OP3Val OP4Val; none # Set mod return value
+    0x1F add uR1 OP3Val OP4Val; none    # Set mod return value
     0x20 if nByte uR2 0x01 uRet
     0x21 cmp uR0 uR0; none;
     0x22 add uR0 uR0 i1; mov uPC uRet
@@ -57,13 +57,22 @@
 
 
 # MUL:
-    0x30 mov uCnt i3; mov uR0 i0
+    0x30 mov uCnt i0; mov uR0 i0    # Set current bit pos and product to 0
+    0x31 add uTmp i3 i1; mov uR1 i0 # Set ovf bit pos to 32 and ovf to 0
 # MUL_LOOP:
-    0x31 sll uR0 uR0 i1; none       # Double the current partial sum
-    0x32 if nBits OP3Val 1 +1        # If bit not set, skip the next instruction
-    0x33 add uR0 uR0 OP4Val; none   # Add second factor to partial sum
-    
-    # Break loop or update and restart loop
-    0x34 if eq uCnt i0 Writeback
-    0x35 srl OP3Val OP3Val i1; sub uCnt uCnt i1 
-    0x36 none; goto MUL_LOOP
+    # Skip to end of loop if low bit is not set
+    0x31 if nBits OP3Val 0x01 MUL_LOOP_1
+
+    # Add shifted values to both returns
+    0x32 sll uR2 OP4Val uCnt; none  
+    0x33 add uR0 uR0 uR2; srl uR2 OP4Val uTmp
+    0x34 add uR1 uR1 uR2; none
+
+# MUL_LOOP_1:
+    # Check if looped through all 32 bits
+    0x35 if byte uCnt 0x1F Writeback
+
+    # Shift src1 down by 1, update bit positions, and loop
+    0x36 srl OP3Val OP3Val i1; add uCnt uCnt i1 
+    0x37 sub uTmp uTmp i1; goto MUL_LOOP
+
