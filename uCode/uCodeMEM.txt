@@ -4,7 +4,7 @@ MOV:
     uR0 <- OP1Val, goto Writeback
 
 SWP:
-    uR0 <- OP1Val, ur1 <-OP2Val
+    uR0 <- OP2Val, ur1 <-OP1Val
     <No Op>, goto Writeback
 
 CPY:
@@ -26,14 +26,13 @@ CPY_C:
     OP2Val <- OP2Val + 1, goto CPY_C
 
 CPY_P:
-    if OP4Val == 0x00, goto Writeback
-
     MAR <- OP1Val, OP1Val <- OP1Val + 1
     MDR <- Mem[MAR], MAR <- OP2Val
     Mem[MAR] <- MDR, uCnt <- MDR
     OP4Val <- OP4Val - 1, <No Op>
     
-    if OP4Val == 0x00, goto Writeback
+    if uCnt == 0, goto Writeback
+    if OP4Val == 0, goto Writeback
 
 CPY_P_1:
     MAR <- OP1Val, OP1Val <- OP1Val + 1

@@ -130,7 +130,10 @@ Control         7FF
     DMP             802
     OUT             803
 MEM             8FF
-    MOV             FFFFFFFF
-    SWP             FFFFFFFF
-    CPY             FFFFFFFF
+    MOV             8FF
+    SWP             900
+    CPY             90F
+        CPY_C           914
+        CPY_P           91B
+        CPY_P_1         921
 halt            FFFFFFFF
