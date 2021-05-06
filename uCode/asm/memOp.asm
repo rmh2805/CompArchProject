@@ -4,7 +4,7 @@
 #   uCnt: The (pre-scaled) EA to grab
 #   uR1: The related OpType
 # Uses:
-#   uTmp, uCnt
+#   uTmp, uCnt, uR2
 # Returns:
 #   uR0: The value referenced by the operand, grabbed from mem if necessary
 #
@@ -22,7 +22,9 @@
 # MemOp2:
     0x07 mov MAR uCnt; srl uR0 uR0 iB
     0x08 read; none
-    0x09 or uR0 uR0 MDR; none
+    0x09 sll uR2 MDR iF; none
+    0x0A or uR0 uR0 uR2; none
     
-    0x0A if eq uTmp i0 uRet
-    0x0B sub uTmp uTmp i1; goto MemOp2
+    0x0B if eq uTmp i0 uRet
+    0x0C add uCnt uCnt i1; none
+    0x0D sub uTmp uTmp i1; goto MemOp2
