@@ -61,18 +61,18 @@
     0x31 add uTmp i3 i1; mov uR1 i0 # Set ovf bit pos to 32 and ovf to 0
 # MUL_LOOP:
     # Skip to end of loop if low bit is not set
-    0x31 if nBits OP3Val 0x01 MUL_LOOP_1
+    0x32 if nBits OP3Val 0x01 MUL_LOOP_1
 
     # Add shifted values to both returns
-    0x32 sll uR2 OP4Val uCnt; none  
-    0x33 add uR0 uR0 uR2; srl uR2 OP4Val uTmp
-    0x34 add uR1 uR1 uR2; none
+    0x33 sll uR2 OP4Val uCnt; none  
+    0x34 add uR0 uR0 uR2; srl uR2 OP4Val uTmp
+    0x35 add uR1 uR1 uR2; none
 
 # MUL_LOOP_1:
     # Check if looped through all 32 bits
-    0x35 if byte uCnt 0x1F Writeback
+    0x36 if byte uCnt 0x1F Writeback
 
     # Shift src1 down by 1, update bit positions, and loop
-    0x36 srl OP3Val OP3Val i1; add uCnt uCnt i1 
-    0x37 sub uTmp uTmp i1; goto MUL_LOOP
+    0x37 srl OP3Val OP3Val i1; add uCnt uCnt i1 
+    0x38 sub uTmp uTmp i1; goto MUL_LOOP
 
