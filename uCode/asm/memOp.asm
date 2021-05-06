@@ -20,7 +20,7 @@
 # MemOp1:
     0x06 mov uTmp i7; none
 # MemOp2:
-    0x07 mov MAR uCnt; srl uR0 uR0 iB
+    0x07 mov MAR uCnt; sll uR0 uR0 iB
     0x08 read; none
     0x09 or uR0 uR0 MDR; none
     
