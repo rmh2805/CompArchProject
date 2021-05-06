@@ -60,11 +60,10 @@
     0x30 mov uCnt i3; mov uR0 i0
 # MUL_LOOP:
     0x31 sll uR0 uR0 i1; none       # Double the current partial sum
-    0x32 if bits OP3Val 1 +1        # If bit not set, skip the next instruction
+    0x32 if nBits OP3Val 1 +1        # If bit not set, skip the next instruction
     0x33 add uR0 uR0 OP4Val; none   # Add second factor to partial sum
     
     # Break loop or update and restart loop
     0x34 if eq uCnt i0 Writeback
     0x35 srl OP3Val OP3Val i1; sub uCnt uCnt i1 
     0x36 none; goto MUL_LOOP
-    
