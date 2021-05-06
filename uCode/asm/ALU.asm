@@ -67,3 +67,4 @@
     0x34 if eq uCnt i0 Writeback
     0x35 srl OP3Val OP3Val i1; sub uCnt uCnt i1 
     0x36 none; goto MUL_LOOP
+    
