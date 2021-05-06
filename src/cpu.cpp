@@ -909,7 +909,7 @@ void printMacroInst(int opc, bool skipMnemonic, long** vals, long * RETS,
             printMacroArgTxt(NULL);
             
             cout << "\n          | ";
-            printMacroArgVals(*vals[0]);
+            printMacroArgVals(*vals[0], RETS[0], true);
             cout << " | ";
             printMacroArgTxt(NULL);
             cout << " | ";

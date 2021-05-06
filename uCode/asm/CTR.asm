@@ -7,6 +7,6 @@
 # CLR
     0x02 mov uR0 i0; goto Writeback
 # DMP
-    0x03 none; goto Writeback
+    0x03 mov uR0 OP1Val; goto Writeback
 # OUT
     0x04 mov o1 OP1Val; goto Writeback
