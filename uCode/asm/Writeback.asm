@@ -57,7 +57,9 @@
     0x23 mov uR1 uR0; mov uR0 OP2Type
     0x24 mov uCnt OP2Val; mov uR2 OP4Val
     0x25 mov uRet uPC; goto WriteRet
-    0x26 none; goto WritebackAdd
+    
+    # Restore old uR0 and write it out
+    0x26 mov uR0 OP3Val; goto WritebackAdd
 
 # WritebackInc:
     # Restore original operand values and writeback as in ADD
