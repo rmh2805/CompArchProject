@@ -70,29 +70,30 @@
     0x26 sub uTmp uTmp i1; goto EvalMemLoop
 
 # EvalIdx:
-    0x2D and uTmp uR1 i6; none              # Grab the rs value
+    0x2C and uTmp uR1 i7; none              # Grab the rs2 value
 
-    0x2E if nByte uTmp 0x00 +1              # Skip unless targeting r0
-    0x2F mov uR0 r0; goto EvalIdx1          # Grab r0 and grab second
-    0x30 if nByte uTmp 0x04 +1              # Skip unless targeting r1
-    0x31 mov uR1 r1; goto EvalIdx1          # Grab r1 and grab second
-    0x32 if nByte uTmp 0x08 +1              # Skip unless targeting pB
-    0x33 mov uR1 pB; goto EvalIdx1          # Grab pB and grab second
+    0x2D if nByte uTmp 0x00 +1              # Skip unless targeting r0
+    0x2E mov uR0 r0; goto EvalIdx1          # Grab r0 and grab second
+    0x2F if nByte uTmp 0x01 +1              # Skip unless targeting r1
+    0x30 mov uR0 r1; goto EvalIdx1          # Grab r1 and grab second
+    0x31 if nByte uTmp 0x02 +1              # Skip unless targeting pB
+    0x32 mov uR0 pB; goto EvalIdx1          # Grab pB and grab second
 
-    0x34 mov uR2 uRet; none                 # Save uRet for restore
-    0x35 mov uRet uPC; goto RegVal          # Grab the register's value
+    0x33 mov uR2 uRet; none                 # Save uRet for restore
+    0x34 mov uRet uPC; goto RegVal          # Grab the register's value
 
 # EvalIdx1:
-    0x36 and uTmp uR1 i6; mov uR1 uR0       # Grab the rs2 and store last val
+    0x35 and uTmp uR1 i6; mov uR1 uR0       # Grab the rs and store last val
 
-    0x37 if nByte uTmp 0x00 +1              # Skip unless targeting r0
-    0x38 mov uR0 r0; goto EvalIdx2          # Grab r0 and grab second
-    0x39 if nByte uTmp 0x04 +1              # Skip unless targeting r1
-    0x3A mov uR1 r1; goto EvalIdx2          # Grab r1 and grab second
-    0x3B if nByte uTmp 0x08 +1              # Skip unless targeting pB
-    0x3C mov uR1 pB; goto EvalIdx2          # Grab pB and grab second
+    0x36 if nByte uTmp 0x00 +1              # Skip unless targeting r0
+    0x37 mov uR0 r0; goto EvalIdx2          # Grab r0 and grab second
+    0x38 if nByte uTmp 0x04 +1              # Skip unless targeting r1
+    0x39 mov uR0 r1; goto EvalIdx2          # Grab r1 and grab second
+    0x3A if nByte uTmp 0x08 +1              # Skip unless targeting pB
+    0x3B mov uR0 pB; goto EvalIdx2          # Grab pB and grab second
     
-    0x3D mov uR2 uRet; none                 # Save uRet for restore
+    0x3C none; none
+    0x3D mov uR2 uRet; srl uCnt uCnt iB     # Save uRet for restore, shift 2
     0x3E mov uRet uPC; goto RegVal          # Grab the register's value
 
 # EvalIdx2:

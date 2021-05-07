@@ -701,25 +701,25 @@ void printMacroArgTxt(long * op) {
         int rs2 = op[0] & 0x03;
         
         //Grab register 1
-        if(!(rs1 ^ 0x00)) {
+        if((rs1 == 0x00)) {
             r1 = snagReg(0x30);
-        } else if(!(rs1 ^ 0x00)) {
+        } else if((rs1 == 0x01)) {
             r1 = snagReg(0x31);
-        } else if(!(rs1 ^ 0x00)) {
+        } else if((rs1 == 0x02)) {
             r1 = snagReg(0x3D);
         } else {
             r1 = snagReg(0x30 | (ext1 & 0x0F));
         }
         
         //Grab register 2
-        if(!(rs2 ^ 0x00)) {
+        if((rs2 == 0x00)) {
             r2 = snagReg(0x30);
-        } else if(!(rs2 ^ 0x00)) {
+        } else if((rs2 == 0x01)) {
             r2 = snagReg(0x31);
-        } else if(!(rs2 ^ 0x00)) {
+        } else if((rs2 == 0x02)) {
             r2 = snagReg(0x3D);
         } else {
-            r2 = snagReg(0x30 | (ext1 & 0x0F));
+            r2 = snagReg(0x30 | (ext2 & 0x0F));
         }
         
         sprintf(oBuf, "<IDX> (%%%2s+%%%2s)", r1->name(), r2->name());

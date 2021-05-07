@@ -13,7 +13,7 @@ Fetch           0
     InterpCpy1      55
     InterpBeq       56
 RegVal          9F
-    RegValRet       BF
+    RegValRet       C0
 GetOperand      0FF
     GetOpType       101
     GetOpType2      109
@@ -64,8 +64,8 @@ EvalOp          2FF
     EvalReg1        317
     EvalMem         31F
     EvalMemLoop     320
-    EvalIdx         32C
-    EvalIdx1        335
+    EvalIdx         32B
+    EvalIdx1        334
     EvalIdx2        33E
     EvalDsp         33F
     EvalDsp1        34A

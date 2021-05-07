@@ -57,7 +57,7 @@
     
     0x18 none; goto halt                # Halt on Invalid address mode
 # FetchOpImm:
-    0x19 and uCnt MDR i7; none          # Set the immediate width register
+    0x19 and uCnt uR0 i7; none          # Set the immediate width register
 # FetchOpImmLoop:
     0x1A if pcmax halt                  # Halt on PC overflow
     0x1B add PC PC i1; none             # Increment PC
@@ -114,7 +114,7 @@
     0x39 and uR0 uR0 i5; mov uCnt i0    # Clear uR0 MSB and count register
 
     # Skip grabbing Reg byte if not specified
-    0x3A if bits MDR 0x0C FetchOpImm
+    0x3A if nBits MDR 0x0C FetchOpImm
 
     0x3B if pcmax Halt                  # Halt on PC overflow
     0x3C add PC PC i1; none             # Increment PC
