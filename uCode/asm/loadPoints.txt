@@ -21,13 +21,13 @@ GetOperand      0FF
     FetchOpVal      10C
     FetchOpImm      118
     FetchOpImmLoop  119
-    FetchOpReg      120
-    FetchOpReg2     122
-    FetchOpIdx      128
-    FetchOpIdx2     12F
-    FetchOpDsp      137
-    FetchOpScl      141
-    FetchOpScl1     149
+    FetchOpReg      121
+    FetchOpReg2     123
+    FetchOpIdx      129
+    FetchOpIdx2     130
+    FetchOpDsp      138
+    FetchOpScl      142
+    FetchOpScl1     14A
 ScaleOp         19F
     ScaleOp1        1AC
 Decode          1FF

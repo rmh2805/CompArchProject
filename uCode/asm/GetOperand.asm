@@ -56,7 +56,6 @@
     0x17 if nyb MDR 0xB0 FetchOpScl     # Fetch a scale operand
     
     0x18 none; goto halt                # Halt on Invalid address mode
-
 # FetchOpImm:
     0x19 and uCnt MDR i7; none          # Set the immediate width register
 # FetchOpImmLoop:
@@ -64,93 +63,95 @@
     0x1B add PC PC i1; none             # Increment PC
 
     0x1C mov MAR PC; none               # Prepare to grab the next byte
-    0x1D read; sll uR1 uR1 iB           # Grab next byte and prepare space
-    0x1E or uR1 uR1 MDR; none           # incorporate IMM byte into return
+    0x1D read; srl uR1 uR1 iB           # Grab next byte and prepare space
+    0x1E sll uTmp MDR iF; none          # Shift it to the next position
+    0x1F or uR1 uR1 uTmp; none          # incorporate IMM byte into return
     
-    0x1F if eq uCnt i0 uRet             # Return on zero counter, else loop
-    0x20 sub uCnt uCnt i1; goto FetchOpImmLoop
+    0x20 if eq uCnt i0 uRet             # Return on zero counter, else loop
+    0x21 sub uCnt uCnt i1; goto FetchOpImmLoop
 
 # FetchOpReg:
     # Skip grabbing the second byte if it's not specified
-    0x21 if bits MDR 0x0C FetchOpReg2
-    0x22 mov uPC uRet; none             # Return
+    0x22 if bits MDR 0x0C FetchOpReg2
+    0x23 mov uPC uRet; none             # Return
 
 # FetchOpReg2:
-    0x23 if pcmax halt                  # Halt on PC overflow
-    0x24 add PC PC i1; none             # Increment PC
+    0x24 if pcmax halt                  # Halt on PC overflow
+    0x25 add PC PC i1; none             # Increment PC
 
-    0x25 mov mar pc; none               # Target next byte
-    0x26 read; sll uR1 uR1 iB           # Grab next byte and prepare space
-    0x27 or uR1 uR1 MDR; none           # Incorporate reg byte into return
+    0x26 mov mar pc; none               # Target next byte
+    0x27 read; sll uR1 uR1 iB           # Grab next byte and prepare space
+    0x28 or uR1 uR1 MDR; none           # Incorporate reg byte into return
 
-    0x28 mov uPC uRet; none             # Return
+    0x29 mov uPC uRet; none             # Return
 
 # FetchOpIdx:
     # Skip Grabbing the first register byte if not specified
-    0x29 if nBits MDR 0x0C FetchOpIdx2
-    0x2A mov uPC uRet; none             # Return
+    0x2A if nBits MDR 0x0C FetchOpIdx2
+    0x2B mov uPC uRet; none             # Return
 
-    0x2B if pcmax halt                  # Halt on PC overflow
-    0x2C add PC PC i1; none             # Increment PC
+    0x2C if pcmax halt                  # Halt on PC overflow
+    0x2D add PC PC i1; none             # Increment PC
 
-    0x2D mov mar pc; none               # Target next byte
-    0x2E read; sll uR1 uR1 iB           # Grab next byte and prepare space
-    0x2F or uR1 uR1 MDR; none           # Incorporate reg byte into return
+    0x2E mov mar pc; none               # Target next byte
+    0x2F read; sll uR1 uR1 iB           # Grab next byte and prepare space
+    0x30 or uR1 uR1 MDR; none           # Incorporate reg byte into return
 
 # FetchOpIdx2:
-    0x30 none; sll uR1 uR1 iB           # Move up read byte
-    0x31 if nBits uR0 0x03 uRet         # Possibly skip mem read
+    0x31 none; sll uR1 uR1 iB           # Move up read byte
+    0x32 if nBits uR0 0x03 uRet         # Possibly skip mem read
     
-    0x32 if pcmax halt                  # Halt on PC overflow
-    0x33 add PC PC i1; none             # Increment PC
+    0x33 if pcmax halt                  # Halt on PC overflow
+    0x34 add PC PC i1; none             # Increment PC
 
-    0x34 mov MAR PC; none               # Target Next Byte
-    0x35 read; none                     # Grab the next byte
-    0x36 or uR1 uR1 MDR; none           # Incorporate byte into return
+    0x35 mov MAR PC; none               # Target Next Byte
+    0x36 read; none                     # Grab the next byte
+    0x37 or uR1 uR1 MDR; none           # Incorporate byte into return
 
-    0x37 mov uPC uRet; none             # Return
+    0x38 mov uPC uRet; none             # Return
 
 # FetchOpDsp:
-    0x38 and uR0 uR0 i5; mov uCnt i0    # Clear uR0 MSB and count register
+    0x39 and uR0 uR0 i5; mov uCnt i0    # Clear uR0 MSB and count register
 
     # Skip grabbing Reg byte if not specified
-    0x39 if bits MDR 0x0C FetchOpImm
+    0x3A if bits MDR 0x0C FetchOpImm
 
-    0x3A if pcmax Halt                  # Halt on PC overflow
-    0x3B add PC PC i1; none             # Increment PC
+    0x3B if pcmax Halt                  # Halt on PC overflow
+    0x3C add PC PC i1; none             # Increment PC
 
-    0x3C mov MAR PC; none               # Target the next byte
-    0x3D read; none                     # Read in the next byte
-    0x3E mov uCnt MDR; none             # Store the register byte in a temp reg
+    0x3D mov MAR PC; none               # Target the next byte
+    0x3E read; none                     # Read in the next byte
+    0x3F mov uCnt MDR; none             # Store the register byte in a temp reg
     
-    0x3F sll uCnt uCnt iF; none         # Shift the register byte up three bytes
-    0x40 or uR0 uR0 uCnt; none          # Store the register byte in uR0
+    0x40 sll uCnt uCnt iF; none         # Shift the register byte up three bytes
+    0x41 or uR0 uR0 uCnt; none          # Store the register byte in uR0
 
-    0x41 none; goto FetchOpImm          # Grab the immediate for this mode
+    0x42 none; goto FetchOpImm          # Grab the immediate for this mode
 
 # FetchOpScl:
-    0x42 mov uR2 MDR; and uR0 uR0 i2    # Move scale param to uR2 and clear it 
+    0x43 mov uR2 MDR; and uR0 uR0 i2    # Move scale param to uR2 and clear it 
                                         # from uR0
-    0x43 sll uR2 uR2 iB; none           # Make space in uR2 for the reg byte
+    0x44 sll uR2 uR2 iB; none           # Make space in uR2 for the reg byte
 
-    0x44 if bits MDR 0x03 FetchOpScl1
+    0x45 if bits MDR 0x03 FetchOpScl1
 
-    0x45 if pcmax Halt                  # Halt on PC overflow
-    0x46 add PC PC i1; none             # Increment the PC
+    0x46 if pcmax Halt                  # Halt on PC overflow
+    0x47 add PC PC i1; none             # Increment the PC
 
-    0x47 mov mar pc; none               # Target the next byte
-    0x48 read; none                     # Read the register byte
-    0x49 or uR2 uR2 MDR; none           # Store the register byte
+    0x48 mov mar pc; none               # Target the next byte
+    0x49 read; none                     # Read the register byte
+    0x4A or uR2 uR2 MDR; none           # Store the register byte
 
 # FetchOpScl1:
-    0x4A if pcmax Halt                  # Halt on PC overflow
-    0x4B add PC PC i1; none             # Increment the PC
+    0x4B if pcmax Halt                  # Halt on PC overflow
+    0x4C add PC PC i1; none             # Increment the PC
 
-    0x4C mov MAR PC; none               # Target the next byte
-    0x4D read; none                     # Grab the next byte
+    0x4D mov MAR PC; none               # Target the next byte
+    0x4E read; none                     # Grab the next byte
 
-    0x4E if nyb MDR 0x00 halt           # Fail on prefix byte
-    0x4F if nyb MDR 0xB0 halt           # Fail on scale of scale
+    0x4F if nyb MDR 0x00 halt           # Fail on prefix byte
+    0x50 if nyb MDR 0xB0 halt           # Fail on scale of scale
 
     # Store op type in reg and decode scaled op 
-    0x50 or uR0 uR0 MDR; goto FetchOpVal
+    0x51 or uR0 uR0 MDR; goto FetchOpVal
+
