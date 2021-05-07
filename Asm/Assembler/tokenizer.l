@@ -1,6 +1,11 @@
 
 %%
 
+
+    /* Comments */
+\/\/[ \tA-Za-z0-9_:\<\>\-\+=,\(\).`\']*\n        {printf("EOL\n");}
+#[ \tA-Za-z0-9_:\<\>\-\+=,\(\).`\']*\n         {printf("EOL\n");}
+
     /* Key Characters */
 "%"                         {printf("REG_MARK\n");}
 "$"                         {printf("IMM_MARK\n");}

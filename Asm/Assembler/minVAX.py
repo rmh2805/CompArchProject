@@ -162,6 +162,7 @@ def encode(instrs, dataInit, codeBase, dataBase):
 def main():
     toks = clean()
     dataLabels, dataInit = dataOffsets(toks)
+
     codeLabels, codePos = codeOffsets(toks, instrSizeFxn)
     instrs = getInstrs(toks, 0, codeLabels, codePos, dataLabels)
     
