@@ -241,6 +241,11 @@ def encodeInst(inst, codePos):
         line += ' ' + argStr
         nWords += argWords
 
+    # Insert explicit end of args
+    if maxArgs[mnemonic] != len(args):
+        line += ' 0'
+        nWords += 1
+
     # Apply the positioning information
     line = hex(codePos)[2:] + ' ' + hex(nWords)[2:] + ' ' + line
     return line, nWords
