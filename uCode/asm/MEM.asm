@@ -1,7 +1,7 @@
 # Microcode for all memory operations
 
 # MOV:
-    0x00 mov uR0 OP1Val; goto Writeback
+    0x00 mov uR0 OP2Val; goto Writeback
 # SWP:
     0x01 mov uR0 OP2Val; mov uR1 OP1Val
     0x02 none; goto Writeback
