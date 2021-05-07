@@ -63,6 +63,7 @@ EvalOp          2FF
     EvalReg         30E
     EvalReg1        317
     EvalMem         31F
+    EvalMemLoop     320
     EvalIdx         32C
     EvalIdx1        335
     EvalIdx2        33E

@@ -40,9 +40,9 @@
     0x10 if nByte uTmp 0x00 +1              # Skip unless targeting r0
     0x11 mov uR0 r0; goto EvalReg1          # Grab r0 and truncate
     0x12 if nByte uTmp 0x04 +1              # Skip unless targeting r1
-    0x13 mov uR1 r1; goto EvalReg1          # Grab r1 and truncate
+    0x13 mov uR0 r1; goto EvalReg1          # Grab r1 and truncate
     0x14 if nByte uTmp 0x08 +1              # Skip unless targeting pB
-    0x15 mov uR1 pB; goto EvalReg1          # Grab pB and truncate
+    0x15 mov uR0 pB; goto EvalReg1          # Grab pB and truncate
 
     0x16 mov uR2 uRet; none                 # Save uRet for restore
     0x17 mov uRet uPC; goto RegVal          # Grab the register's value
@@ -59,19 +59,15 @@
     0x1F none; mov uPC uRet                 # return with full value
 
 # EvalMem:
-    0x20 mov MAR uCnt; none                 # Read the address' first byte
-    0x21 read; none
-    0x22 mov uR0 MDR; add uCnt uCnt i1
-    0x23 mov MAR uCnt; sll uR0 uR0 iB       # Read the address' second byte
-    0x24 read; none
-    0x25 or uR0 uR0 MDR; add uCnt uCnt i1
-    0x26 mov MAR uCnt; sll uR0 uR0 iB       # Read the address' third byte
-    0x27 read; none
-    0x28 or uR0 uR0 MDR; add uCnt uCnt i1
-    0x29 mov MAR uCnt; sll uR0 uR0 iB       # Read the address' fourth byte
-    0x2A read; none
-    0x2B or uR0 uR0 MDR; add uCnt uCnt i1
-    0x2C mov uPC uRet; none;                # Return
+    0x20 mov uTmp i7; none                  # Set the loop counter
+# EvalMemLoop:
+    0x21 mov MAR uCnt; add uCnt uCnt i1     # Prepare to read the next byte
+    0x22 read; srl uR0 uR0 iB               # Read it and make space to store
+    0x23 sll uTmp2 MDR iF; none             # Shift it into the next position
+    0x24 or uR0 uR0 uTmp2; none             # Incorporate it into return
+    
+    0x25 if eq uTmp i0 uRet                 # Either break loop or dec and loop
+    0x26 sub uTmp uTmp i1; goto EvalMemLoop
 
 # EvalIdx:
     0x2D and uTmp uR1 i6; none              # Grab the rs value
