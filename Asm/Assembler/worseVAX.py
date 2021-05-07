@@ -119,6 +119,150 @@ def instrSizeFxn(instrToks):
 
     return sz
 
+def encodeImm(val):
+    argStr = ''
+    
+    for i in range(0, 4):
+        argStr += ' ' + hex(val & 0xFF)[2:]
+        val = val >> 8
+    
+    return argStr
+
+def encodeReg(argByte, rNr):
+    argStr = ''
+    nWords = 0
+
+    if rNr == 0:
+        argByte = argByte | 0x00
+    elif rNr == 1:
+        argByte = argByte | 0x04
+    elif rNr == 0x0D:
+        argByte = argByte | 0x08
+    else:
+        argByte = argByte | 0x0C
+        argStr = ' ' + hex(rNr)[2:]
+        nWords += 1
+    
+    argStr = hex(argByte)[2:] + argStr
+    nWords += 1
+
+    return argStr, nWords
+
+
+def encodeArg(arg, incAmt = 4):
+    argStr = ""
+    nWords = 0
+
+    if arg[0] == 'REG':
+        argStr, nWords = encodeReg(0x33, arg[1] - 1)
+    
+    elif arg[0] == 'IMM':
+        argStr = '23'
+        nWords += 5
+        argStr += encodeImm(arg[1])
+    
+    elif arg[0] == 'ABS':
+        argStr = '83'
+        nWords += 5
+        argStr += encodeImm(arg[1])
+
+    elif arg[0] == 'IDR':
+        argStr, nWords = encodeReg(0x43, arg[1] - 1)
+
+    elif arg[0] == 'IDM':
+        argStr = '53'
+        nWords += 5
+        argStr += encodeImm(arg[1])
+    
+    elif arg[0] == 'IDX':
+        argStr = ''
+        argByte = 0x60
+
+        rNr = arg[1] - 1
+        if rNr == 0:
+            argByte = argByte | 0x00
+        elif rNr == 1:
+            argByte = argByte | 0x04
+        elif rNr == 0x0D:
+            argByte = argByte | 0x08
+        else:
+            argByte = argByte | 0x0C
+            argStr = ' ' + hex(rNr)[2:]
+            nWords += 1
+        
+        rNr = arg[2] - 1
+        if rNr == 0:
+            argByte = argByte | 0x00
+        elif rNr == 1:
+            argByte = argByte | 0x01
+        elif rNr == 0x0D:
+            argByte = argByte | 0x02
+        else:
+            argByte = argByte | 0x03
+            argStr = ' ' + hex(rNr)[2:]
+            nWords += 1
+        
+        argStr = hex(argByte)[2:] + argStr
+        nWords += 1
+
+    elif arg[0] == 'DSP':
+        argStr, nWords = encodeReg(0x73, arg[2])
+        argStr += encodeImm(arg[1])
+        nWords += 4
+
+    elif arg[0] == 'INC':
+        argByte = 0x90 | (incAmt - 1)
+        argStr, nWords = encodeReg(argByte, arg[1] - 1)
+    elif arg[0] == 'DEC':
+        argByte = 0xA0 | (incAmt - 1)
+        argStr, nWords = encodeReg(argByte, arg[1] - 1)
+    else:
+        print(arg)
+
+    return argStr, nWords
+
+def encodeInst(inst, codePos):
+    global mnemonics, maxArgs
+    line = ""
+    nWords = 1
+    
+    mnemonic = inst[0].upper()
+    args = inst[1]
+
+    # Insert the mnemonic into the instruction
+    if mnemonic not in mnemonics:
+        print("ERROR: Unrecognized mnemonic " + mnemonic)
+        exit(-1)
+    line = hex(mnemonics[mnemonic])[2:]
+
+    # Insert each arg into the instruction
+    for arg in args:
+        argStr, argWords = encodeArg(arg)
+        line += ' ' + argStr
+        nWords += argWords
+
+    # Apply the positioning information
+    line = hex(codePos)[2:] + ' ' + hex(nWords)[2:] + ' ' + line
+    return line, nWords
+    
+
+def encode(instrs, dataInit, codeBase, dataBase):
+    codePos = codeBase
+    for inst in instrs:
+        line, nWords = encodeInst(inst, codePos)
+        print(line)
+        codePos += nWords
+
+    for i in range(0, len(dataInit)):
+        value, width, offset = dataInit[i]
+        print(hex(dataBase + offset)[2:] + ' ' + hex(width)[2:], end='')
+        
+        for j in range(0, width):
+            print(' ' + hex(value & 0xFF)[2:], end='')
+            value = value >> 8
+        print()
+    print(hex(codeBase - 1)[2:])
+
 def main():
     toks = clean()
     dataLabels, dataInit = dataOffsets(toks)
@@ -132,13 +276,6 @@ def main():
         codeLabels[reg] = regNrs[reg]
 
     instrs = getInstrs(toks, 1, codeLabels, codePos, dataLabels)
-
-    print("\n\n\t\t===<Data Labels>===")
-    for label in dataLabels:
-        print(label + ': ' + str(dataLabels[label] + codePos))
-
-    print("\n\n\t\t===<Instructions>===")
-    for inst in instrs:
-        print(inst)
+    encode(instrs, dataInit, 1, codePos)
 
 main()
