@@ -61,12 +61,12 @@
 
 # BGT
     0x50 sub uTmp OP2Val OP1Val; none       # uTmp <- OP1Val - OP2Val
-    0x51 sll uTmp uTmp iF; none             # uTmp <- uTmp >> 24
+    0x51 srl uTmp uTmp iF; none             # uTmp <- uTmp >> 24
     0x52 if nBits uTmp 0x80; Writeback      # No work if not sign bit
     0x53 mov PC OP3Val; goto Writeback      # Update PC if sign bit
 # BGE
     0x54 sub uTmp OP1Val OP2Val; none       # uTmp <- OP2Val - OP1Val
-    0x55 sll uTmp uTmp iF; none             # uTmp <- uTmp >> 24
+    0x55 srl uTmp uTmp iF; none             # uTmp <- uTmp >> 24
     0x56 if bits uTmp 0x80; Writeback       # No work if sign bit
     0x57 mov PC OP3Val; goto Writeback      # Update PC if not sign bit
 

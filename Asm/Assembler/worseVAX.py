@@ -274,6 +274,9 @@ def main():
     codeLabels, codePos = codeOffsets(toks, instrSizeFxn)
     codePos = codePos + 4
 
+    for codeLabel in codeLabels:
+        codeLabels[codeLabel] -= 1
+
     for reg in regNrs:
         if reg in codeLabels or reg in dataLabels:
             print("Register mnemonic " + reg + " overrides existing label")
