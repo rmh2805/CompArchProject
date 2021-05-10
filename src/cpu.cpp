@@ -60,7 +60,7 @@ Memory control_storage("Control_Storage", CU_DATA_SIZE, CU_DATA_SIZE, kMaxAddr,
                         1, true);
 
 // System Registers
-StorageObject * SYS[24] = {
+StorageObject * SYS[26] = {
     new StorageObject("uPC", kRegSize),
     new StorageObject("uRET", kRegSize),
     new StorageObject("uR0", kRegSize),
@@ -85,6 +85,8 @@ StorageObject * SYS[24] = {
     new StorageObject("uTmp", kRegSize),
     new StorageObject("uRet2", kRegSize),
     new StorageObject("uTmp2", kRegSize),
+    new StorageObject("aluCarry", kRegSize),
+    new StorageObject("aluOverflow", kRegSize),
 };
 
 StorageObject uIR("uIR", CU_DATA_SIZE);
@@ -150,6 +152,10 @@ void connect() {
     uIR.connectsTo(control_storage.READ());
     uIR.connectsTo(ALU1.OP1());
     uIR.connectsTo(ALU1.IN1());
+
+    // Connect Carry and Overflow registers to ALU2
+    SYS[Carry]->connectsTo(ALU2.CARRY());
+    SYS[Overflow]->connectsTo(ALU2.OFLOW());
 
     // Connect GPRs and IMMs
     for(int i = 0; i < 16; i++) {
@@ -252,6 +258,8 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
                 if(uTrace) {
                     cout << ", ";
                 }
+                SYS[Carry]->latchFrom(ALU2.CARRY());
+                SYS[Overflow]->latchFrom(ALU2.OFLOW());
                 setBfield(bBits, &ALU2);
                 if(uTrace) {
                     cout << "\n";
@@ -261,6 +269,8 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
             case 1: // A Field jump
                 if (uTrace) cout << "uJMP: uPC <- uIR[" 
                                  << (uIR.value() & 0xFFFFFFFF) << "],";
+                SYS[Carry]->latchFrom(ALU2.CARRY());
+                SYS[Overflow]->latchFrom(ALU2.OFLOW());
                 setAfield(&ALU2);
                 if(uTrace) cout << "\n";
                 ALU1.IN1().pullFrom(uIR);
@@ -272,6 +282,8 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
                 bBits = CU_DATA_SIZE-3;
                 if (uTrace) cout << "uJMP: uPC <- uIR[" 
                                  << (uIR.value() & 0xFFFFFFFF) << "], ";
+                SYS[Carry]->latchFrom(ALU2.CARRY());
+                SYS[Overflow]->latchFrom(ALU2.OFLOW());
                 setBfield(bBits, &ALU2);
                 if (uTrace) cout << "\n";
                 ALU1.IN1().pullFrom(uIR);
@@ -615,12 +627,10 @@ bool Conditional() {
         case 6: // Nybble 1 equal
             if (uTrace) printCONDmicroInstr(rs, rT, " & 0xf0 == ");
             return !((rs->value() & 0xf0) ^ rT);
-            break;
 
         case 7: // Nybble 1 not equal
             if (uTrace) printCONDmicroInstr(rs, rT, " & 0xf0 != ");
             return (rs->value() & 0xf0) ^ rT;
-            break;
 
         case 8: // IR 0 Ops
             if (uTrace) printMAXOpsMicroInstr(0);
@@ -641,6 +651,14 @@ bool Conditional() {
         case 12: // PC Max
             if (uTrace) cout << "if PC[" << GPR[15]->value() << "] == PC_MAX";
             return GPR[15]->value() >= kMaxAddr;
+
+        case 13: // ALU2 Carry
+            if (uTrace) cout << "if ALU2.CARRY[" << SYS[Carry]->value() << "] == 1";
+            return SYS[Carry]->value() == 1;
+
+        case 14: // ALU2 Overflow
+            if (uTrace) cout << "if ALU2.OFLOW[" << SYS[Overflow]->value() << "] == 1";
+            return SYS[Overflow]->value() == 1;
 
         default:
             break;
