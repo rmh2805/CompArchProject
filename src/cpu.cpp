@@ -249,7 +249,7 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
         // Execute
         long prefix = (uIR.value() >> 53);
         long bBits;
-        
+
         // Get prefix (first 2 bits of uIR)
         switch(prefix) {
             case 0: // Parallel Operations
@@ -258,8 +258,6 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
                 if(uTrace) {
                     cout << ", ";
                 }
-                SYS[Carry]->latchFrom(ALU2.CARRY());
-                SYS[Overflow]->latchFrom(ALU2.OFLOW());
                 setBfield(bBits, &ALU2);
                 if(uTrace) {
                     cout << "\n";
@@ -269,8 +267,6 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
             case 1: // A Field jump
                 if (uTrace) cout << "uJMP: uPC <- uIR[" 
                                  << (uIR.value() & 0xFFFFFFFF) << "],";
-                SYS[Carry]->latchFrom(ALU2.CARRY());
-                SYS[Overflow]->latchFrom(ALU2.OFLOW());
                 setAfield(&ALU2);
                 if(uTrace) cout << "\n";
                 ALU1.IN1().pullFrom(uIR);
@@ -282,8 +278,6 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
                 bBits = CU_DATA_SIZE-3;
                 if (uTrace) cout << "uJMP: uPC <- uIR[" 
                                  << (uIR.value() & 0xFFFFFFFF) << "], ";
-                SYS[Carry]->latchFrom(ALU2.CARRY());
-                SYS[Overflow]->latchFrom(ALU2.OFLOW());
                 setBfield(bBits, &ALU2);
                 if (uTrace) cout << "\n";
                 ALU1.IN1().pullFrom(uIR);
@@ -542,6 +536,8 @@ void setBfield(long Bfield, BusALU * alu) {
 
         case 5: // SUB
             if (uTrace) print3OpmicroInstr(dB, sB, tB, "-", rsImm, rtImm);
+            SYS[Carry]->latchFrom(ALU2.CARRY());
+            SYS[Overflow]->latchFrom(ALU2.OFLOW());
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
@@ -550,6 +546,8 @@ void setBfield(long Bfield, BusALU * alu) {
 
         case 6: // ADD
             if (uTrace) print3OpmicroInstr(dB, sB, tB, "+", rsImm, rtImm);
+            SYS[Carry]->latchFrom(ALU2.CARRY());
+            SYS[Overflow]->latchFrom(ALU2.OFLOW());
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());

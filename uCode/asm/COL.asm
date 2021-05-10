@@ -81,5 +81,10 @@
     0x66 if neq uTmp i0 Writeback
     0x67 mov PC OP3Val; goto Writeback
 
-
+# BAO:
+    0x70 if overflow goto JMP
+    0x71 none; goto Writeback
+# BAC:
+    0x72 if carry goto JMP
+    0x73 none; goto Writeback
 

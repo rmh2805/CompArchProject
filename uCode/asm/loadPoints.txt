@@ -105,8 +105,8 @@ COL             5FF
     BGE             653
     BIE             65F
     BDE             663
-    BAO             FFFFFFFF
-    BAC             FFFFFFFF
+    BAO             66F
+    BAC             671
 ALU             6FF
     ADD             6FF
     SUB             700

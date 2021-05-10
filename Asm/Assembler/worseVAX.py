@@ -12,7 +12,7 @@ mnemonics = {'HLT':0x00, 'NOP':0x01, 'CLR':0x02, 'DMP':0x03,
              
                          'JMP':0x31, 'JAL':0x32, 'RET':0x33,
              'BEQ':0x34, 'BNE':0x35, 'BGT':0x36, 'BGE':0x37,
-             'BIE':0x38, 'BDE':0x39}
+             'BIE':0x38, 'BDE':0x39, 'BAO':0x3A, 'BAC':0x3B}
 
 maxArgs   = {'HLT':0, 'NOP':0, 'CLR':1, 'DMP':1,
              'OUT':2, 
@@ -25,7 +25,7 @@ maxArgs   = {'HLT':0, 'NOP':0, 'CLR':1, 'DMP':1,
              
                          'JMP':1, 'JAL':1, 'RET':0,
              'BEQ':3, 'BNE':3, 'BGT':3, 'BGE':3,
-             'BIE':3, 'BDE':3}
+             'BIE':3, 'BDE':3, 'BAO':1, 'BAC':1}
 
 regNrs = {'R0':0x00, 'R1':0x01, 'R2':0x02, 'R3':0x03,
           'R4':0x04, 'R5':0x05, 'R6':0x06, 'R7':0x07,
