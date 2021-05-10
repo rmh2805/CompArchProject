@@ -206,7 +206,7 @@ def encodeArg(arg, incAmt = 4):
         nWords += 1
 
     elif arg[0] == 'DSP':
-        argStr, nWords = encodeReg(0x73, arg[2])
+        argStr, nWords = encodeReg(0x73, arg[2] - 1)
         argStr += encodeImm(arg[1])
         nWords += 4
 
@@ -273,6 +273,9 @@ def main():
     dataLabels, dataInit = dataOffsets(toks)
     codeLabels, codePos = codeOffsets(toks, instrSizeFxn)
     codePos = codePos + 4
+
+    for codeLabel in codeLabels:
+        codeLabels[codeLabel] -= 1
 
     for reg in regNrs:
         if reg in codeLabels or reg in dataLabels:

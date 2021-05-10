@@ -1,5 +1,5 @@
 .data
-    a0 = .word 5
+    a0 = .word -5
     a1 = .word 10
     a2 = .word 0x76543210
     memIndSto = .word 0

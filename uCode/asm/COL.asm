@@ -8,7 +8,7 @@
     0x11 mov uCnt i7; none                  # (Set count reg for write width)
 
 # JAL_LOOP_PB:
-    0x12 mov MAR uCnt; mov MDR uTmp         # Prepare write
+    0x12 mov MAR uR0; mov MDR uTmp         # Prepare write
     0x13 write; none                        # Write
     0x14 srl uTmp uTmp iB; add uR0 uR0 i1   # Shift output down and retarget
     0x15 if byte uCnt 0x00 JAL_BREAK_PB     # Break after final byte
@@ -19,7 +19,7 @@
     0x19 mov uCnt i7; none                  # (Set count reg for write width)
 
 # JAL_LOOP_PR:
-    0x1A mov MAR uCnt; mov MDR uTmp         # Prepare write
+    0x1A mov MAR uR0; mov MDR uTmp          # Prepare write
     0x1B write; none                        # Write
     0x1C srl uTmp uTmp iB; add uR0 uR0 i1   # Shift output down and retarget
     0x1D if byte uCnt 0x00 JAL_BREAK_PR     # Break after final byte
@@ -42,7 +42,7 @@
 # RET_BREAK_PR:
     0x37 add pS pB iD; none                 # Restore PS
 
-    0x38 mov uCnt i8; mov uR0 pB            # Prepare for pB Read
+    0x38 mov uCnt i7; mov uR0 pB            # Prepare for pB Read
 # RET_LOOP_PB:
     0x39 mov MAR uR0; none
     0x3A read; sll pB pB iB                 # Read and shift for next byte
@@ -61,12 +61,12 @@
 
 # BGT
     0x50 sub uTmp OP2Val OP1Val; none       # uTmp <- OP1Val - OP2Val
-    0x51 sll uTmp uTmp iF; none             # uTmp <- uTmp >> 24
+    0x51 srl uTmp uTmp iF; none             # uTmp <- uTmp >> 24
     0x52 if nBits uTmp 0x80; Writeback      # No work if not sign bit
     0x53 mov PC OP3Val; goto Writeback      # Update PC if sign bit
 # BGE
     0x54 sub uTmp OP1Val OP2Val; none       # uTmp <- OP2Val - OP1Val
-    0x55 sll uTmp uTmp iF; none             # uTmp <- uTmp >> 24
+    0x55 srl uTmp uTmp iF; none             # uTmp <- uTmp >> 24
     0x56 if bits uTmp 0x80; Writeback       # No work if sign bit
     0x57 mov PC OP3Val; goto Writeback      # Update PC if not sign bit
 

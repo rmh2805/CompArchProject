@@ -30,6 +30,8 @@ enum sys_names {
     uTmp,
     uRet2,
     uTmp2,
+    Carry,
+    Overflow,
 };
 
 const size_t kAddrBusSize = 32;

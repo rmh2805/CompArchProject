@@ -6,6 +6,17 @@
 \/\/[ \tA-Za-z0-9_:\<\>\-\+=,\(\).`\']*\n        {printf("EOL\n");}
 #[ \tA-Za-z0-9_:\<\>\-\+=,\(\).`\']*\n         {printf("EOL\n");}
 
+
+    /* Section Directives */
+"."[cC][oO][dD][eE]         {printf("CODE_SEG\n");}
+"."[dD][aA][tT][aA]         {printf("DATA_SEG\n");}
+
+    /* Numeric Literals */
+"0x"[0-9a-fA-F]+            {printf("INT %ld\n", strtol(yytext, NULL, 16));}
+"0"[0-7]+                   {printf("INT %ld\n", strtol(yytext, NULL, 8));}
+[0-9]+                      {printf("INT %ld\n", strtol(yytext, NULL, 10));}
+"-"[0-9]+                   {printf("INT %s\n", yytext);}
+
     /* Key Characters */
 "%"                         {printf("REG_MARK\n");}
 "$"                         {printf("IMM_MARK\n");}
@@ -20,10 +31,6 @@
 "["                         {printf("OPEN_BRACKET\n");}
 "]"                         {printf("CLOSE_BRACKET\n");}
 
-    /* Section Directives */
-"."[cC][oO][dD][eE]         {printf("CODE_SEG\n");}
-"."[dD][aA][tT][aA]         {printf("DATA_SEG\n");}
-
     /* Alignment Directives */
 "."[wW][oO][rR][dD]         {printf("WORD_ALIGN\n");}
 "."[hH][aA][lL][fF]         {printf("HALF_ALIGN\n");}
@@ -32,11 +39,6 @@
 
     /* Misc Dot Directives */
  /* "."[a-zA-Z0-9_]+            {printf("DOT_DIR %s\n", yytext);} */
-
-    /* Numeric Literals */
-"0x"[0-9a-fA-F]+            {printf("INT %ld\n", strtol(yytext, NULL, 16));}
-"0"[0-7]+                   {printf("INT %ld\n", strtol(yytext, NULL, 8));}
-[0-9]+                      {printf("INT %ld\n", strtol(yytext, NULL, 10));}
 
     /* Alphanum Literals */
 [a-zA-Z_][a-zA-Z0-9_]*":"   {printf("LABEL %.*s\n", yyleng - 1, yytext);}

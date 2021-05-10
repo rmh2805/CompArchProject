@@ -10,7 +10,7 @@
 #        EvalOp and ScaleOp first to get value or EA)
 #
 # PrefixOp:
-    0x00 if nNyb uR1 0xf0 0x70 PrefixOp2    # Start loop if not dispacement
+    0x00 if nNyb uR1 0x70 PrefixOp2         # Start loop if not dispacement
     0x01 and uR1 uR1 i5; goto PrefixOp2     # Yeet reg byte, start loop
 
 # PrefixOp1:
