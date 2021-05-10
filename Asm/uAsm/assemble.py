@@ -153,7 +153,10 @@ condMap = {'eq'   :(0x0, 1),
            'oneop':(0x9, 0),
            'twoops':(0xA, 0),
            'threeops':(0xB, 0),
-           'pcmax':(0xC, 0)}
+           'pcmax':(0xC, 0),
+           'overflow':(0xD, 0),
+           'carry':(0xE, 0)}
+
 
 loadPoints = {'.':None}
 
