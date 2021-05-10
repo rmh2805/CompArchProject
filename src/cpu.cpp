@@ -652,13 +652,13 @@ bool Conditional() {
             if (uTrace) cout << "if PC[" << GPR[15]->value() << "] == PC_MAX";
             return GPR[15]->value() >= kMaxAddr;
 
-        case 13: // ALU2 Carry
-            if (uTrace) cout << "if ALU2.CARRY[" << SYS[Carry]->value() << "] == 1";
-            return SYS[Carry]->value() == 1;
-
-        case 14: // ALU2 Overflow
+        case 13: // ALU2 Overflow
             if (uTrace) cout << "if ALU2.OFLOW[" << SYS[Overflow]->value() << "] == 1";
             return SYS[Overflow]->value() == 1;
+
+        case 14: // ALU2 Carry
+            if (uTrace) cout << "if ALU2.CARRY[" << SYS[Carry]->value() << "] == 1";
+            return SYS[Carry]->value() == 1;
 
         default:
             break;
