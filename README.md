@@ -21,8 +21,8 @@ simulator
   - The object file is the only requirement, and is the program to run
   - The 2nd arg will turn on micro trace output if its first character is 'y'
   - The 3rd arg specifes an alternative file to load microcode from
-    - The default value of this arg is `../uCode/asm/uCode.obj` relative to 
-    the execution location
+    - The default value of this arg is `uCode.obj` relative to the execution 
+location
 
 ## Included Files
 - `src`: Main source code directory
