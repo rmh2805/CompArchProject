@@ -16,10 +16,10 @@ push_str:
     jmp push_str
 
 push_str_done:
-    dmp 0(%r6)
-    dmp 1(%r6)
-    dmp 2(%r6)
-    dmp 3(%r6)
+    dmp 16(%r6)
+    dmp 20(%r6)
+    dmp 24(%r6)
+    dmp 28(%r6)
     cpy 0xFF, 16(%r6), $0, $16
     dmp 16(%r6)
     dmp 20(%r6)
