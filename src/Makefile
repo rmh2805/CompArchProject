@@ -67,9 +67,9 @@ OBJFILES =	cpu.o
 # Main targets
 #
 
-all:	main 
+all:	CPU 
 
-main:	main.o $(OBJFILES)
+CPU:	CPU.o $(OBJFILES)
 	$(CXX) $(CXXFLAGS) -o main main.o $(OBJFILES) $(CCLIBFLAGS)
 
 #
@@ -77,7 +77,7 @@ main:	main.o $(OBJFILES)
 #
 
 cpu.o:	cpu.h includes.h
-main.o:	cpu.h includes.h
+CPU.o:	cpu.h includes.h
 
 #
 # Housekeeping
