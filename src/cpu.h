@@ -42,6 +42,8 @@ const size_t CU_DATA_SIZE = 55;
 
 const size_t kMaxAddr = int(pow(2, 20)) - 1;
 
+const long WRITEBACK_UPC = 0x3FF;
+
 // Memory
 extern Memory m;
 extern Memory control_storage;

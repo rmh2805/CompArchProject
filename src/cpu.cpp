@@ -58,7 +58,6 @@ StorageObject * IMM[16] = {
 Memory m("Main_Memory", kAddrBusSize, kDataBusSize, kMaxAddr, 1, true);
 Memory control_storage("Control_Storage", CU_DATA_SIZE, CU_DATA_SIZE, kMaxAddr, 
                         1, true);
-
 // System Registers
 StorageObject * SYS[26] = {
     new StorageObject("uPC", kRegSize),
@@ -89,9 +88,16 @@ StorageObject * SYS[26] = {
     new StorageObject("aluOverflow", kRegSize),
 };
 
+// Delay registers
+StorageObject delay1("CarryDelay", kRegSize);
+StorageObject delay2("OflowDelay", kRegSize);
+
 StorageObject uIR("uIR", CU_DATA_SIZE);
 
 static bool uTrace = false;
+
+// Global flag for carry and overflow detection
+bool AddOrSub = false;
 
 //==========================<Helper Fxn Declaration>==========================//
 // Register locator helpers
@@ -154,8 +160,12 @@ void connect() {
     uIR.connectsTo(ALU1.IN1());
 
     // Connect Carry and Overflow registers to ALU2
-    SYS[Carry]->connectsTo(ALU2.CARRY());
-    SYS[Overflow]->connectsTo(ALU2.OFLOW());
+    delay1.connectsTo(ALU2.CARRY());
+    delay1.connectsTo(ALU2.OP1());
+    delay1.connectsTo(ALU2.OP2());
+    delay2.connectsTo(ALU2.OFLOW());
+    delay2.connectsTo(ALU2.OP1());
+    delay2.connectsTo(ALU2.OP2());
 
     // Connect GPRs and IMMs
     for(int i = 0; i < 16; i++) {
@@ -173,7 +183,7 @@ void connect() {
     }
 
     // Basic connect for Systems Registers to ALU
-    for(int i = 0; i < 24; i++) {
+    for(int i = 0; i < 26; i++) {
         if (i == MDR || i == IR || i == MAR || i == uPC ) {
             continue;
         }
@@ -203,6 +213,7 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
 
     cout << "Entering Main Execute Loop\n";
     while(true) { 
+        bool checkALU2Outputs = false;
         // Check if we were at 0xFFFFFFFF
         if(SYS[uPC]->value() == 0xFFFFFFFF) {
             cout << "HLT\n";
@@ -215,6 +226,26 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
         ALU1.perform(BusALU::op_add); // Add uPC + 1
         control_storage.MAR().latchFrom(ALU1.OUT());
         SYS[uPC]->latchFrom(ALU1.OUT());
+
+        // Check if we need to store ALU2 Carry/OFlow
+        if(SYS[uPC]->value() == WRITEBACK_UPC && AddOrSub) {
+            // Pass Carry along to SYS[Carry]
+            ALU2.OP1().pullFrom(delay1);
+            ALU2.OP2().pullFrom(delay1);  
+            ALU2.perform(BusALU::op_rop1);
+            SYS[Carry]->latchFrom(ALU2.OUT());
+        } else {
+            AddOrSub = false;
+        }
+        Clock::tick();
+
+        // If its still true then we need to pass OFLOW too
+        if(AddOrSub) {
+            ALU2.OP1().pullFrom(delay2);
+            ALU2.OP2().pullFrom(delay2);  
+            ALU2.perform(BusALU::op_rop1);
+            SYS[Overflow]->latchFrom(ALU2.OUT());
+        }
         Clock::tick();
         
         // Trigger macro trace calls here
@@ -244,7 +275,7 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
         if (uTrace) {
             cout << "\t" << setw(3) << setfill('0') << SYS[uPC]->value() << ": " ;
         }
-        
+
 
         // Execute
         long prefix = (uIR.value() >> 53);
@@ -253,6 +284,9 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
         // Get prefix (first 2 bits of uIR)
         switch(prefix) {
             case 0: // Parallel Operations
+                // Always latch onto ALU2 Carry/Oflows
+                delay1.latchFrom(ALU2.CARRY());
+                delay2.latchFrom(ALU2.OFLOW());
                 bBits = CU_DATA_SIZE-24;
                 setAfield(&ALU1);
                 if(uTrace) {
@@ -278,6 +312,9 @@ void execute(const char * codeFile, const char * uCodeFile, bool doUTrace) {
                 bBits = CU_DATA_SIZE-3;
                 if (uTrace) cout << "uJMP: uPC <- uIR[" 
                                  << (uIR.value() & 0xFFFFFFFF) << "], ";
+                // Always latch onto ALU2 Carry/Oflows
+                delay1.latchFrom(ALU2.CARRY());
+                delay2.latchFrom(ALU2.OFLOW());
                 setBfield(bBits, &ALU2);
                 if (uTrace) cout << "\n";
                 ALU1.IN1().pullFrom(uIR);
@@ -535,9 +572,8 @@ void setBfield(long Bfield, BusALU * alu) {
             break;
 
         case 5: // SUB
+            AddOrSub = true;
             if (uTrace) print3OpmicroInstr(dB, sB, tB, "-", rsImm, rtImm);
-            SYS[Carry]->latchFrom(ALU2.CARRY());
-            SYS[Overflow]->latchFrom(ALU2.OFLOW());
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
@@ -545,9 +581,8 @@ void setBfield(long Bfield, BusALU * alu) {
             break;
 
         case 6: // ADD
+            AddOrSub = true;
             if (uTrace) print3OpmicroInstr(dB, sB, tB, "+", rsImm, rtImm);
-            SYS[Carry]->latchFrom(ALU2.CARRY());
-            SYS[Overflow]->latchFrom(ALU2.OFLOW());
             alu->OP1().pullFrom(*sB);
             alu->OP2().pullFrom(*tB);
             dB->latchFrom(alu->OUT());
