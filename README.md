@@ -25,32 +25,40 @@ simulator
     the execution location
 
 ## Included Files
-- src: Main source code directory
-    - CPU.h: the main entrypoint for the simulation
-    - cpu.h/cpu.cpp: define the actual simulation (hardware, linking, and 
+- `src`: Main source code directory
+    - `CPU.h`: the main entrypoint for the simulation
+    - `cpu.h/cpu.cpp`: define the actual simulation (hardware, linking, and 
     controls)
-    - includes.h: General includes file, ensures that all files get everything 
+    - `includes.h`: General includes file, ensures that all files get everything 
     they need to function
-    - testFiles/*: get their own section
+    - `testFiles/*`: get their own section
 
-- Asm: Assembler code
-    - Assembler/*: All code for the macro-code assembler
-    - uAsm/*: All code for the micro-code assembler and linker
+- `Asm`: Assembler code
+    - `Assembler/*`: All code for the macro-code assembler
+    - `uAsm/*`: All code for the micro-code assembler and linker
 
-- HW_Docs
+- `HW_Docs`
     - The files already submitted earlier describing our hardware
 
-- ISA_Docs: The documents comprising our ISA
-    - ISA_doc.txt: Our compiled ISA document
+- `ISA_Docs`: The documents comprising our ISA
+    - `ISA_doc.txt`: Our compiled ISA document
 
-- uCode: all information pertaining to our micro code
-    - asm/*: The assembly and object files implementing the microcode
-    - rtl/*: The RTL files originally used to describe the code
-    - uCodeFmt.txt: Defines the microcode format
+- `uCode`: all information pertaining to our micro code
+    - `asm/*`: The assembly and object files implementing the microcode
+    - `rtl/*`: The RTL files originally used to describe the code
+    - `uCodeFmt.txt`: Defines the microcode format
 
 
 ## Included Tests
-
+- `9thfib.obj`: An object file which recursively calculates the 9th fibbonacci 
+number
+- `10thfib.obj`: An object file which recursively calculates the 10th fibbonacci
+number
+- `alu_tests.obj`: Basic tests on most of the ALU functions
+- `argTypeTest.obj`: Basic tests for most of the addressing modes
+- `testBGE.obj`: Tests the performance of BGE (created to debug)
+- `branchTest.obj`: Tests the ALU flag conditionals
+- `copyTest.obj`: Demo of both `CPY` and of operand interpretation
 ## Additional Notes
 - Although `OUT` was implemented, the simulated device attached never was, so 
 its entire function is to write to a register that is never utilized.
