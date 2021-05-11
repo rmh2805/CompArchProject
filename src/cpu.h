@@ -1,6 +1,13 @@
 #ifndef  _CPU_H_
 #define  _CPU_H_
 
+/*
+ * cpu.h
+ * DESC: This file contains global level hardware declarations and global constansts. It also
+ * contains the enum used to reference system level registers.
+ * Primary Author: Ian Campbell
+ * Contributor: Ray Healy
+ */
 #include <math.h>
 
 #include "includes.h"

@@ -1,3 +1,9 @@
+/*
+ * CPU.CPP
+ * DESC: This file contains the standard main entry point for our CPU.
+ * Primary Author: Ray Healy
+ * Contributor: Ian Campbell
+ */
 #include "includes.h"
 #include "cpu.h"
 

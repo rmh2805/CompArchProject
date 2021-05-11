@@ -1,10 +1,10 @@
 // includes.h
 //
-// Original version:	Warren Carithers, Novermber 2000
+// Original version:	Warren Carithers, November 2000
 // Updates:
 //	2020/01/12:	wrc, reorganized
+//  2021/03/01: Ian Campbell, Ray Healy - Took over from dummest
 //
-// Master include file for the dummest little computer.
 
 #ifndef _INCLUDES_H
 #define _INCLUDES_H

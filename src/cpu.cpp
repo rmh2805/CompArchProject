@@ -1,3 +1,11 @@
+/*
+ * cpu.cpp
+ * DESC: This file contains the definitions of all hardware used in our CPU. It also
+ * contians the execute function. This contains all C++ code needed to simulate our 
+ * architecture. 
+ * Primary Author: Ian Campbell
+ * Contributor: Ray Healy
+ */
 #include "cpu.h"
 
 //===============================<CPU Objects>================================//
