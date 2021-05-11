@@ -21,9 +21,33 @@ simulator
   - The object file is the only requirement, and is the program to run
   - The 2nd arg will turn on micro trace output if its first character is 'y'
   - The 3rd arg specifes an alternative file to load microcode from
-    - The default value of this arg is `uCode/asm/uCode.obj`
+    - The default value of this arg is `../uCode/asm/uCode.obj` relative to 
+    the execution location
 
 ## Included Files
+- src: Main source code directory
+    - CPU.h: the main entrypoint for the simulation
+    - cpu.h/cpu.cpp: define the actual simulation (hardware, linking, and 
+    controls)
+    - includes.h: General includes file, ensures that all files get everything 
+    they need to function
+    - testFiles/*: get their own section
+
+- Asm: Assembler code
+    - Assembler/*: All code for the macro-code assembler
+    - uAsm/*: All code for the micro-code assembler and linker
+
+- HW_Docs
+    - The files already submitted earlier describing our hardware
+
+- ISA_Docs: The documents comprising our ISA
+    - ISA_doc.txt: Our compiled ISA document
+
+- uCode: all information pertaining to our micro code
+    - asm/*: The assembly and object files implementing the microcode
+    - rtl/*: The RTL files originally used to describe the code
+    - uCodeFmt.txt: Defines the microcode format
+
 
 ## Included Tests
 
