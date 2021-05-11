@@ -70,7 +70,7 @@ OBJFILES =	cpu.o
 all:	CPU 
 
 CPU:	CPU.o $(OBJFILES)
-	$(CXX) $(CXXFLAGS) -o main main.o $(OBJFILES) $(CCLIBFLAGS)
+	$(CXX) $(CXXFLAGS) -o CPU CPU.o $(OBJFILES) $(CCLIBFLAGS)
 
 #
 # Dependencies
