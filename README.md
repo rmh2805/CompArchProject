@@ -52,3 +52,5 @@ simulator
 ## Included Tests
 
 ## Additional Notes
+- Although `OUT` was implemented, the simulated device attached never was, so 
+its entire function is to write to a register that is never utilized.
