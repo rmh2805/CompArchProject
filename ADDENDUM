@@ -1,0 +1,20 @@
+Addendum:
+
+- In general, RTL files submitted previously have been updated in the course of 
+debugging while translating into microcode. I also belive that the microcode 
+execution RTL has been updated inside of `uCodeFmt.txt`
+
+- The microcode format and hardware have been updated to include a few new 
+systems registers, most notably a uRet2 and uTmp2 included to allow for certain 
+unrealized complexities in microcode, 2 pair of new registers to track the 
+overflow and carry flags of ALU 2 in order to allow for jumps on those flags, 
+and another single register to act as a hypothetical buffer between users and 
+an output port;
+
+- The hardware has also been updated to include a connection between the uPC and
+the A input of ALU 2 as well, to allow for otherwise unrealized parallelism.
+
+- The microcode formate has been updated to include 3 new micro conditionals: 
+    1. PC Max, which checks if the PC is prepared to overflow
+    2. Overflow, which checks if the saved overflow bit is set
+    3. Carry, which checks if the saved carry bit is set
